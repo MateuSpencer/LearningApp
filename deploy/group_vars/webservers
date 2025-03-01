@@ -1,0 +1,8 @@
+---
+python_version: python3
+ansistrano_deploy_to: /mnt/persist/www/learningapp
+database_name: learningapp
+database_user: learningapp
+project_slug: learningapp
+domain_stage: stage.example.com
+domain_prod: example.com

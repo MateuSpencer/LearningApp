@@ -1,0 +1,4 @@
+User-agent: *
+Sitemap: https://example.com/wt/sitemap.xml
+Disallow: /wt/admin/
+Disallow: /wt/cms/
