@@ -3,6 +3,6 @@ webservers:
     prod1:
       ansible_user: deploy
       ansible_port: 22
-      ansible_host: example.com
-      domain: example.com
+      ansible_host: learningapp.com
+      domain: learningapp.com
       stage_name: prod

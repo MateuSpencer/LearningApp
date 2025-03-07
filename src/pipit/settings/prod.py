@@ -75,7 +75,7 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # Email notification url
-WAGTAILADMIN_BASE_URL = "https://example.com"
+WAGTAILADMIN_BASE_URL = "https://learningapp.com"
 
 # Sentry
 SENTRY_DSN = get_env("SENTRY_DSN", required=True)
