@@ -52,9 +52,7 @@ class Command(BaseCommand):
 
         with open(init_file, "a") as f:
             f.write(f"from .{file_name} import *  # NOQA\n")
-            f.write(
-                f"from .{file_name}_serializer import *  # NOQA\n"
-            )
+            f.write(f"from .{file_name}_serializer import *  # NOQA\n")
 
         self.create_file(page_file, page_template, context)
 
@@ -79,7 +77,8 @@ class Command(BaseCommand):
         file_name = get_snake_from_pascal_case(name)
         test_path = os.path.join(to_app, "tests/")
         test_file = "{test_path}test_{name}_page.py".format(
-            test_path=test_path, name=file_name,
+            test_path=test_path,
+            name=file_name,
         )
 
         if os.path.exists(test_file):
