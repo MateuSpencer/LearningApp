@@ -29,52 +29,108 @@
 
 ## Installation
 
-1. Setup container .env files
+1. Setup container .env files (configures environment variables for Docker containers)
 
     ```
     cp docker/config/python.example.env docker/config/python.env
     ```
 
-2. Include this ip on your hosts-file
+2. Include this ip on your hosts-file (enables local domain name resolution)
 
     ```
-    127.0.0.1 example.com.test
+    127.0.0.1 learningapp.com.test
     ```
 
     On windows you can run this command to append it:
 
     ```
-    echo 127.0.0.1 example.com.test >> c:\windows\System32\drivers\etc\hosts
+    echo 127.0.0.1 learningapp.com.test >> c:\windows\System32\drivers\etc\hosts
     ```
 
-3. Add root cert: `mkcert -install` (if not already available)
-
-4. Generate ssl certs for local development
+3. Add root cert for SSL (allows your browser to trust locally-generated certificates): 
     ```
-    mkcert --cert-file docker/files/certs/cert.pem --key-file docker/files/certs/cert-key.pem example.com.test
+    mkcert -install
     ```
 
-5. Enable SSL in Nginx
+4. Generate SSL certs for local development (enables HTTPS on your local site)
+    ```
+    mkcert --cert-file docker/files/certs/cert.pem --key-file docker/files/certs/cert-key.pem learningapp.com.test
+    ```
+
+5. Enable SSL in Nginx (configures the web server to use the SSL certificates)
     ```
     sed -i.bak 's/\#mkcert\ //g' docker/files/config/nginx.conf.template
     rm -f docker/files/config/nginx.conf.template.bak
     ```
-
-6. Start project
-
+    
+    Alternatively, you can use the included script:
     ```
-    docker compose up
+    ./scripts/enable_ssl.sh
     ```
 
-7. Install and start frontend
+6. Start the Docker containers (launches the backend services: Wagtail, database, and Nginx)
+    ```
+    docker compose up -d
+    ```
+   
+   **Linux users:** Add the following to your docker-compose.yml for the `web` container:
+   ```yml
+   services:
+     web:
+       ...
+       extra_hosts: 
+         - "host.docker.internal:host-gateway"
+   ```
+
+7. Initialize the database (first time only, sets up the database structure)
+    ```
+    ./scripts/manage.sh migrate
+    ./scripts/manage.sh createsuperuser  # If you need a custom admin user
+    ```
+
+8. Setup and start the frontend (runs the Next.js frontend development server)
     ```
     cd frontend
-    nvm use
+    nvm use  # Make sure you're using Node 20
     npm i
     npm run dev
     ```
-8. Visit your site on: [https://example.com.test:8082](https://example.com.test:8082)
-    - ...or login to [https://example.com.test:8082/wt/cms](https://example.com.test:8082/wt/cms) (Username: `admin` and password: `admin`)
+
+9. Visit your site:
+   - Frontend: [https://learningapp.com.test:8082](https://learningapp.com.test:8082)
+   - Wagtail admin: [https://learningapp.com.test:8082/wt/cms](https://learningapp.com.test:8082/wt/cms) 
+     (Username: `admin` and password: `admin`)
+
+10. (Optional) Set up Git hooks for development workflow (automates version bumping, testing, and code validation)
+    ```bash
+    # Version bumping
+    chmod +x $PWD/.githooks/bump-version.sh
+    ln -nfs $PWD/.githooks/bump-version.sh .git/hooks/post-flow-release-start
+    ln -nfs $PWD/.githooks/bump-version.sh .git/hooks/post-flow-hotfix-start
+    
+    # Test suite before push
+    chmod +x $PWD/.githooks/pre-push.sh
+    ln -nfs $PWD/.githooks/pre-push.sh .git/hooks/pre-push
+    
+    # Code style validation on commit
+    chmod +x $PWD/.githooks/pre-commit.sh
+    ln -nfs $PWD/.githooks/pre-commit.sh .git/hooks/pre-commit
+    ```
+
+11. (Optional) Configure Git Flow for streamlined development (provides structured branching model for features, releases, and hotfixes)
+    ```
+    git flow init
+    ```
+    
+    Use the following recommended settings:
+    - Branch name for production releases: `master`
+    - Branch name for development: `develop`
+    - Feature branches: `feature/`
+    - Bugfix branches: `bugfix/`
+    - Release branches: `release/`
+    - Hotfix branches: `hotfix/`
+    - Support branches: `support/`
+    - Version tag prefix: `v`
 
 
 ## Where to go from here?
@@ -133,6 +189,197 @@ To use pdb you need to start the container with service-ports exposed instead of
 docker compose run --rm --service-ports python
 ```
 
+
+## Deployment
+
+This project uses CircleCI for CI/CD to automatically deploy to staging and production environments. The deployment process involves provisioning your server first (which is done from your local machine), then setting up CircleCI for continuous deployment.
+
+### Server Requirements
+
+Your web servers need:
+- Linux (Ubuntu 20.04+ recommended)
+- Nginx
+- uWSGI
+- Python 3.11+
+- PostgreSQL 12+ with PostGIS
+- GDAL
+- Node 20+
+- PM2
+
+Users required on the server:
+- "root" - Used when provisioning web server
+- "deploy" - Used for deployment (both need passwordless login with SSH keys)
+
+### 1. Server Provisioning (from your local machine)
+
+First, configure your server connection details:
+
+```bash
+# Edit the stage.yml file to contain your server information
+nano deploy/stages/stage.yml
+```
+
+The file should look like this (update with your actual server details):
+```yml
+webservers:
+  hosts:
+    stage1:
+      ansible_user: deploy
+      ansible_port: 22
+      ansible_host: stage.learningapp.com
+      domain: stage.learningapp.com
+      stage_name: stage
+```
+
+Make sure your local machine has SSH access to the server:
+
+1. If you haven't already, generate an SSH key pair:
+   ```bash
+   ssh-keygen -t ed25519
+   ```
+
+2. Add your public key to the server's authorized_keys:
+   ```bash
+   ssh-copy-id deploy@stage.learningapp.com
+   ssh-copy-id root@stage.learningapp.com  # Also needed for provisioning
+   ```
+
+3. Test the SSH connection:
+   ```bash
+   ssh deploy@stage.learningapp.com
+   ssh root@stage.learningapp.com
+   ```
+
+Now you can proceed with the provisioning:
+
+```bash
+# Step 1: Navigate to the deploy directory and create a virtual environment
+cd deploy
+python3 -m venv venv
+. venv/bin/activate
+
+# Step 2: Install Ansible and dependencies
+pip install -r requirements.txt
+
+# Step 3: Verify connection to your server
+ansible -i stages/stage.yml webservers -m ping
+# You should see a "SUCCESS" message
+
+# Step 4: Install Ansistrano (deployment tool)
+ansible-galaxy install -r requirements.yml
+
+# Step 5: Run the provisioning playbook for staging
+ansible-playbook provision.yml -i stages/stage.yml
+
+# For production
+ansible-playbook provision.yml -i stages/prod.yml
+```
+
+### 2. CircleCI Configuration
+
+After server provisioning, set up CircleCI for automated deployments:
+
+1. **Generate SSH Keys** (from your local machine):
+
+   ```bash
+   # For staging - don't use a passphrase
+   ssh-keygen -t ed25519 -C "ci@learningapp.com" -f stage.learningapp.com
+   
+   # For production
+   ssh-keygen -t ed25519 -C "ci@learningapp.com" -f learningapp.com
+   ```
+
+2. **Add Public Keys to Server**:
+
+   ```bash
+   # Copy the public key to your staging server
+   cat stage.learningapp.com.pub | ssh deploy@stage.learningapp.com "cat >> ~/.ssh/authorized_keys"
+   
+   # Copy to production server
+   cat learningapp.com.pub | ssh deploy@learningapp.com "cat >> ~/.ssh/authorized_keys"
+   ```
+
+3. **Add Private Keys to CircleCI**:
+   - Login to CircleCI
+   - Navigate to Project Settings > SSH Keys > Additional SSH Keys
+   - Click "Add SSH Key"
+   - For "Hostname" enter `stage.learningapp.com` or `learningapp.com`
+   - For "Private key", paste the content of your key file
+   - Repeat for both staging and production
+   
+4. **Optional: Delete Local SSH Keys**:
+   Once you've verified your setup works, delete the keys from your local machine for security.
+
+### 3. Sentry Configuration (Optional)
+
+If you want error tracking, configure Sentry:
+
+1. Create a [Sentry account and project](https://sentry.io/signup/)
+2. Add these environment variables in CircleCI:
+   - `NEXT_PUBLIC_SENTRY_DSN` - Your Sentry DSN
+   - `SENTRY_AUTH_TOKEN` - Auth token with "Release: Admin" permissions
+   - `SENTRY_ORG` - Your organization slug
+   - `SENTRY_PROJECT` - Your project name
+
+### 4. Deployment Workflow
+
+Once configured, the deployment pipeline works as follows:
+
+- **Develop Branch**: Pushes trigger build, tests, and deployment to staging
+- **Tags**: Tags with pattern `v*.*.*` (e.g., `v1.2.3`) trigger production deployment
+- **Feature Branches**: Only build and test, no deployment
+
+The CircleCI configuration ignores changes to:
+- `master` and `main` branches (by default)
+- Files listed in `.ciignore`
+
+### Manual Deployment
+
+You can also deploy manually from your local machine:
+
+```bash
+cd deploy
+python -m venv venv
+. venv/bin/activate
+pip install -r requirements.txt
+ansible-galaxy install -r requirements.yml
+
+# Deploy to staging
+ansible-playbook deploy.yml -i stages/stage.yml
+
+# Deploy to production
+ansible-playbook deploy.yml -i stages/prod.yml
+```
+
+### Troubleshooting
+
+- **PostGIS Extension Issue**: If you see `Permission denied to create extension "postgis"`:
+  ```bash
+  # On server as root
+  psql
+  \c mydb
+  CREATE EXTENSION IF NOT EXISTS postgis;
+  ```
+
+- **Python Library Import Error**: The `--check` mode is not supported for the provision playbook
+
+
+## Merge conflicts
+
+### How to handle merge conflicts
+
+1. **Identify the conflict**: When you try to merge branches, Git will notify you of conflicts.
+2. **Open the conflicting files**: Open the files with conflicts in your code editor.
+3. **Resolve the conflicts**: Manually edit the files to resolve the conflicts. Look for lines marked with `<<<<<<<`, `=======`, and `>>>>>>>`.
+4. **Mark as resolved**: After resolving the conflicts, mark the files as resolved using `git add`.
+5. **Commit the changes**: Commit the resolved files using `git commit`.
+
+Example:
+
+```bash
+git add <resolved_file>
+git commit -m "Resolved merge conflict in <resolved_file>"
+```
 
 ## Git hooks
 
