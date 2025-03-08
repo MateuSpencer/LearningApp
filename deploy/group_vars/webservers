@@ -4,5 +4,5 @@ ansistrano_deploy_to: /mnt/persist/www/learningapp
 database_name: learningapp
 database_user: learningapp
 project_slug: learningapp
-domain_stage: stage.learningapp.com
-domain_prod: learningapp.com
+domain_stage: stage.learningapp.online
+domain_prod: learningapp.online

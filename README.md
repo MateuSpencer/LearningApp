@@ -38,13 +38,13 @@
 2. Include this ip on your hosts-file (enables local domain name resolution)
 
     ```
-    127.0.0.1 learningapp.com.test
+    127.0.0.1 learningapp.online.test
     ```
 
     On windows you can run this command to append it:
 
     ```
-    echo 127.0.0.1 learningapp.com.test >> c:\windows\System32\drivers\etc\hosts
+    echo 127.0.0.1 learningapp.online.test >> c:\windows\System32\drivers\etc\hosts
     ```
 
 3. Add root cert for SSL (allows your browser to trust locally-generated certificates): 
@@ -54,7 +54,7 @@
 
 4. Generate SSL certs for local development (enables HTTPS on your local site)
     ```
-    mkcert --cert-file docker/files/certs/cert.pem --key-file docker/files/certs/cert-key.pem learningapp.com.test
+    mkcert --cert-file docker/files/certs/cert.pem --key-file docker/files/certs/cert-key.pem learningapp.online.test
     ```
 
 5. Enable SSL in Nginx (configures the web server to use the SSL certificates)
@@ -97,8 +97,8 @@
     ```
 
 9. Visit your site:
-   - Frontend: [https://learningapp.com.test:8082](https://learningapp.com.test:8082)
-   - Wagtail admin: [https://learningapp.com.test:8082/wt/cms](https://learningapp.com.test:8082/wt/cms) 
+   - Frontend: [https://learningapp.online.test:8082](https://learningapp.online.test:8082)
+   - Wagtail admin: [https://learningapp.online.test:8082/wt/cms](https://learningapp.online.test:8082/wt/cms) 
      (Username: `admin` and password: `admin`)
 
 10. (Optional) Set up Git hooks for development workflow (automates version bumping, testing, and code validation)
@@ -226,8 +226,8 @@ webservers:
     stage1:
       ansible_user: deploy
       ansible_port: 22
-      ansible_host: stage.learningapp.com
-      domain: stage.learningapp.com
+      ansible_host: stage.learningapp.online
+      domain: stage.learningapp.online
       stage_name: stage
 ```
 
@@ -240,14 +240,14 @@ Make sure your local machine has SSH access to the server:
 
 2. Add your public key to the server's authorized_keys:
    ```bash
-   ssh-copy-id deploy@stage.learningapp.com
-   ssh-copy-id root@stage.learningapp.com  # Also needed for provisioning
+   ssh-copy-id deploy@stage.learningapp.online
+   ssh-copy-id root@stage.learningapp.online  # Also needed for provisioning
    ```
 
 3. Test the SSH connection:
    ```bash
-   ssh deploy@stage.learningapp.com
-   ssh root@stage.learningapp.com
+   ssh deploy@stage.learningapp.online
+   ssh root@stage.learningapp.online
    ```
 
 Now you can proceed with the provisioning:
@@ -283,27 +283,27 @@ After server provisioning, set up CircleCI for automated deployments:
 
    ```bash
    # For staging - don't use a passphrase
-   ssh-keygen -t ed25519 -C "ci@learningapp.com" -f stage.learningapp.com
+   ssh-keygen -t ed25519 -C "ci@learningapp.online" -f stage.learningapp.online
    
    # For production
-   ssh-keygen -t ed25519 -C "ci@learningapp.com" -f learningapp.com
+   ssh-keygen -t ed25519 -C "ci@learningapp.online" -f learningapp.online
    ```
 
 2. **Add Public Keys to Server**:
 
    ```bash
    # Copy the public key to your staging server
-   cat stage.learningapp.com.pub | ssh deploy@stage.learningapp.com "cat >> ~/.ssh/authorized_keys"
+   cat stage.learningapp.online.pub | ssh deploy@stage.learningapp.online "cat >> ~/.ssh/authorized_keys"
    
    # Copy to production server
-   cat learningapp.com.pub | ssh deploy@learningapp.com "cat >> ~/.ssh/authorized_keys"
+   cat learningapp.online.pub | ssh deploy@learningapp.online "cat >> ~/.ssh/authorized_keys"
    ```
 
 3. **Add Private Keys to CircleCI**:
    - Login to CircleCI
    - Navigate to Project Settings > SSH Keys > Additional SSH Keys
    - Click "Add SSH Key"
-   - For "Hostname" enter `stage.learningapp.com` or `learningapp.com`
+   - For "Hostname" enter `stage.learningapp.online` or `learningapp.online`
    - For "Private key", paste the content of your key file
    - Repeat for both staging and production
    

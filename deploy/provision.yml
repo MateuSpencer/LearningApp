@@ -21,8 +21,10 @@
       register: pm2_application_count
 
     - name: Makes sure python psql lib is available
-      pip:
-        name: psycopg2-binary
+      apt:
+        name: python3-psycopg2
+        state: present
+      become: yes
 
     - name: Creates directory for shared files
       file:
@@ -49,11 +51,11 @@
         group: www-data
         mode: 0664
 
-    - name: Creates postgres database (with sv_SE collation)
+    - name: Creates postgres database (with en_US collation)
       postgresql_db:
         name: "{{ database_name }}"
-        lc_collate: sv_SE.utf8
-        lc_ctype: sv_SE.utf8
+        # lc_collate: en_US.utf8
+        # lc_ctype: en_US.utf8
         template: template0
 
     - name: Creates postgres user

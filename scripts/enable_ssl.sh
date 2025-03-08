@@ -4,7 +4,7 @@ set -e
 # Generate development ssl certificates using mkcert
 # NOTE: you need mkcert installed locally for this to work!
 
-readonly DOMAIN="learningapp.com.test"
+readonly DOMAIN="learningapp.online.test"
 readonly HTTPS_PORT=8082
 
 if ! [ -d .git ]; then

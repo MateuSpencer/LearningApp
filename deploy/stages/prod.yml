@@ -3,6 +3,6 @@ webservers:
     prod1:
       ansible_user: deploy
       ansible_port: 22
-      ansible_host: learningapp.com
-      domain: learningapp.com
+      ansible_host: learningapp.online
+      domain: learningapp.online
       stage_name: prod

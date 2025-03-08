@@ -3,7 +3,7 @@ server {
     listen [::]:80 default_server;
     proxy_read_timeout 120s;
 
-    server_name learningapp.com.test _;
+    server_name learningapp.online.test _;
 
     # do not touch - uncommented when enable_ssl.sh is used
     listen 443 ssl;

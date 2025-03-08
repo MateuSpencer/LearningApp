@@ -75,7 +75,7 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # Email notification url
-WAGTAILADMIN_BASE_URL = "https://stage.learningapp.com"
+WAGTAILADMIN_BASE_URL = "https://stage.learningapp.online"
 
 # Sentry
 SENTRY_DSN = get_env("SENTRY_DSN", required=True)

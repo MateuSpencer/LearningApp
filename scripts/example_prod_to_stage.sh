@@ -10,8 +10,8 @@
 
 set -e
 
-readonly STAGE_HOST=deploy@stage.learningapp.com
-readonly PROD_HOST=deploy@learningapp.com
+readonly STAGE_HOST=deploy@stage.learningapp.online
+readonly PROD_HOST=deploy@learningapp.online
 readonly REMOTE_MEDIA_PATH=/mnt/persist/www/learningapp/shared/media
 
 scripts_dir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
@@ -42,7 +42,7 @@ rm /tmp/db-dump.sql
 echo "Updating database..."
 manage_prefix="source /mnt/persist/www/learningapp/shared/venv/bin/activate && cd /mnt/persist/www/learningapp/current/src &&"
 
-ssh $STAGE_HOST "$manage_prefix python manage.py change_site_domain --site_id=1 --new_site_domain='stage.learningapp.com'"
+ssh $STAGE_HOST "$manage_prefix python manage.py change_site_domain --site_id=1 --new_site_domain='stage.learningapp.online'"
 
 echo "Syncing media..."
 src_dir=${scripts_dir}/../src
