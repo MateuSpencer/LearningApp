@@ -27,7 +27,7 @@
     production: true
     ci: yes
   environment:
-    NODE_OPTIONS: "--max_old_space_size=256"
+    NODE_OPTIONS: "--max_old_space_size=128"
 
 - name: Run Migrations
   shell: "{{ ansistrano_shared_path }}/venv/bin/python {{ ansistrano_release_path.stdout }}/src/manage.py migrate --noinput"
