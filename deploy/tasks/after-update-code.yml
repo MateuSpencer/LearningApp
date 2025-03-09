@@ -24,10 +24,10 @@
 - name: Install node modules
   npm:
     path: "{{ ansistrano_release_path.stdout }}/src/frontend/"
-    production: true
+    omit: dev
     ci: yes
   environment:
-    NODE_OPTIONS: "--max_old_space_size=512"
+    NODE_OPTIONS: "--max_old_space_size=256"
 
 - name: Run Migrations
   shell: "{{ ansistrano_shared_path }}/venv/bin/python {{ ansistrano_release_path.stdout }}/src/manage.py migrate --noinput"
