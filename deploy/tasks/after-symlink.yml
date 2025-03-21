@@ -7,17 +7,17 @@
 - name: Restart uWSGI
   become: yes
   become_user: root
-  command: systemctl restart uwsgi
+  command: sudo systemctl restart uwsgi
   async: 60
   poll: 5
 
 - name: Restart PM2 app
   become: yes
   become_user: root
-  command: "pm2 restart {{ project_slug }}"
+  command: "sudo pm2 restart {{ project_slug }}"
 
 - name: Restart Nginx
   become: yes
   become_user: root
-  command: systemctl restart nginx
+  command: sudo systemctl restart nginx
 
