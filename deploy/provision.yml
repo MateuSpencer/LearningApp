@@ -76,6 +76,15 @@
         name: postgis
         db: "{{ database_name }}"
 
+    - name: Grant comprehensive schema permissions to database user
+      postgresql_query:
+        db: "{{ database_name }}"
+        query: |
+          ALTER DATABASE {{ database_name }} OWNER TO {{ database_user }};
+          GRANT ALL PRIVILEGES ON SCHEMA public TO {{ database_user }};
+          GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO {{ database_user }};
+          GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {{ database_user }};
+
     - name: Creates uWSGI config
       template:
         src: files/uwsgi.ini.j2
