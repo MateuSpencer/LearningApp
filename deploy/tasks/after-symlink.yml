@@ -10,6 +10,8 @@
   service:
     name: uwsgi
     state: restarted
+  async: 60
+  poll: 5
 
 - name: Restart PM2 app
   # become: yes
