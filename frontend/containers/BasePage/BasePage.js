@@ -2,6 +2,7 @@ import React from 'react';
 import Head from 'next/head';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
+import ThemeToggleButton from '../../components/ThemeToggleButton';
 
 const WagtailUserbar = dynamic(() => import('../../components/WagtailUserbar'));
 
@@ -77,7 +78,10 @@ const BasePage = ({ children, seo, shouldRenderSeo, wagtailUserbar }) => {
                     )}
                 </Head>
             )}
-            <div className="BasePage">{children}</div>
+            <div className="BasePage">
+                {children}
+                <ThemeToggleButton />
+            </div>
             {!!wagtailUserbar && <WagtailUserbar {...wagtailUserbar} />}
         </>
     );

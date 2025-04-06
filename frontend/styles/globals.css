@@ -1,3 +1,5 @@
+/* Update this existing file:
+   frontend/styles/globals.css */
 html,
 body {
     padding: 0;
@@ -14,6 +16,9 @@ body {
         Droid Sans,
         Helvetica Neue,
         sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a {

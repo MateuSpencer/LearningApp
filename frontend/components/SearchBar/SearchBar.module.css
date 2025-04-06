@@ -7,38 +7,38 @@
 .Input {
     width: 75%;
     padding: 12px;
-    border: 1px solid #dfe1e5;
+    border: 1px solid var(--border-color);
     border-radius: 24px 0 0 24px;
     outline: none;
     font-size: 16px;
 }
 
 .Input:focus {
-    box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
-    border-color: rgba(223, 225, 229, 0);
+    box-shadow: 0 0 0 2px var(--color-primary-dark);
+    border-color: var(--color-primary);
 }
 
 .Button {
     width: 25%;
     padding: 12px;
-    background-color: #f8f9fa;
-    border: 1px solid #dfe1e5;
+    background-color: var(--color-secondary); /* Bright Orange */
+    color: white;
+    border: 1px solid var(--color-secondary);
     border-left: none;
     border-radius: 0 24px 24px 0;
     font-size: 16px;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .Button:hover {
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-    background-color: #f8f9fa;
-    border: 1px solid #dadce0;
-    border-left: none;
-    color: #202124;
+    background-color: var(--color-secondary-dark); /* Vivid Orange */
+    border-color: var(--color-secondary-dark);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .Error {
-    color: #d93025;
+    color: var(--color-error);
     font-size: 12px;
     margin-top: 4px;
     text-align: left;
