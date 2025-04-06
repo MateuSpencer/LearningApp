@@ -2,7 +2,7 @@ import React from 'react';
 import Head from 'next/head';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
-import ThemeToggleButton from '../../components/ThemeToggleButton';
+import LeftSidebar from '../../components/LeftSidebar';
 
 const WagtailUserbar = dynamic(() => import('../../components/WagtailUserbar'));
 
@@ -22,6 +22,15 @@ const BasePage = ({ children, seo, shouldRenderSeo, wagtailUserbar }) => {
         seoMetaRobots,
         canonicalLink,
     } = seo;
+    
+    const sidebarItems = [
+        { label: 'Home', href: '/', icon: '🏠' },
+        { label: 'Courses', href: '/courses', icon: '📚' },
+        { label: 'Topics', href: '/topics', icon: '📋' },
+        { label: 'About', href: '/about', icon: 'ℹ️' },
+        { label: 'Contact', href: '/contact', icon: '✉️' }
+    ];
+    
     return (
         <>
             {shouldRenderSeo && (
@@ -78,9 +87,9 @@ const BasePage = ({ children, seo, shouldRenderSeo, wagtailUserbar }) => {
                     )}
                 </Head>
             )}
+            <LeftSidebar items={sidebarItems} />
             <div className="BasePage">
                 {children}
-                <ThemeToggleButton />
             </div>
             {!!wagtailUserbar && <WagtailUserbar {...wagtailUserbar} />}
         </>
@@ -100,12 +109,18 @@ BasePage.propTypes = {
         seoOgTitle: PropTypes.string,
         seoOgDescription: PropTypes.string,
         seoOgUrl: PropTypes.string,
+        seoOgImage: PropTypes.string,
+        seoOgType: PropTypes.string,
         seoTwitterTitle: PropTypes.string,
+        seoTwitterDescription: PropTypes.string,
+        seoTwitterUrl: PropTypes.string,
+        seoTwitterImage: PropTypes.string,
         seoMetaRobots: PropTypes.shape({
             index: PropTypes.bool,
             follow: PropTypes.bool,
             value: PropTypes.string,
         }),
+        canonicalLink: PropTypes.string,
     }),
     shouldRenderSeo: PropTypes.bool,
     wagtailUserbar: PropTypes.shape({

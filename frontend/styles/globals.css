@@ -1,24 +1,11 @@
-/* Update this existing file:
-   frontend/styles/globals.css */
 html,
 body {
     padding: 0;
     margin: 0;
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        Segoe UI,
-        Roboto,
-        Oxygen,
-        Ubuntu,
-        Cantarell,
-        Fira Sans,
-        Droid Sans,
-        Helvetica Neue,
-        sans-serif;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* Global font */
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease, margin-left 0.3s ease;
 }
 
 a {
@@ -28,4 +15,5 @@ a {
 
 * {
     box-sizing: border-box;
+    font-family: inherit; /* Ensure all elements inherit the global font */
 }

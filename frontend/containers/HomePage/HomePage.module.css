@@ -37,4 +37,5 @@
     margin-bottom: 20px;
     color: var(--text-primary);
     font-weight: 400;
+    font-family: 'Poppins', sans-serif; /* Match the title font */
 }
