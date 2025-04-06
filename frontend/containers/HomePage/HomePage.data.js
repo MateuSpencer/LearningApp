@@ -1,4 +1,5 @@
 export default {
-    title: 'Hello Title',
+    title: 'What do you want to learn?',
+    siteName: 'LearningApp',
     seo: {},
 };
