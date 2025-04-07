@@ -1,14 +1,15 @@
-import { render, /* screen */ } from '@testing-library/react';
-import RightSidebar from './';
-// import data from './RightSidebar.data';
+import { render } from '@testing-library/react';
+import RightSidebar from './RightSidebar';
+import { ThemeProvider } from '../../context/ThemeContext';
+
+const renderWithTheme = (component) => {
+  return render(
+    <ThemeProvider>{component}</ThemeProvider>
+  );
+};
 
 describe('<RightSidebar />', () => {
-    it('Renders an empty RightSidebar', () => {
-        render(<RightSidebar />);
-    });
-
-    // it('Renders RightSidebar with data', () => {
-    //     const { container } = render(<RightSidebar {...data} />);
-    //     expect(container).toMatchSnapshot();
-    // });
+  it('Renders properly', () => {
+    renderWithTheme(<RightSidebar />);
+  });
 });
