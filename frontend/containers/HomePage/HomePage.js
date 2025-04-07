@@ -1,24 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { basePageWrap } from '../BasePage';
-import SearchBar from '../../components/SearchBar';
 import s from './HomePage.module.css';
+import SearchBar from '../../components/SearchBar';
+import Logo from '../../components/Logo';
+import SiteName from '../../components/SiteName';
 
-const HomePage = ({ title }) => {
+const HomePage = ({ siteName }) => {
     const handleSearch = (query) => {
-        // TODO: Implement search functionality
+        console.log('Search query:', query);
+        // Implement search functionality
     };
 
     return (
         <div className={s.Container}>
-            <div className={s.SiteNameContainer}>
-                <h1 className={s.SiteName}>LearningApp</h1>
+            <div className={s.LogoContainer}>
+                <Logo size="large" />
+                <SiteName text={siteName} size="large" />
             </div>
+            
             <div className={s.SearchContainer}>
-                <h2 className={s.Title}>What do you want to learn?</h2>
                 <SearchBar 
-                    onSearch={handleSearch} 
-                    placeholder="Type anything..." 
+                    placeholder="What do you want to learn?" 
+                    onSearch={handleSearch}
+                    maxLength={50}
                 />
             </div>
         </div>
@@ -26,11 +31,11 @@ const HomePage = ({ title }) => {
 };
 
 HomePage.defaultProps = {
-    title: 'What do you want to learn?',
+    siteName: 'LearningApp'
 };
 
 HomePage.propTypes = {
-    title: PropTypes.string.isRequired,
+    siteName: PropTypes.string
 };
 
 export default basePageWrap(HomePage);

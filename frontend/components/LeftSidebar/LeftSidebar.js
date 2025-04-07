@@ -1,39 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useTheme } from '../../context/ThemeContext';
-import ThemeToggleButton from '../ThemeToggleButton';
 import s from './LeftSidebar.module.css';
+import ThemeToggleButton from '../ThemeToggleButton';
+import Logo from '../Logo';
+import SiteName from '../SiteName';
 
 const LeftSidebar = ({ items }) => {
     const [collapsed, setCollapsed] = useState(false);
-    const { theme } = useTheme();
 
-    useEffect(() => {
-        const savedState = localStorage.getItem('sidebar-collapsed');
-        if (savedState !== null) {
-            setCollapsed(JSON.parse(savedState));
-        }
-    }, []);
-
-    const toggleSidebar = () => {
-        const newState = !collapsed;
-        setCollapsed(newState);
-        localStorage.setItem('sidebar-collapsed', JSON.stringify(newState));
-        document.body.classList.toggle('sidebar-collapsed', newState);
+    const toggleCollapse = () => {
+        setCollapsed(!collapsed);
     };
 
     return (
         <div className={`${s.LeftSidebar} ${collapsed ? s.Collapsed : s.Expanded}`}>
-            <button
+            <button 
                 className={s.ToggleButton}
-                onClick={toggleSidebar}
+                onClick={toggleCollapse}
                 aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
                 {collapsed ? '›' : '‹'}
             </button>
 
+            <div className={s.Header}>
+              <div className={s.LogoWrapper}>
+                <Logo size="medium" />
+                <div className={s.SiteNameWrapper}>
+                  <SiteName size="medium" />
+                </div>
+              </div>
+            </div>
+
             <div className={s.Content}>
-                {/* Navigation items removed */}
+                {/* Navigation items */}
                 
                 <div className={s.Footer}>
                     {!collapsed && <p className={s.ThemeLabel}>Theme</p>}
@@ -42,16 +41,6 @@ const LeftSidebar = ({ items }) => {
             </div>
         </div>
     );
-};
-
-LeftSidebar.propTypes = {
-    items: PropTypes.arrayOf(
-        PropTypes.shape({
-            label: PropTypes.string.isRequired,
-            href: PropTypes.string.isRequired,
-            icon: PropTypes.string,
-        })
-    ),
 };
 
 LeftSidebar.defaultProps = {

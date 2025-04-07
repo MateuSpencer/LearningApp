@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import s from './Hero.module.css';
-import logo from '../../public/img/logo.svg';
+import logo from '../../public/img/logo.png';
 
 import i18n from '../../i18n';
 
