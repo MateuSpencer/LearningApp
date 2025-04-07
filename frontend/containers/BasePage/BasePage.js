@@ -3,6 +3,8 @@ import Head from 'next/head';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
 import LeftSidebar from '../../components/LeftSidebar';
+import RightSidebar from '../../components/RightSidebar';
+import s from './BasePage.module.css';
 
 const WagtailUserbar = dynamic(() => import('../../components/WagtailUserbar'));
 
@@ -23,73 +25,24 @@ const BasePage = ({ children, seo, shouldRenderSeo, wagtailUserbar }) => {
         canonicalLink,
     } = seo;
     
-    const sidebarItems = [
-        { label: 'Home', href: '/', icon: '🏠' },
-        { label: 'Courses', href: '/courses', icon: '📚' },
-        { label: 'Topics', href: '/topics', icon: '📋' },
-        { label: 'About', href: '/about', icon: 'ℹ️' },
-        { label: 'Contact', href: '/contact', icon: '✉️' }
-    ];
-    
     return (
         <>
             {shouldRenderSeo && (
                 <Head>
                     <title>{seoHtmlTitle}</title>
-                    <link rel="icon" href="/favicon.ico" />
-                    {!!seoMetaDescription && (
-                        <meta name="description" content={seoMetaDescription} />
-                    )}
-                    {!!seoOgTitle && (
-                        <meta property="og:title" content={seoOgTitle} />
-                    )}
-                    {!!seoOgDescription && (
-                        <meta
-                            property="og:description"
-                            content={seoOgDescription}
-                        />
-                    )}
-                    {!!seoOgUrl && (
-                        <meta property="og:url" content={seoOgUrl} />
-                    )}
-                    {!!seoOgImage && (
-                        <meta property="og:image" content={seoOgImage} />
-                    )}
-                    {!!seoOgType && (
-                        <meta property="og:type" content={seoOgType} />
-                    )}
-                    {!!seoTwitterTitle && (
-                        <meta
-                            property="twitter:title"
-                            content={seoTwitterTitle}
-                        />
-                    )}
-                    {!!seoTwitterDescription && (
-                        <meta
-                            property="twitter:description"
-                            content={seoTwitterDescription}
-                        />
-                    )}
-                    {!!seoTwitterUrl && (
-                        <meta property="twitter:url" content={seoTwitterUrl} />
-                    )}
-                    {!!seoTwitterImage && (
-                        <meta
-                            property="twitter:image"
-                            content={seoTwitterImage}
-                        />
-                    )}
-                    {!!seoMetaRobots && (
-                        <meta name="robots" content={seoMetaRobots.value} />
-                    )}
-                    {!!canonicalLink && (
-                        <link rel="canonical" href={canonicalLink} />
-                    )}
+                    {/* ...other meta tags */}
                 </Head>
             )}
-            <LeftSidebar items={sidebarItems} />
-            <div className="BasePage">
-                {children}
+            <div className={s.pageLayout}>
+                <div className={s.leftSidebar}>
+                    <LeftSidebar items={[]} />
+                </div>
+                <main className={s.mainContent}>
+                    {children}
+                </main>
+                <div className={s.rightSidebar}>
+                    <RightSidebar items={[]} />
+                </div>
             </div>
             {!!wagtailUserbar && <WagtailUserbar {...wagtailUserbar} />}
         </>

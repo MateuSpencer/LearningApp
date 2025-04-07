@@ -1,17 +1,17 @@
-.LeftSidebar {
-    position: fixed;
+.RightSidebar {
     height: 100%;
     width: 100%;
     background-color: var(--bg-secondary);
-    border-right: 1px solid var(--border-color);
-    border-radius: 0 15px 15px 0;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    border-left: 1px solid var(--border-color);
+    border-radius: 15px 0 0 15px;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
     transition: width var(--theme-transition-speed) var(--theme-transition-timing), 
-    background-color var(--theme-transition-speed) var(--theme-transition-timing), 
-    border-color var(--theme-transition-speed) var(--theme-transition-timing);
+                background-color var(--theme-transition-speed) var(--theme-transition-timing), 
+                border-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .Collapsed {
@@ -31,28 +31,13 @@
     overflow-y: auto;
 }
 
-.Footer {
-    margin-top: auto;
-    padding: 15px;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.ThemeLabel {
-    font-size: 14px;
-    margin-bottom: 10px;
-    color: var(--text-secondary);
-}
-
 .ToggleButton {
     position: absolute;
     top: 50%;
-    right: -10px;
+    left: -10px;
     width: 40px;
     height: 60px;
-    border-radius: 30px 0 0 30px;
+    border-radius: 0 30px 30px 0;
     background-color: var(--color-primary);
     color: var(--bg-primary);
     border: none;
@@ -62,7 +47,7 @@
     align-items: center;
     justify-content: center;
     transform: translateY(-50%);
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
     z-index: 1001;
 }
 

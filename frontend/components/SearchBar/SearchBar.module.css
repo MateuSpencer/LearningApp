@@ -28,7 +28,6 @@
     border-radius: 0 24px 24px 0;
     font-size: 16px;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .Button:hover {

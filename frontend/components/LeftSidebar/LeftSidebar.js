@@ -23,7 +23,7 @@ const LeftSidebar = ({ items }) => {
     };
 
     return (
-        <div className={`${s.LeftSidebar} ${collapsed ? s.Collapsed : ''}`}>
+        <div className={`${s.LeftSidebar} ${collapsed ? s.Collapsed : s.Expanded}`}>
             <button
                 className={s.ToggleButton}
                 onClick={toggleSidebar}
@@ -33,15 +33,8 @@ const LeftSidebar = ({ items }) => {
             </button>
 
             <div className={s.Content}>
-                <div className={s.NavItems}>
-                    {items.map((item, index) => (
-                        <a key={index} href={item.href} className={s.NavItem}>
-                            {item.icon && <span className={s.Icon}>{item.icon}</span>}
-                            {!collapsed && <span className={s.Label}>{item.label}</span>}
-                        </a>
-                    ))}
-                </div>
-
+                {/* Navigation items removed */}
+                
                 <div className={s.Footer}>
                     {!collapsed && <p className={s.ThemeLabel}>Theme</p>}
                     <ThemeToggleButton small={collapsed} />
