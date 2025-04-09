@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import s from './LeftSidebar.module.css';
 import ThemeToggleButton from '../ThemeToggleButton';
 import Logo from '../Logo';
@@ -44,7 +43,6 @@ const LeftSidebar = ({ items }) => {
 };
 
 LeftSidebar.defaultProps = {
-    items: [],
 };
 
 export default LeftSidebar;

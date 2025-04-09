@@ -27,12 +27,7 @@ const RightSidebar = ({ items }) => {
     );
 };
 
-RightSidebar.propTypes = {
-    items: PropTypes.array,
-};
-
 RightSidebar.defaultProps = {
-    items: [],
 };
 
 export default RightSidebar;

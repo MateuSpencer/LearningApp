@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import DOMPurify from 'dompurify'; // Add this import
+import DOMPurify from 'dompurify';
 import s from './SearchBar.module.css';
 
-const SearchBar = ({ onSearch, placeholder, maxLength }) => {
+const SearchBar = () => {
     const [query, setQuery] = useState('');
     const [error, setError] = useState(null);
+    const maxLength = 100;
     
     const validateQuery = (input) => {
         // Basic validation rules
@@ -32,6 +33,15 @@ const SearchBar = ({ onSearch, placeholder, maxLength }) => {
         });
         
         return sanitized;
+    };
+    
+    const onSearch = (searchQuery) => {
+        console.log('Searching for:', searchQuery);
+        // Here you would typically:
+        // 1. Make an API call
+        // 2. Update search results state
+        // 3. Navigate to search results page 
+        // This is just a placeholder implementation
     };
     
     const handleSubmit = (e) => {
@@ -63,7 +73,7 @@ const SearchBar = ({ onSearch, placeholder, maxLength }) => {
                     onChange={handleChange}
                     className={s.Input}
                     placeholder="What do you want to learn?"
-                    maxLength={100}
+                    maxLength={maxLength}
                     aria-invalid={!!error}
                 />
                 <button type="submit" className={s.Button}>Search</button>
@@ -71,14 +81,6 @@ const SearchBar = ({ onSearch, placeholder, maxLength }) => {
             </form>
         </div>
     );
-};
-
-SearchBar.propTypes = {
-    onSearch: PropTypes.func.isRequired,
-};
-
-SearchBar.defaultProps = {
-    onSearch: () => {} // TODO
 };
 
 export default SearchBar;

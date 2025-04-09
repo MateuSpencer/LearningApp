@@ -14,14 +14,14 @@
 }
 
 .Input:focus {
-    box-shadow: 0 0 0 2px var(--color-primary-dark);
+    box-shadow: 0 0 0 2px var(--color-primary);
     border-color: var(--color-primary);
 }
 
 .Button {
     width: 25%;
     padding: 12px;
-    background-color: var(--color-secondary); /* Bright Orange */
+    background-color: var(--color-secondary);
     color: white;
     border: 1px solid var(--color-secondary);
     border-left: none;
@@ -31,9 +31,9 @@
 }
 
 .Button:hover {
-    background-color: var(--color-secondary-dark); /* Vivid Orange */
+    background-color: var(--color-secondary-dark);
     border-color: var(--color-secondary-dark);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 2px var(--color-secondary-dark);
 }
 
 .Error {

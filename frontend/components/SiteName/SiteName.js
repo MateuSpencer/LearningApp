@@ -2,9 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import s from './SiteName.module.css';
 
-const SiteName = ({ text, size }) => {
-    // Use the provided text or default to "LearningApp"
-    const displayText = text || 'LearningApp';
+const SiteName = ({ size }) => {
+    const displayText ='LearningApp';
     
     return (
         <span className={`${s.SiteName} ${s[size]}`}>
@@ -14,12 +13,10 @@ const SiteName = ({ text, size }) => {
 };
 
 SiteName.propTypes = {
-    text: PropTypes.string,
     size: PropTypes.oneOf(['small', 'medium', 'large'])
 };
 
 SiteName.defaultProps = {
-    text: 'LearningApp',
     size: 'medium'
 };
 

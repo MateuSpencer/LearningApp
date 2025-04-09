@@ -7,7 +7,7 @@ const Logo = ({ size, linkToHome = true }) => {
   const LogoImg = (
     <img 
       src="/img/logo.png" 
-      alt="LearningApp Logo" 
+      alt="Logo" 
       className={`${s.LogoImage} ${s[size]}`}
     />
   );
