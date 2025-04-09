@@ -1,6 +1,9 @@
 .RightSidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
     height: 100%;
-    width: 100%;
+    width: 250px; /* Full width by default */
     background-color: var(--bg-secondary);
     border-left: 1px solid var(--border-color);
     border-radius: 15px 0 0 15px;
@@ -8,18 +11,19 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    position: relative;
-    transition: width var(--theme-transition-speed) var(--theme-transition-timing), 
-                background-color var(--theme-transition-speed) var(--theme-transition-timing), 
+    transition: transform var(--theme-transition-speed) var(--theme-transition-timing),
+                background-color var(--theme-transition-speed) var(--theme-transition-timing),
                 border-color var(--theme-transition-speed) var(--theme-transition-timing);
+    will-change: transform; /* Hint to browser to optimize */
 }
 
 .Collapsed {
-    width: 60px;
+    /* Instead of changing width, translate it off-screen */
+    transform: translateX(190px); /* Move 190px to the right (250px - 60px) */
 }
 
 .Expanded {
-    width: 250px;
+    transform: translateX(0); /* Fully visible */
 }
 
 .Content {

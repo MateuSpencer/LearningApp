@@ -58,7 +58,7 @@
   .Collapsed .SiteNameWrapper {
     max-width: 0;
     opacity: 0;
-    margin-left: -10px; /* Slight shift effect */
+    margin-left: -10px;
   }
 
 .Footer {
@@ -70,10 +70,37 @@
     align-items: center;
 }
 
-.ThemeLabel {
-    font-size: 14px;
-    margin-bottom: 10px;
-    color: var(--text-secondary);
+.ButtonsContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.AboutButtonWrapper {
+    max-width: 100px; /* Increased from 40px to ensure enough space for content */
+    width: auto;
+    overflow: hidden;
+    opacity: 1;
+    visibility: visible;
+    transition: max-width 0.3s ease-in-out,
+                opacity 0.3s ease-in-out,
+                margin-left 0.3s ease-in-out,
+                visibility 0s linear 0s;
+    white-space: nowrap;
+}
+
+.Collapsed .AboutButtonWrapper {
+    max-width: 0;
+    opacity: 0;
+    margin-left: -10px;
+    visibility: hidden;
+    transition: max-width 0.3s ease-in-out,
+                opacity 0.25s ease-in-out,
+                margin-left 0.3s ease-in-out,
+                visibility 0s linear 0.3s; /* Delay visibility change until after other transitions */
 }
 
 .ToggleButton {

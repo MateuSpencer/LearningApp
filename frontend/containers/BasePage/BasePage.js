@@ -3,7 +3,6 @@ import Head from 'next/head';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
 import LeftSidebar from '../../components/LeftSidebar';
-import RightSidebar from '../../components/RightSidebar';
 import s from './BasePage.module.css';
 
 const WagtailUserbar = dynamic(() => import('../../components/WagtailUserbar'));
@@ -40,9 +39,6 @@ const BasePage = ({ children, seo, shouldRenderSeo, wagtailUserbar }) => {
                 <main className={s.mainContent}>
                     {children}
                 </main>
-                <div className={s.rightSidebar}>
-                    <RightSidebar items={[]} />
-                </div>
             </div>
             {!!wagtailUserbar && <WagtailUserbar {...wagtailUserbar} />}
         </>
