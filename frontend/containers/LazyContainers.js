@@ -8,4 +8,8 @@ export default {
     PasswordProtectedPage: dynamic(() => import('./PasswordProtectedPage')),
     PureHtmlPage: dynamic(() => import('./PureHtmlPage')),
     AboutPage: dynamic(() => import('./AboutPage')),
+    // Wiki containers
+    WikiIndexPage: dynamic(() => import('./WikiIndexPage')),
+    WikiArticlePage: dynamic(() => import('./WikiArticlePage'))
+    //WikiSearchPage: dynamic(() => import('./WikiSearchPage')), // You can implement this later
 };
