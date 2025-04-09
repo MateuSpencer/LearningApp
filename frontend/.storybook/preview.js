@@ -1,11 +1,14 @@
 import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n';
+import { withThemeProvider } from './decorators/withThemeProvider';
+
 
 import '../styles/index.css';
 
 export const decorators = [
     (storyFn) => <I18nextProvider i18n={i18n}>{storyFn()}</I18nextProvider>,
+    withThemeProvider
 ];
 
 const customViewports = {
@@ -49,6 +52,13 @@ export const parameters = {
             },
         ],
     },
+    actions: { argTypesRegex: '^on[A-Z].*' },
+    controls: {
+        matchers: {
+        color: /(background|color)$/i,
+        date: /Date$/,
+        },
+    },
 };
 
-export const tags = ['autodocs'];
+export const tags = ['autodocs', 'autodocs'];

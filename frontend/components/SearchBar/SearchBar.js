@@ -62,8 +62,8 @@ const SearchBar = ({ onSearch, placeholder, maxLength }) => {
                     value={query}
                     onChange={handleChange}
                     className={s.Input}
-                    placeholder={placeholder}
-                    maxLength={maxLength}
+                    placeholder="What do you want to learn?"
+                    maxLength={100}
                     aria-invalid={!!error}
                 />
                 <button type="submit" className={s.Button}>Search</button>
@@ -75,13 +75,9 @@ const SearchBar = ({ onSearch, placeholder, maxLength }) => {
 
 SearchBar.propTypes = {
     onSearch: PropTypes.func.isRequired,
-    placeholder: PropTypes.string,
-    maxLength: PropTypes.number
 };
 
 SearchBar.defaultProps = {
-    placeholder: 'Search...',
-    maxLength: 100,
     onSearch: () => {} // TODO
 };
 

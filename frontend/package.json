@@ -32,11 +32,11 @@
     }
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "^8.5.3",
-    "@storybook/addon-actions": "^8.5.3",
-    "@storybook/addon-backgrounds": "^8.5.3",
-    "@storybook/addon-viewport": "^8.5.3",
-    "@storybook/nextjs": "^8.5.3",
+    "@storybook/addon-a11y": "^8.6.12",
+    "@storybook/addon-actions": "^8.6.12",
+    "@storybook/addon-backgrounds": "^8.6.12",
+    "@storybook/addon-viewport": "^8.6.12",
+    "@storybook/nextjs": "^8.6.12",
     "@swc/jest": "^0.2.37",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
@@ -51,6 +51,6 @@
     "jest-junit": "^16.0.0",
     "prettier": "^3.4.2",
     "pretty-quick": "^4.0.0",
-    "storybook": "^8.2.5"
+    "storybook": "^8.6.12"
   }
 }

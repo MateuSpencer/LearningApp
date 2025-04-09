@@ -20,8 +20,7 @@ const config = {
         babelModeV7: true,
     },
     docs: {
-        autodocs: true,
-        defaultName: 'Documentation',
+        defaultName: 'Documentation'
     },
     framework: {
         name: '@storybook/nextjs',

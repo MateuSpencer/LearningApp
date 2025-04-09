@@ -21,9 +21,7 @@ const HomePage = ({ siteName }) => {
             
             <div className={s.SearchContainer}>
                 <SearchBar 
-                    placeholder="What do you want to learn?" 
                     onSearch={handleSearch}
-                    maxLength={50}
                 />
             </div>
         </div>
