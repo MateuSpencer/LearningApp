@@ -1,56 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import s from './WikipediaPreview.module.css';
 
 const WikipediaPreview = ({ slug }) => {
   // Format the slug for Wikipedia URL (replace underscores with spaces for display)
   const articleTitle = slug.replace(/_/g, ' ');
-  // State to track if content is expanded or collapsed
-  const [isExpanded, setIsExpanded] = useState(false);
   
-  // Toggle expanded state
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
+  // States for API data
+  const [summary, setSummary] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [articleExists, setArticleExists] = useState(true);
+  
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchWikipediaSummary();
+  }, [slug]);
+  
+  // Function to fetch data from Wikipedia API
+  const fetchWikipediaSummary = async () => {
+    setLoading(true);
+    setArticleExists(true);
+    
+    try {
+      // Using Wikipedia's REST API to fetch page summary
+      const response = await fetch(
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`
+      );
+      
+      if (!response.ok) {
+        setArticleExists(false);
+        setLoading(false);
+        return;
+      }
+      
+      const data = await response.json();
+      setSummary(data.extract);
+    } catch (err) {
+      // Silently handle the error
+      setArticleExists(false);
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
-    <div className={s.toggleContainer}>
-      <h1 
-        className={`${s.articleTitle} ${s.toggleHeader}`}
-        onClick={toggleExpand}
-      >
-        <span className={`${s.toggleIcon} ${isExpanded ? s.expanded : ''}`}>
-          {isExpanded ? '▼' : '►'}
-        </span>
-        <a 
-          href={`https://en.wikipedia.org/wiki/${slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {articleTitle}
-        </a>
+    <div className={s.container}>
+      <h1 className={s.centeredTitle}>
+        {articleExists ? (
+          <a 
+            href={`https://en.wikipedia.org/wiki/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {articleTitle}
+          </a>
+        ) : (
+          articleTitle
+        )}
       </h1>
       
-      {isExpanded && (
-        <div className={s.previewContainer}>
-          <iframe 
-            src={`https://en.wikipedia.org/wiki/${slug}?printable=yes`}
-            className={s.previewFrame}
-            title={`Wikipedia article: ${articleTitle}`}
-            loading="lazy"
-          />
-          <div className={s.previewFooter}>
-            <a 
-              href={`https://en.wikipedia.org/wiki/${slug}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              Open in Wikipedia →
-            </a>
-          </div>
-        </div>
-      )}
+      <div className={s.content}>
+        {loading && <p className={s.loadingText}>Loading article summary...</p>}
+        {!loading && !articleExists && (
+          <p className={s.noContentText}>
+            This article doesn't exist on Wikipedia and thus doesn't exist here.
+          </p>
+        )}
+        {!loading && articleExists && summary && (
+          <>
+            <p className={s.articleText}>{summary}</p>
+            <div className={s.readMoreLink}>
+              <a 
+                href={`https://en.wikipedia.org/wiki/${slug}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Read full article on Wikipedia →
+              </a>
+            </div>
+          </>
+        )}
+        {!loading && articleExists && !summary && (
+          <p className={s.noContentText}>No summary available for this article.</p>
+        )}
+      </div>
     </div>
   );
 };

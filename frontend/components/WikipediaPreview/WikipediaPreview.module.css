@@ -1,88 +1,60 @@
-.previewContainer {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  margin: 20px 0;
-}
+/* Simplified styles for WikipediaPreview component */
 
-.previewHeader {
-  display: flex;
-  align-items: center;
-  padding: 10px 15px;
-  background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
-  font-weight: 600;
-}
-
-.wikiLogo {
-  height: 24px;
-  margin-right: 10px;
-}
-
-.previewFrame {
-  width: 100%;
-  height: 600px;
-  border: none;
-}
-
-.previewFooter {
-  padding: 10px 15px;
-  text-align: right;
-  border-top: 1px solid var(--border-color);
-  background-color: var(--bg-secondary);
-}
-
-.previewFooter a {
-  color: var(--text-primary);
-  text-decoration: none;
-}
-
-.previewFooter a:hover {
-  text-decoration: underline;
-}
-
-.toggleContainer {
+.container {
   margin-bottom: 24px;
-  border-radius: 8px;
 }
 
-.toggleHeader {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 6px;
-  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
-}
-
-.toggleIcon {
-  margin-right: 10px;
-  font-size: 0.7em;
-  color: var(--color-secondary);
-  transition: transform 0.3s ease;
-  display: inline-block;
-}
-
-.toggleIcon.expanded {
-  transform: rotate(0deg);
-}
-
-.articleTitle {
-  margin-bottom: 10px;
-  font-size: 2rem;
-  display: flex;
-  align-items: center;
+.centeredTitle {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 24px;
   font-family: 'Linux Libertine', 'Libertine', 'Georgia', 'Times', serif;
   font-weight: normal;
 }
 
-.articleTitle a {
+.centeredTitle a {
   color: var(--text-primary);
   text-decoration: none;
 }
 
-.articleTitle a:hover {
+.centeredTitle a:hover {
   color: var(--color-primary);
   text-decoration: underline;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.articleText {
+  font-family: 'Linux Libertine', 'Libertine', 'Georgia', 'Times', serif;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.readMoreLink {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.readMoreLink a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-family: 'Linux Libertine', 'Libertine', 'Georgia', 'Times', serif;
+}
+
+.readMoreLink a:hover {
+  text-decoration: underline;
+}
+
+.loadingText, .errorText, .noContentText {
+  text-align: center;
+  font-family: 'Linux Libertine', 'Libertine', 'Georgia', 'Times', serif;
+  font-size: 1.2rem;
+}
+
+.errorText {
+  color: var(--color-error, #ff3333);
 }

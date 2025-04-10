@@ -80,15 +80,14 @@
 }
 
 .AboutButtonWrapper {
-    max-width: 100px; /* Increased from 40px to ensure enough space for content */
+    max-width: 100px;
     width: auto;
-    overflow: hidden;
     opacity: 1;
     visibility: visible;
-    transition: max-width 0.3s ease-in-out,
-                opacity 0.3s ease-in-out,
-                margin-left 0.3s ease-in-out,
-                visibility 0s linear 0s;
+    transition: max-width var(--theme-transition-speed) var(--theme-transition-timing),
+                opacity var(--theme-transition-speed) var(--theme-transition-timing),
+                margin-left var(--theme-transition-speed) var(--theme-transition-timing),
+                visibility var(--theme-transition-speed) var(--theme-transition-timing);
     white-space: nowrap;
 }
 
@@ -97,10 +96,10 @@
     opacity: 0;
     margin-left: -10px;
     visibility: hidden;
-    transition: max-width 0.3s ease-in-out,
-                opacity 0.25s ease-in-out,
-                margin-left 0.3s ease-in-out,
-                visibility 0s linear 0.3s; /* Delay visibility change until after other transitions */
+    transition: max-width var(--theme-transition-speed) var(--theme-transition-timing),
+                opacity var(--theme-transition-speed) var(--theme-transition-timing),
+                margin-left var(--theme-transition-speed) var(--theme-transition-timing),
+                visibility var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .ToggleButton {
