@@ -4,7 +4,12 @@ import s from './WikipediaPreview.module.css';
 
 const WikipediaPreview = ({ slug }) => {
   // Format the slug for Wikipedia URL (replace underscores with spaces for display)
-  const articleTitle = slug.replace(/_/g, ' ');
+  // and properly capitalize each word
+  const articleTitle = slug
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
   
   // States for API data
   const [summary, setSummary] = useState('');

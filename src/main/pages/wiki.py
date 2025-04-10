@@ -51,7 +51,6 @@ class WikiPage(HeadlessPreviewMixin, RoutablePageMixin, BasePage):
         data = self.get_component_data(
             context=context, serializer_cls="main.pages.WikiSearchSerializer"
         )
-        """component_name="WikiSearchPage","""
 
         response_cls = Response if isinstance(request, Request) else JsonResponse
         return response_cls(data)

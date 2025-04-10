@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import DOMPurify from 'dompurify';
+import { useRouter } from 'next/router';
 import s from './SearchBar.module.css';
 
-const SearchBar = () => {
+const SearchBar = ({ placeholder = "What do you want to learn?" }) => {
+    const router = useRouter();
     const [query, setQuery] = useState('');
     const [error, setError] = useState(null);
     const maxLength = 100;
@@ -26,7 +28,6 @@ const SearchBar = () => {
     
     const sanitizeQuery = (input) => {
         // Use DOMPurify for proper sanitization
-        // This handles edge cases and evolving attack vectors
         const sanitized = DOMPurify.sanitize(input.trim(), {
             ALLOWED_TAGS: [], // No HTML tags allowed
             ALLOWED_ATTR: [] // No attributes allowed
@@ -36,12 +37,11 @@ const SearchBar = () => {
     };
     
     const onSearch = (searchQuery) => {
-        console.log('Searching for:', searchQuery);
-        // Here you would typically:
-        // 1. Make an API call
-        // 2. Update search results state
-        // 3. Navigate to search results page 
-        // This is just a placeholder implementation
+        // Convert to lowercase and replace spaces with underscores for Wikipedia-style URLs
+        const formattedQuery = searchQuery.toLowerCase().replace(/\s+/g, '_');
+        
+        // Navigate to the wiki page for this query
+        router.push(`/wiki/${formattedQuery}`);
     };
     
     const handleSubmit = (e) => {
@@ -72,7 +72,7 @@ const SearchBar = () => {
                     value={query}
                     onChange={handleChange}
                     className={s.Input}
-                    placeholder="What do you want to learn?"
+                    placeholder={placeholder}
                     maxLength={maxLength}
                     aria-invalid={!!error}
                 />
@@ -81,6 +81,10 @@ const SearchBar = () => {
             </form>
         </div>
     );
+};
+
+SearchBar.propTypes = {
+    placeholder: PropTypes.string
 };
 
 export default SearchBar;
