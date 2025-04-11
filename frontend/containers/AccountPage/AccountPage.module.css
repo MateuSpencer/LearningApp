@@ -1,0 +1,53 @@
+.AccountPage {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.Title {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.AuthForms {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.FormContainer {
+  width: 100%;
+  max-width: 400px;
+}
+
+.FormToggle {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.ToggleButton {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  margin-left: 5px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.ToggleButton:hover {
+  text-decoration: underline;
+}
+
+.ProfileSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.LogoutSection {
+  margin-top: 30px;
+}
