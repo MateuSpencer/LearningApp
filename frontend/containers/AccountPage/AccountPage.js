@@ -4,6 +4,7 @@ import LoginForm from '../../components/LoginForm';
 import RegistrationForm from '../../components/RegistrationForm';
 import UserProfile from '../../components/UserProfile';
 import LogoutButton from '../../components/LogoutButton';
+import auth from '../../api/auth';
 import s from './AccountPage.module.css';
 
 const AccountPage = () => {
@@ -24,21 +25,9 @@ const AccountPage = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // We'll implement this API function later
-        // const response = await fetch('/api/auth/user', {
-        //   credentials: 'include',
-        // });
-        
-        // if (response.ok) {
-        //   const userData = await response.json();
-        //   setUser(userData);
-        //   setIsAuthenticated(true);
-        // }
-
-        // For now, just check localStorage as a placeholder
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+        const userData = await auth.getCurrentUser();
+        if (userData) {
+          setUser(userData);
           setIsAuthenticated(true);
         }
       } catch (error) {
@@ -55,34 +44,8 @@ const AccountPage = () => {
     setLoginError(null);
     
     try {
-      // We'll implement this API call later
-      // const response = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(formData),
-      //   credentials: 'include',
-      // });
-      
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   throw new Error(errorData.message || 'Login failed');
-      // }
-      
-      // const userData = await response.json();
-      
-      // Simulated login for now
-      const mockUser = {
-        username: formData.username,
-        email: `${formData.username}@example.com`,
-        dateJoined: new Date().toISOString()
-      };
-      
-      // Store user in localStorage (temporary solution)
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      
-      setUser(mockUser);
+      const userData = await auth.login(formData);
+      setUser(userData);
       setIsAuthenticated(true);
     } catch (error) {
       setLoginError(error.message || 'Login failed. Please try again.');
@@ -97,34 +60,8 @@ const AccountPage = () => {
     setRegistrationError(null);
     
     try {
-      // We'll implement this API call later
-      // const response = await fetch('/api/auth/register', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(formData),
-      //   credentials: 'include',
-      // });
-      
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   throw new Error(errorData.message || 'Registration failed');
-      // }
-      
-      // const userData = await response.json();
-      
-      // Simulated registration for now
-      const mockUser = {
-        username: formData.username,
-        email: formData.email,
-        dateJoined: new Date().toISOString()
-      };
-      
-      // Store user in localStorage (temporary solution)
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      
-      setUser(mockUser);
+      const userData = await auth.register(formData);
+      setUser(userData);
       setIsAuthenticated(true);
     } catch (error) {
       setRegistrationError(error.message || 'Registration failed. Please try again.');
@@ -138,15 +75,7 @@ const AccountPage = () => {
     setLogoutLoading(true);
     
     try {
-      // We'll implement this API call later
-      // await fetch('/api/auth/logout', {
-      //   method: 'POST',
-      //   credentials: 'include',
-      // });
-      
-      // Clear user from localStorage
-      localStorage.removeItem('user');
-      
+      await auth.logout();
       setUser(null);
       setIsAuthenticated(false);
     } catch (error) {

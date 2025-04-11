@@ -66,6 +66,8 @@ urlpatterns += [
     path("wt/documents/", include(wagtaildocs_urls)),
     path("wt/sitemap.xml", sitemap, name="sitemap"),
     path("wt/health-check/", health_check, name="health_check"),
+    # Add authentication URLs - separate from Wagtail admin
+    path("api/auth/", include("accounts.urls")),
 ]
 
 urlpatterns += [re_path(r"", include(wagtail_urls))]

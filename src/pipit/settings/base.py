@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "customdocument",
     "main",
     "nextjs",
+    "accounts",
 ]
 
 MIDDLEWARE = [
@@ -151,6 +152,14 @@ DEFAULT_FROM_EMAIL = get_env("DEFAULT_FROM_EMAIL", default="noreply@example.com"
 
 # Auth
 AUTH_USER_MODEL = "customuser.User"
+
+# Authentication settings
+LOGIN_URL = "/api/auth/login/"  # Frontend user login URL
+LOGIN_REDIRECT_URL = "/account"  # Redirect to account page after login
+
+# Session settings
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_COOKIE_HTTPONLY = True
 
 # Wagtail
 WAGTAIL_SITE_NAME = "Company-Project"
