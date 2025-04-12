@@ -4,7 +4,51 @@ const API_BASE_URL = '/api/auth';
 
 export const auth = {
     login: async (credentials) => {
-        return httpPost(`${API_BASE_URL}/login/`, credentials);
+        try {
+            return await httpPost(`${API_BASE_URL}/login/`, credentials);
+        } catch (error) {
+            // Extract specific error messages from the response
+            if (error.response) {
+                // Handle based on status code
+                if (error.response.status === 403 || error.response.status === 401) {
+                    throw new Error('Invalid username or password');
+                }
+                
+                // Extract any specific error messages from the response data
+                if (error.response.data) {
+                    const errorData = error.response.data;
+                    
+                    // Format error messages
+                    let errorMessage = '';
+                    
+                    // Handle field-specific errors
+                    if (typeof errorData === 'object') {
+                        const fields = Object.keys(errorData);
+                        
+                        if (fields.length > 0) {
+                            errorMessage = fields.map(field => {
+                                const fieldError = Array.isArray(errorData[field]) 
+                                    ? errorData[field].join(' ')
+                                    : errorData[field];
+                                return `${field}: ${fieldError}`;
+                            }).join('\n');
+                        }
+                    } else if (typeof errorData === 'string') {
+                        errorMessage = errorData;
+                    }
+                    
+                    // If we have a formatted error message, throw it
+                    if (errorMessage) {
+                        const enhancedError = new Error(errorMessage);
+                        enhancedError.fieldErrors = errorData;
+                        throw enhancedError;
+                    }
+                }
+            }
+            
+            // If we couldn't parse specific errors, re-throw the original error
+            throw new Error('Login failed. Please try again.');
+        }
     },
     
     logout: async () => {
@@ -12,7 +56,52 @@ export const auth = {
     },
     
     register: async (userData) => {
-        return httpPost(`${API_BASE_URL}/register/`, userData);
+        try {
+            return await httpPost(`${API_BASE_URL}/register/`, userData);
+        } catch (error) {
+            // Extract specific error messages from the response
+            if (error.response && error.response.data) {
+                const errorData = error.response.data;
+                
+                // Format error messages
+                let errorMessage = '';
+                
+                // Handle field-specific errors
+                if (typeof errorData === 'object') {
+                    const fields = Object.keys(errorData);
+                    
+                    if (fields.length > 0) {
+                        errorMessage = fields.map(field => {
+                            // Handle both array and string error formats
+                            const fieldError = Array.isArray(errorData[field]) 
+                                ? errorData[field].join(' ')
+                                : errorData[field];
+                            
+                            // Enhance specific error messages for clarity
+                            if (field === 'username' && fieldError.includes('already exists')) {
+                                return `Username: This username is already taken. Please choose another one.`;
+                            } else if (field === 'email' && fieldError.includes('already exists')) {
+                                return `Email: This email is already registered. Try logging in instead.`;
+                            }
+                            
+                            return `${field}: ${fieldError}`;
+                        }).join('\n');
+                    }
+                } else if (typeof errorData === 'string') {
+                    errorMessage = errorData;
+                }
+                
+                // If we have a formatted error message, throw it
+                if (errorMessage) {
+                    const enhancedError = new Error(errorMessage);
+                    enhancedError.fieldErrors = errorData;
+                    throw enhancedError;
+                }
+            }
+            
+            // If we couldn't parse specific errors, provide a more helpful generic message
+            throw new Error('Registration failed. The username or email may already be in use. Please try different credentials.');
+        }
     },
     
     getCurrentUser: async () => {
