@@ -55,11 +55,11 @@
     white-space: nowrap;
   }
   
-  .Collapsed .SiteNameWrapper {
+.Collapsed .SiteNameWrapper {
     max-width: 0;
     opacity: 0;
     margin-left: -10px;
-  }
+}
 
 .Footer {
     margin-top: auto;
@@ -79,27 +79,37 @@
     width: 100%;
 }
 
+.ButtonWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: max-width var(--theme-transition-speed) var(--theme-transition-timing),
+                opacity var(--theme-transition-speed) var(--theme-transition-timing),
+                margin var(--theme-transition-speed) var(--theme-transition-timing),
+                visibility var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.ThemeButtonWrapper,
 .AboutButtonWrapper {
     max-width: 100px;
     width: auto;
     opacity: 1;
     visibility: visible;
-    transition: max-width var(--theme-transition-speed) var(--theme-transition-timing),
-                opacity var(--theme-transition-speed) var(--theme-transition-timing),
-                margin-left var(--theme-transition-speed) var(--theme-transition-timing),
-                visibility var(--theme-transition-speed) var(--theme-transition-timing);
     white-space: nowrap;
 }
 
+.Collapsed .ThemeButtonWrapper,
 .Collapsed .AboutButtonWrapper {
     max-width: 0;
     opacity: 0;
     margin-left: -10px;
     visibility: hidden;
-    transition: max-width var(--theme-transition-speed) var(--theme-transition-timing),
-                opacity var(--theme-transition-speed) var(--theme-transition-timing),
-                margin-left var(--theme-transition-speed) var(--theme-transition-timing),
-                visibility var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.Collapsed .AccountButtonWrapper {
+    width: 40px;
+    min-width: 40px;
+    margin: 0 auto;
 }
 
 .ToggleButton {

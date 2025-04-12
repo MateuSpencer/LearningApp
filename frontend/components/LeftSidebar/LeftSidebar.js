@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import s from './LeftSidebar.module.css';
 import ThemeToggleButton from '../ThemeToggleButton';
 import AboutButton from '../AboutButton';
+import AccountButton from '../AccountButton';
 import Logo from '../Logo';
 import SiteName from '../SiteName';
 
@@ -37,9 +38,14 @@ const LeftSidebar = ({ items }) => {
                 <div className={s.Footer}>
                     {!collapsed && <p className={s.ThemeLabel}></p>}
                     <div className={s.ButtonsContainer}>
-                        <ThemeToggleButton/>
-                        <div className={s.AboutButtonWrapper}>
+                        <div className={`${s.ButtonWrapper} ${s.ThemeButtonWrapper}`}>
+                            <ThemeToggleButton/>
+                        </div>
+                        <div className={`${s.ButtonWrapper} ${s.AboutButtonWrapper}`}>
                             <AboutButton expanded={!collapsed} />
+                        </div>
+                        <div className={`${s.ButtonWrapper} ${s.AccountButtonWrapper}`}>
+                            <AccountButton />
                         </div>
                     </div>
                 </div>
