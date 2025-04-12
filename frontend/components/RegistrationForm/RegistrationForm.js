@@ -7,7 +7,9 @@ const RegistrationForm = ({ onSubmit, isLoading, error }) => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    first_name: '',
+    last_name: ''
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -63,6 +65,28 @@ const RegistrationForm = ({ onSubmit, isLoading, error }) => {
       {error && <div className={s.Error}>{error}</div>}
       
       <form onSubmit={handleSubmit}>
+      <div className={s.FormGroup}>
+        <label htmlFor="first_name">First Name</label>
+        <input
+          type="text"
+          id="first_name"
+          name="first_name"
+          value={formData.first_name}
+          onChange={handleChange}
+          className={s.Input}
+        />
+      </div>
+      <div className={s.FormGroup}>
+        <label htmlFor="last_name">Last Name</label>
+        <input
+          type="text"
+          id="last_name"
+          name="last_name"
+          value={formData.last_name}
+          onChange={handleChange}
+          className={s.Input}
+        />
+      </div>
         <div className={s.FormGroup}>
           <label htmlFor="username">Username</label>
           <input

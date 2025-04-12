@@ -1,4 +1,4 @@
-// import { getCookie } from './Cookie';
+import { getCookie } from './Cookie';
 
 const parseJSON = (response) => response.json();
 
@@ -13,12 +13,12 @@ const buildHeaders = () => {
     };
 };
 
-// const buildHeadersWithCsrf = () => {
-//     return {
-//         'X-CSRFToken': getCookie('csrftoken'),
-//         ...defaultHeaders,
-//     }
-// }
+const buildHeadersWithCsrf = () => {
+    return {
+        'X-CSRFToken': getCookie('csrftoken'),
+        ...defaultHeaders,
+    }
+}
 
 const checkStatus = (response) => {
     if (response.status >= 200 && response.status < 300) {
@@ -27,6 +27,7 @@ const checkStatus = (response) => {
 
     const error = new Error(response.statusText);
     error.response = response;
+    error.status = response.status;  // Add this line
     throw error;
 };
 
@@ -49,7 +50,7 @@ const httpPostWithCsrfToken = (url, data) =>
         .then(parseJSON);
 
 
-export const fetchCsrfToken = async () => {
+const fetchCsrfToken = async () => {
     try {
         const response = await fetch('/api/auth/csrf-token/', {
             method: 'GET',
@@ -68,7 +69,7 @@ export const fetchCsrfToken = async () => {
     }
 };
 
-export const httpPost = async (url, data) => {
+const httpPost = async (url, data) => {
     // Get CSRF token first
     let headers = buildHeaders();
     

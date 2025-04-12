@@ -20,7 +20,7 @@ export const auth = {
             return await httpGet(`${API_BASE_URL}/user/`);
         } catch (error) {
             // If 401 or 403, user is not authenticated
-            if (error.status === 401 || error.status === 403) {
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
                 return null;
             }
             throw error;
