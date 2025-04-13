@@ -74,8 +74,8 @@ const httpPost = async (url, data) => {
     let headers = buildHeaders();
     
     try {
-        // Try to get CSRF token - only if endpoint is available
-        if (url.startsWith('/api/auth/')) {
+        // Try to get CSRF token for all API endpoints
+        if (url.startsWith('/api/')) {
             try {
                 const csrfToken = await fetchCsrfToken();
                 if (csrfToken) {

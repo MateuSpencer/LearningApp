@@ -1,0 +1,53 @@
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.newPostButton {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.newPostButton:hover {
+    background-color: #357abD;
+}
+
+.loading, .error, .emptyMessage {
+    text-align: center;
+    padding: 20px;
+}
+
+.error {
+    color: #e74c3c;
+}
+
+.emptyMessage {
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.postsList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}

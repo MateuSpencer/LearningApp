@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "main",
     "nextjs",
     "accounts",
+    "posts",
 ]
 
 MIDDLEWARE = [
