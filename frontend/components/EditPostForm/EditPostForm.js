@@ -1,37 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import s from './NewPostForm.module.css';
-import { setCookie } from '../../utils/Cookie';
+import { fetchCsrfToken } from '../../utils/Http';
+import s from './EditPostForm.module.css';
 
-const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+const EditPostForm = ({ post, onSave, onCancel }) => {
+  const [title, setTitle] = useState(post.title);
+  const [content, setContent] = useState(post.content);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [csrfToken, setCsrfToken] = useState(null);
   
   // Fetch CSRF token when component mounts
   useEffect(() => {
-    const fetchCsrfToken = async () => {
+    const getToken = async () => {
       try {
-        const response = await fetch('/api/auth/csrf-token/', {
-          method: 'GET',
-          credentials: 'same-origin',
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setCsrfToken(data.csrfToken);
-          
-          // Also set it as a cookie so other parts of the app can use it
-          setCookie('csrftoken', data.csrfToken, 1); // Save for 1 day
-        }
+        const token = await fetchCsrfToken();
+        setCsrfToken(token);
       } catch (error) {
         console.error('Failed to fetch CSRF token:', error);
       }
     };
     
-    fetchCsrfToken();
+    getToken();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -46,41 +36,39 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       setSubmitting(true);
       setError(null);
       
-      const response = await fetch('/api/posts/', {
-        method: 'POST',
+      const response = await fetch(`/api/posts/${post.id}/`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken, // Use the token we got from API
+          'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify({
           title,
           content,
-          page_slug: pageSlug
+          page_slug: post.page_slug // Add this line to include the page_slug
         }),
         credentials: 'same-origin'
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to create post: ${response.status} ${response.statusText}\n${errorText}`);
+        throw new Error(`Failed to update post: ${response.status} ${response.statusText}\n${errorText}`);
       }
       
-      const newPost = await response.json();
-      setTitle('');
-      setContent('');
-      onSubmit(newPost);
+      const updatedPost = await response.json();
+      onSave(updatedPost);
       
     } catch (err) {
-      console.error('Error creating post:', err);
-      setError(`Failed to create post: ${err.message}`);
+      console.error('Error updating post:', err);
+      setError(`Failed to update post: ${err.message}`);
     } finally {
       setSubmitting(false);
     }
-  };
+};
 
   return (
     <div className={s.formContainer}>
-      <h3 className={s.formTitle}>Share Your Thoughts</h3>
+      <h3 className={s.formTitle}>Edit Post</h3>
       
       {error && <div className={s.errorMessage}>{error}</div>}
       
@@ -94,7 +82,6 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             onChange={(e) => setTitle(e.target.value)}
             className={s.input}
             disabled={submitting}
-            placeholder="Give your post a title"
           />
         </div>
         
@@ -107,7 +94,6 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             className={s.textarea}
             disabled={submitting}
             rows={5}
-            placeholder="Share your knowledge, ideas, or questions..."
           />
         </div>
         
@@ -125,7 +111,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             className={s.submitButton}
             disabled={submitting}
           >
-            {submitting ? 'Posting...' : 'Post'}
+            {submitting ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </form>
@@ -133,10 +119,14 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
   );
 };
 
-NewPostForm.propTypes = {
-  pageSlug: PropTypes.string.isRequired,
-  onSubmit: PropTypes.func.isRequired,
+EditPostForm.propTypes = {
+  post: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    content: PropTypes.string.isRequired
+  }).isRequired,
+  onSave: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired
 };
 
-export default NewPostForm;
+export default EditPostForm;

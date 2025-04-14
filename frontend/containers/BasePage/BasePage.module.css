@@ -3,10 +3,11 @@
     grid-template-columns: 1fr auto;
     min-height: 100vh;
     position: relative;
+    overflow-y: auto;
 }
 
 .leftSidebar {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
@@ -18,6 +19,7 @@
     padding: 20px;
     width: 80%;
     margin: 0 auto;
+    overflow-y: visible;
 }
 
 .rightSidebar {

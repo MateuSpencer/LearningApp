@@ -1,11 +1,14 @@
 .post {
-    border: 1px solid #e1e1e1;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 16px;
-    background-color: #ffffff;
+    background-color: var(--bg-secondary);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, 
+                background-color var(--theme-transition-speed) var(--theme-transition-timing),
+                border-color var(--theme-transition-speed) var(--theme-transition-timing),
+                box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .post:hover {
@@ -18,21 +21,77 @@
     margin-bottom: 12px;
     font-size: 1.25rem;
     font-weight: 600;
+    color: var(--text-primary);
+    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .content {
     margin-bottom: 16px;
     font-size: 1rem;
     line-height: 1.5;
+    color: var(--text-primary);
+    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .meta {
     display: flex;
     justify-content: space-between;
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.875rem;
+    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .author {
     font-style: italic;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    justify-content: flex-end;
+}
+
+.actionButton {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.actionButton:hover {
+    transform: scale(1.1);
+}
+
+.editButton {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.editButton:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.deleteButton {
+    background-color: var(--color-secondary);
+    color: white;
+}
+
+.deleteButton:hover {
+    background-color: var(--color-secondary-dark);
+}
+
+.icon {
+    font-size: 14px;
+}
+
+.topic {
+    margin-left: 10px;
+    font-style: italic;
+    color: var(--color-primary);
 }

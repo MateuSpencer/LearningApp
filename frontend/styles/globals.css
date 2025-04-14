@@ -10,7 +10,6 @@ body {
                 margin-left var(--theme-transition-speed) var(--theme-transition-timing);
     height: 100%; /* Ensure full height */
     overflow-x: hidden; /* Prevent horizontal scrolling */
-    overflow-y: hidden; /* Prevent vertical scrolling when unnecessary */
 }
 
 a {
