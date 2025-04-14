@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import s from './LeftSidebar.module.css';
 import ThemeToggleButton from '../ThemeToggleButton';
 import AboutButton from '../AboutButton';
@@ -34,7 +35,17 @@ const LeftSidebar = ({ items }) => {
 
             <div className={s.Content}>
                 {/* Navigation items */}
-                
+                <nav className={s.Navigation}>
+                    <ul className={s.NavList}>
+                        <li className={s.NavItem}>
+                            <Link href="/my-posts" className={s.NavLink}>
+                                <span className={s.NavIcon}>📝</span>
+                                <span className={s.NavText}>My Posts</span>
+                            </Link>
+                        </li>
+                    </ul>
+                </nav>
+
                 <div className={s.Footer}>
                     {!collapsed && <p className={s.ThemeLabel}></p>}
                     <div className={s.ButtonsContainer}>

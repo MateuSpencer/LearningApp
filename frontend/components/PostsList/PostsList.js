@@ -5,7 +5,7 @@ import EditPostForm from '../EditPostForm';
 import { fetchCsrfToken } from '../../utils/Http';
 import s from './PostsList.module.css';
 
-const PostsList = ({ pageSlug, onNewPost }) => {
+const PostsList = ({ pageSlug, onNewPost, showOnlyMyPosts, sortBy, filterType }) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,8 +19,7 @@ const PostsList = ({ pageSlug, onNewPost }) => {
                 const response = await fetch('/api/auth/user/');
                 if (response.ok) {
                     const data = await response.json();
-                    // Store the ID as currentUser instead of username
-                    setCurrentUser(data.id.toString()); // Convert to string for consistent comparison
+                    setCurrentUser(data.id.toString());
                 }
             } catch (err) {
                 console.error('Error fetching current user:', err);
@@ -35,7 +34,32 @@ const PostsList = ({ pageSlug, onNewPost }) => {
         const fetchPosts = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`/api/posts/?page=${pageSlug}`);
+                
+                // Build the API URL with query parameters
+                let apiUrl = '/api/posts/';
+                const queryParams = [];
+                
+                if (pageSlug) {
+                    queryParams.push(`page=${pageSlug}`);
+                }
+                
+                if (showOnlyMyPosts) {
+                    queryParams.push('my_posts=true');
+                }
+                
+                if (filterType && filterType !== 'all') {
+                    queryParams.push(`status=${filterType}`);
+                }
+                
+                if (sortBy) {
+                    queryParams.push(`sort=${sortBy}`);
+                }
+                
+                if (queryParams.length > 0) {
+                    apiUrl += `?${queryParams.join('&')}`;
+                }
+                
+                const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
                     throw new Error('Failed to fetch posts');
@@ -53,8 +77,9 @@ const PostsList = ({ pageSlug, onNewPost }) => {
         };
         
         fetchPosts();
-    }, [pageSlug]);
+    }, [pageSlug, showOnlyMyPosts, sortBy, filterType, currentUser]);
 
+    // Keep the rest of the component as is
     const handleEdit = (postId) => {
         setEditingPostId(postId);
     };
@@ -94,23 +119,34 @@ const PostsList = ({ pageSlug, onNewPost }) => {
         }
     };
 
+    // Modify the header based on whether we're showing our own posts
+    const headerTitle = showOnlyMyPosts ? "My Posts" : "Posts";
+
     return (
         <div className={s.container}>
-            <div className={s.header}>
-                <h2 className={s.title}>Posts</h2>
-                <button 
-                    className={s.newPostButton}
-                    onClick={onNewPost}
-                >
-                    Add New Post
-                </button>
-            </div>
+            {!showOnlyMyPosts && (
+                <div className={s.header}>
+                    <h2 className={s.title}>{headerTitle}</h2>
+                    {onNewPost && (
+                        <button 
+                            className={s.newPostButton}
+                            onClick={onNewPost}
+                        >
+                            Add New Post
+                        </button>
+                    )}
+                </div>
+            )}
             
             {loading && <p className={s.loading}>Loading posts...</p>}
             {error && <p className={s.error}>{error}</p>}
             
             {!loading && !error && posts.length === 0 && (
-                <p className={s.emptyMessage}>No posts yet. Be the first to contribute!</p>
+                <p className={s.emptyMessage}>
+                    {showOnlyMyPosts 
+                        ? "You haven't created any posts yet."
+                        : "No posts yet. Be the first to contribute!"}
+                </p>
             )}
             
             <div className={s.postsList}>
@@ -146,8 +182,19 @@ const PostsList = ({ pageSlug, onNewPost }) => {
 };
 
 PostsList.propTypes = {
-    pageSlug: PropTypes.string.isRequired,
-    onNewPost: PropTypes.func.isRequired
+    pageSlug: PropTypes.string,
+    onNewPost: PropTypes.func,
+    showOnlyMyPosts: PropTypes.bool,
+    sortBy: PropTypes.string,
+    filterType: PropTypes.string
+};
+
+PostsList.defaultProps = {
+    pageSlug: '',
+    onNewPost: null,
+    showOnlyMyPosts: false,
+    sortBy: 'newest',
+    filterType: 'all'
 };
 
 export default PostsList;

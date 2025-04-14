@@ -6,10 +6,12 @@ import s from './AboutPage.module.css';
 
 const AboutPage = ({ companyName, aboutText }) => {
     return (
-        <div className={s.AboutPage}>
-            <h1>About {companyName}</h1>
-            <div className={s.AboutContent}>
-                <RawHtml html={aboutText} />
+        <div className={s.container}>
+            <div className={s.contentWrapper}>
+                <h1 className={s.title}>About {companyName}</h1>
+                <div className={s.aboutContent}>
+                    <RawHtml html={aboutText} />
+                </div>
             </div>
         </div>
     );
