@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import s from './WikipediaPreview.module.css';
 
-const WikipediaPreview = ({ slug }) => {
-  // Format the slug for Wikipedia URL (replace underscores with spaces for display)
-  // and properly capitalize each word
+const WikipediaPreview = ({ slug = '' }) => {
+  // slug always a string now
   const articleTitle = slug
     .replace(/_/g, ' ')
     .split(' ')
@@ -94,7 +93,11 @@ const WikipediaPreview = ({ slug }) => {
 };
 
 WikipediaPreview.propTypes = {
-  slug: PropTypes.string.isRequired
+  slug: PropTypes.string,
+};
+
+WikipediaPreview.defaultProps = {
+  slug: '',
 };
 
 export default WikipediaPreview;

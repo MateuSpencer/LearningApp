@@ -1,8 +1,15 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { fetchCsrfToken } from '../utils/Http';
 
-// Create the context
-const CSRFTokenContext = createContext();
+const defaultContext = {
+    token: null,
+    loading: false,
+    error: null,
+    refreshToken: () => Promise.resolve(null),
+};
+
+// give createContext a default
+const CSRFTokenContext = createContext(defaultContext);
 
 /**
  * Provider component for CSRF token management
@@ -62,13 +69,8 @@ export const CSRFTokenProvider = ({ children }) => {
  * @returns {Object} Object containing token, loading state, error, and refreshToken method
  */
 export const useCSRFToken = () => {
-  const context = useContext(CSRFTokenContext);
-  
-  if (!context) {
-    throw new Error('useCSRFToken must be used within a CSRFTokenProvider');
-  }
-  
-  return context;
+  // never throws, always returns at least defaultContext
+  return useContext(CSRFTokenContext);
 };
 
 export default CSRFTokenContext;

@@ -22,8 +22,8 @@ const BasePage = ({ children, seo, shouldRenderSeo, wagtailUserbar }) => {
         seoTwitterImage,
         seoMetaRobots,
         canonicalLink,
-    } = seo;
-    
+    } = seo || {};
+
     return (
         <>
             {shouldRenderSeo && (

@@ -5,8 +5,8 @@ import { useCSRFToken } from '../../context/CSRFTokenContext';
 import s from './EditPostForm.module.css';
 
 const EditPostForm = ({ post, onSave, onCancel }) => {
-  const [title, setTitle] = useState(post.title);
-  const [content, setContent] = useState(post.content);
+  const [title, setTitle] = useState(post?.title || '');
+  const [content, setContent] = useState(post?.content || '');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
@@ -142,12 +142,16 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
 EditPostForm.propTypes = {
   post: PropTypes.shape({
     id: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    content: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    content: PropTypes.string,
     page_slug: PropTypes.string
-  }).isRequired,
-  onSave: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired
+  }),
+  onSave: PropTypes.func,
+  onCancel: PropTypes.func,
+};
+
+EditPostForm.defaultProps = {
+  post: { title: '', content: '' },
 };
 
 export default EditPostForm;

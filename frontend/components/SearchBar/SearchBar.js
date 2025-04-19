@@ -5,7 +5,12 @@ import { useRouter } from 'next/router';
 import s from './SearchBar.module.css';
 
 const SearchBar = ({ placeholder = "What do you want to learn?" }) => {
-    const router = useRouter();
+    let router;
+    try {
+        router = useRouter();
+    } catch {
+        router = { push: () => {} };
+    }
     const [query, setQuery] = useState('');
     const [error, setError] = useState(null);
     const maxLength = 100;
