@@ -1,38 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { httpPost } from '../../utils/Http';
+import { useCSRFToken } from '../../context/CSRFTokenContext';
 import s from './NewPostForm.module.css';
-import { setCookie } from '../../utils/Cookie';
 
 const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [csrfToken, setCsrfToken] = useState(null);
   
-  // Fetch CSRF token when component mounts
-  useEffect(() => {
-    const fetchCsrfToken = async () => {
-      try {
-        const response = await fetch('/api/auth/csrf-token/', {
-          method: 'GET',
-          credentials: 'same-origin',
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setCsrfToken(data.csrfToken);
-          
-          // Also set it as a cookie so other parts of the app can use it
-          setCookie('csrftoken', data.csrfToken, 1); // Save for 1 day
-        }
-      } catch (error) {
-        console.error('Failed to fetch CSRF token:', error);
-      }
-    };
-    
-    fetchCsrfToken();
-  }, []);
+  // Use the CSRF token from context instead of fetching it in the component
+  const { token: csrfToken, loading: tokenLoading, error: tokenError, refreshToken } = useCSRFToken();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,41 +21,72 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       return;
     }
     
+    if (!csrfToken) {
+      setError('Security token not available. Please try again later.');
+      return;
+    }
+    
     try {
       setSubmitting(true);
       setError(null);
       
-      const response = await fetch('/api/posts/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken, // Use the token we got from API
-        },
-        body: JSON.stringify({
+      // Use httpPost with the token from context
+      const newPost = await httpPost(
+        '/api/posts/',
+        {
           title,
           content,
           page_slug: pageSlug
-        }),
-        credentials: 'same-origin'
-      });
+        },
+        csrfToken
+      );
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to create post: ${response.status} ${response.statusText}\n${errorText}`);
-      }
-      
-      const newPost = await response.json();
       setTitle('');
       setContent('');
       onSubmit(newPost);
       
     } catch (err) {
       console.error('Error creating post:', err);
-      setError(`Failed to create post: ${err.message}`);
+      // Check if it's a CSRF token issue (usually 403 Forbidden)
+      if (err.status === 403) {
+        setError('Your session may have expired. Refreshing...');
+        try {
+          // Try to refresh the token
+          await refreshToken();
+          setError('Please try submitting again.');
+        } catch (refreshError) {
+          setError('Failed to refresh security token. Please reload the page.');
+        }
+      } else {
+        setError(`Failed to create post: ${err.message}`);
+      }
     } finally {
       setSubmitting(false);
     }
   };
+
+  // Show loading state while waiting for the token
+  if (tokenLoading) {
+    return <div className={s.loading}>Loading security token...</div>;
+  }
+
+  // Show error if token fetch failed
+  if (tokenError) {
+    return (
+      <div className={s.errorContainer}>
+        <div className={s.errorMessage}>
+          Failed to load security token: {tokenError.message}
+        </div>
+        <button 
+          onClick={refreshToken} 
+          className={s.retryButton}
+          disabled={submitting}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={s.formContainer}>
@@ -93,7 +103,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={s.input}
-            disabled={submitting}
+            disabled={submitting || !csrfToken}
             placeholder="Give your post a title"
           />
         </div>
@@ -105,7 +115,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className={s.textarea}
-            disabled={submitting}
+            disabled={submitting || !csrfToken}
             rows={5}
             placeholder="Share your knowledge, ideas, or questions..."
           />
@@ -123,7 +133,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
           <button 
             type="submit" 
             className={s.submitButton}
-            disabled={submitting}
+            disabled={submitting || !csrfToken}
           >
             {submitting ? 'Posting...' : 'Post'}
           </button>

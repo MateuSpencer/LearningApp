@@ -7,18 +7,14 @@ const defaultHeaders = {
     'Content-Type': 'application/json',
 };
 
-const buildHeaders = () => {
-    return {
-        ...defaultHeaders,
-    };
-};
-
-const buildHeadersWithCsrf = () => {
-    return {
-        'X-CSRFToken': getCookie('csrftoken'),
-        ...defaultHeaders,
+// Build headers with optional CSRF token
+const buildHeaders = (csrfToken = null) => {
+    const headers = { ...defaultHeaders };
+    if (csrfToken) {
+        headers['X-CSRFToken'] = csrfToken;
     }
-}
+    return headers;
+};
 
 const checkStatus = (response) => {
     if (response.status >= 200 && response.status < 300) {
@@ -27,10 +23,11 @@ const checkStatus = (response) => {
 
     const error = new Error(response.statusText);
     error.response = response;
-    error.status = response.status;  // Add this line
+    error.status = response.status;
     throw error;
 };
 
+// Define httpGet without exporting it directly
 const httpGet = (url) =>
     fetch(url, {
         headers: buildHeaders(),
@@ -39,17 +36,7 @@ const httpGet = (url) =>
         .then(checkStatus)
         .then(parseJSON);
 
-const httpPostWithCsrfToken = (url, data) =>
-    fetch(url, {
-        method: 'post',
-        headers: buildHeadersWithCsrf(),
-        body: JSON.stringify(data),
-        credentials: 'same-origin',
-    })
-        .then(checkStatus)
-        .then(parseJSON);
-
-
+// Enhance fetchCsrfToken for context provider use
 const fetchCsrfToken = async () => {
     try {
         const response = await fetch('/api/auth/csrf-token/', {
@@ -69,38 +56,81 @@ const fetchCsrfToken = async () => {
     }
 };
 
-const httpPost = async (url, data) => {
-    // Get CSRF token first
-    let headers = buildHeaders();
-    
-    try {
-        // Try to get CSRF token for all API endpoints
-        if (url.startsWith('/api/')) {
-            try {
-                const csrfToken = await fetchCsrfToken();
-                if (csrfToken) {
-                    headers = {
-                        ...headers,
-                        'X-CSRFToken': csrfToken,
-                    };
-                }
-            } catch (e) {
-                console.warn('Could not fetch CSRF token, proceeding without it');
-            }
+// Update httpPost to accept csrfToken directly
+const httpPost = async (url, data, csrfToken = null) => {
+    // If no token is provided and URL is an API endpoint, try to fetch one
+    if (!csrfToken && url.startsWith('/api/')) {
+        try {
+            csrfToken = await fetchCsrfToken();
+        } catch (e) {
+            console.warn('Could not fetch CSRF token, proceeding without it');
         }
-        
-        return fetch(url, {
-            method: 'post',
-            headers,
-            body: JSON.stringify(data),
-            credentials: 'same-origin',
-        })
-        .then(checkStatus)
-        .then(parseJSON);
-    } catch (error) {
-        console.error('HTTP Post error:', error);
-        throw error;
     }
+    
+    return fetch(url, {
+        method: 'POST',
+        headers: buildHeaders(csrfToken),
+        body: JSON.stringify(data),
+        credentials: 'same-origin',
+    })
+    .then(checkStatus)
+    .then(parseJSON);
 };
 
-export { httpGet, httpPostWithCsrfToken, fetchCsrfToken, httpPost };
+// Add httpPut with csrfToken support
+const httpPut = async (url, data, csrfToken = null) => {
+    // If no token is provided and URL is an API endpoint, try to fetch one
+    if (!csrfToken && url.startsWith('/api/')) {
+        try {
+            csrfToken = await fetchCsrfToken();
+        } catch (e) {
+            console.warn('Could not fetch CSRF token, proceeding without it');
+        }
+    }
+    
+    return fetch(url, {
+        method: 'PUT',
+        headers: buildHeaders(csrfToken),
+        body: JSON.stringify(data),
+        credentials: 'same-origin',
+    })
+    .then(checkStatus)
+    .then(parseJSON);
+};
+
+// Add httpDelete with csrfToken support
+const httpDelete = async (url, csrfToken = null) => {
+    // If no token is provided and URL is an API endpoint, try to fetch one
+    if (!csrfToken && url.startsWith('/api/')) {
+        try {
+            csrfToken = await fetchCsrfToken();
+        } catch (e) {
+            console.warn('Could not fetch CSRF token, proceeding without it');
+        }
+    }
+    
+    return fetch(url, {
+        method: 'DELETE',
+        headers: buildHeaders(csrfToken),
+        credentials: 'same-origin',
+    })
+    .then(checkStatus)
+    .then(response => {
+        // DELETE might return 204 No Content
+        return response.status === 204 ? {} : parseJSON(response);
+    });
+};
+
+// Keep for backward compatibility - will be removed once all components are migrated
+const httpPostWithCsrfToken = (url, data) =>
+    fetch(url, {
+        method: 'POST',
+        headers: buildHeaders(getCookie('csrftoken')),
+        body: JSON.stringify(data),
+        credentials: 'same-origin',
+    })
+        .then(checkStatus)
+        .then(parseJSON);
+
+// Export all functions in a single export statement
+export { httpGet, httpPost, httpPut, httpDelete, fetchCsrfToken, httpPostWithCsrfToken };

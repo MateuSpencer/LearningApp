@@ -2,7 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import s from './Post.module.css';
 
-const Post = ({ id, title, content, author, createdAt, currentUser, slug, onEdit, onDelete }) => {
+const Post = ({ 
+  id, 
+  title, 
+  content, 
+  author, 
+  createdAt, 
+  currentUser, 
+  slug, 
+  onEdit, 
+  onDelete,
+  canModify
+}) => {
     const authorStr = String(author).trim();
     const currentUserStr = String(currentUser).trim();
     const isAuthor = currentUser && authorStr === currentUserStr;
@@ -32,18 +43,16 @@ const Post = ({ id, title, content, author, createdAt, currentUser, slug, onEdit
                         className={`${s.actionButton} ${s.editButton}`}
                         aria-label="Edit post"
                         title="Edit post"
+                        disabled={!canModify}
                     >
                         <span className={s.icon}>✎</span>
                     </button>
                     <button 
-                        onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this post?')) {
-                                onDelete(id);
-                            }
-                        }} 
+                        onClick={() => onDelete(id)} 
                         className={`${s.actionButton} ${s.deleteButton}`}
                         aria-label="Delete post"
                         title="Delete post"
+                        disabled={!canModify}
                     >
                         <span className={s.icon}>✕</span>
                     </button>
@@ -62,7 +71,8 @@ Post.propTypes = {
     currentUser: PropTypes.string,
     slug: PropTypes.string,
     onEdit: PropTypes.func,
-    onDelete: PropTypes.func
+    onDelete: PropTypes.func,
+    canModify: PropTypes.bool
 };
 
 Post.defaultProps = {
@@ -70,7 +80,8 @@ Post.defaultProps = {
     createdAt: new Date().toISOString(),
     slug: '',
     onEdit: () => {},
-    onDelete: () => {}
+    onDelete: () => {},
+    canModify: true
 };
 
 export default Post;

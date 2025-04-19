@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Post from '../Post';
 import EditPostForm from '../EditPostForm';
-import { fetchCsrfToken } from '../../utils/Http';
+import { httpDelete } from '../../utils/Http';
+import { useCSRFToken } from '../../context/CSRFTokenContext';
 import s from './PostsList.module.css';
 
 const PostsList = ({ pageSlug, onNewPost, showOnlyMyPosts, sortBy, filterType }) => {
@@ -11,6 +12,10 @@ const PostsList = ({ pageSlug, onNewPost, showOnlyMyPosts, sortBy, filterType })
     const [error, setError] = useState(null);
     const [editingPostId, setEditingPostId] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
+    const [deleteError, setDeleteError] = useState(null);
+    
+    // Use the CSRF token from context
+    const { token: csrfToken, loading: tokenLoading, error: tokenError, refreshToken } = useCSRFToken();
     
     // Fetch the current user
     useEffect(() => {
@@ -96,26 +101,41 @@ const PostsList = ({ pageSlug, onNewPost, showOnlyMyPosts, sortBy, filterType })
     };
     
     const handleDelete = async (postId) => {
+        setDeleteError(null);
+
+        if (!csrfToken) {
+            setDeleteError('Security token not available. Please try again later.');
+            return;
+        }
+
+        // Confirm deletion with the user
+        if (!window.confirm('Are you sure you want to delete this post?')) {
+            return;
+        }
+        
         try {
-            const csrfToken = await fetchCsrfToken();
-            const response = await fetch(`/api/posts/${postId}/`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRFToken': csrfToken
-                },
-                credentials: 'same-origin'
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Failed to delete: ${response.status} ${response.statusText}`);
-            }
+            // Use httpDelete with the token from context
+            await httpDelete(`/api/posts/${postId}/`, csrfToken);
             
             // Remove the deleted post from state
             setPosts(posts.filter(post => post.id !== postId));
             
         } catch (err) {
             console.error('Error deleting post:', err);
-            alert('Failed to delete post. Please try again.');
+            
+            // Check if it's a CSRF token issue (usually 403 Forbidden)
+            if (err.status === 403) {
+                setDeleteError('Your session may have expired. Refreshing...');
+                try {
+                    // Try to refresh the token
+                    await refreshToken();
+                    setDeleteError('Please try deleting again.');
+                } catch (refreshError) {
+                    setDeleteError('Failed to refresh security token. Please reload the page.');
+                }
+            } else {
+                setDeleteError(`Failed to delete post: ${err.message}`);
+            }
         }
     };
 
@@ -131,6 +151,7 @@ const PostsList = ({ pageSlug, onNewPost, showOnlyMyPosts, sortBy, filterType })
                         <button 
                             className={s.newPostButton}
                             onClick={onNewPost}
+                            disabled={tokenLoading || !!tokenError} // Disable if token is loading or there's an error
                         >
                             Add New Post
                         </button>
@@ -138,6 +159,24 @@ const PostsList = ({ pageSlug, onNewPost, showOnlyMyPosts, sortBy, filterType })
                 </div>
             )}
             
+            {/* Show token-related messages if needed */}
+            {tokenLoading && <p className={s.loading}>Loading security token...</p>}
+            {tokenError && (
+                <div className={s.errorContainer}>
+                    <p className={s.error}>Failed to load security token: {tokenError.message}</p>
+                    <button 
+                        onClick={refreshToken} 
+                        className={s.retryButton}
+                    >
+                        Retry
+                    </button>
+                </div>
+            )}
+            
+            {/* Show delete-specific errors */}
+            {deleteError && <p className={s.error}>{deleteError}</p>}
+            
+            {/* Show post loading and errors */}
             {loading && <p className={s.loading}>Loading posts...</p>}
             {error && <p className={s.error}>{error}</p>}
             
@@ -173,6 +212,8 @@ const PostsList = ({ pageSlug, onNewPost, showOnlyMyPosts, sortBy, filterType })
                             slug={pageSlug}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
+                            // Disable edit/delete if token is not available
+                            canModify={!!csrfToken && !tokenLoading && !tokenError}
                         />
                     );
                 })}

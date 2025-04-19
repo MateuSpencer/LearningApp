@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { fetchCsrfToken } from '../../utils/Http';
+import { httpPut } from '../../utils/Http';
+import { useCSRFToken } from '../../context/CSRFTokenContext';
 import s from './EditPostForm.module.css';
 
 const EditPostForm = ({ post, onSave, onCancel }) => {
@@ -8,21 +9,9 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
   const [content, setContent] = useState(post.content);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [csrfToken, setCsrfToken] = useState(null);
   
-  // Fetch CSRF token when component mounts
-  useEffect(() => {
-    const getToken = async () => {
-      try {
-        const token = await fetchCsrfToken();
-        setCsrfToken(token);
-      } catch (error) {
-        console.error('Failed to fetch CSRF token:', error);
-      }
-    };
-    
-    getToken();
-  }, []);
+  // Use the CSRF token from context instead of fetching it in the component
+  const { token: csrfToken, loading: tokenLoading, error: tokenError, refreshToken } = useCSRFToken();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,39 +21,70 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
       return;
     }
     
+    if (!csrfToken) {
+      setError('Security token not available. Please try again later.');
+      return;
+    }
+    
     try {
       setSubmitting(true);
       setError(null);
       
-      const response = await fetch(`/api/posts/${post.id}/`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify({
+      // Use httpPut with the token from context
+      const updatedPost = await httpPut(
+        `/api/posts/${post.id}/`,
+        {
           title,
           content,
-          page_slug: post.page_slug // Add this line to include the page_slug
-        }),
-        credentials: 'same-origin'
-      });
+          page_slug: post.page_slug
+        },
+        csrfToken
+      );
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update post: ${response.status} ${response.statusText}\n${errorText}`);
-      }
-      
-      const updatedPost = await response.json();
       onSave(updatedPost);
       
     } catch (err) {
       console.error('Error updating post:', err);
-      setError(`Failed to update post: ${err.message}`);
+      // Check if it's a CSRF token issue (usually 403 Forbidden)
+      if (err.status === 403) {
+        setError('Your session may have expired. Refreshing...');
+        try {
+          // Try to refresh the token
+          await refreshToken();
+          setError('Please try submitting again.');
+        } catch (refreshError) {
+          setError('Failed to refresh security token. Please reload the page.');
+        }
+      } else {
+        setError(`Failed to update post: ${err.message}`);
+      }
     } finally {
       setSubmitting(false);
     }
-};
+  };
+
+  // Show loading state while waiting for the token
+  if (tokenLoading) {
+    return <div className={s.loading}>Loading security token...</div>;
+  }
+
+  // Show error if token fetch failed
+  if (tokenError) {
+    return (
+      <div className={s.errorContainer}>
+        <div className={s.errorMessage}>
+          Failed to load security token: {tokenError.message}
+        </div>
+        <button 
+          onClick={refreshToken} 
+          className={s.retryButton}
+          disabled={submitting}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={s.formContainer}>
@@ -81,7 +101,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={s.input}
-            disabled={submitting}
+            disabled={submitting || !csrfToken}
           />
         </div>
         
@@ -92,7 +112,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className={s.textarea}
-            disabled={submitting}
+            disabled={submitting || !csrfToken}
             rows={5}
           />
         </div>
@@ -109,7 +129,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
           <button 
             type="submit" 
             className={s.submitButton}
-            disabled={submitting}
+            disabled={submitting || !csrfToken}
           >
             {submitting ? 'Saving...' : 'Save Changes'}
           </button>
@@ -123,7 +143,8 @@ EditPostForm.propTypes = {
   post: PropTypes.shape({
     id: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
-    content: PropTypes.string.isRequired
+    content: PropTypes.string.isRequired,
+    page_slug: PropTypes.string
   }).isRequired,
   onSave: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired
