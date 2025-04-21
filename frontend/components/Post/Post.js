@@ -54,7 +54,7 @@ const Post = ({
     
     return (
         <div className={`${s.post} ${statusInfo.className}`}>
-            {title && <h3 className={s.title}>{title}</h3>}
+            {/* Removed title rendering */}
             <div className={s.content}>{content}</div>
             <div className={s.meta}>
                 <span className={s.author}>By: {author}</span>

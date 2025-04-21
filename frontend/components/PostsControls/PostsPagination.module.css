@@ -13,15 +13,19 @@
 
 .pageButton {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #ddd;
-  background-color: white;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .pageButton:hover:not(:disabled) {
-  background-color: #f8f8f8;
+  background-color: var(--bg-hover);
 }
 
 .pageButton:disabled {
@@ -30,9 +34,9 @@
 }
 
 .pageButton.active {
-  background-color: #007bff;
+  background-color: var(--color-primary);
   color: white;
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 .ellipsis {
@@ -41,10 +45,13 @@
   justify-content: center;
   width: 40px;
   font-weight: bold;
+  color: var(--text-secondary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .pageInfo {
   margin-left: auto;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }

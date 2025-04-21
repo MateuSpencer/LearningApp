@@ -11,6 +11,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [actualPageSlug, setActualPageSlug] = useState(pageSlug);
+  const [internalTitle, setInternalTitle] = useState(''); // Hidden title that will be used for primary_slug
   
   // Get router to extract current path
   const router = useRouter();
@@ -26,7 +27,12 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       if (pathParts.length > 0) {
         const extractedSlug = pathParts[pathParts.length - 1];
         setActualPageSlug(extractedSlug);
+        // Set the internal title based on the page slug to ensure proper primary_slug creation
+        setInternalTitle(extractedSlug.replace(/_/g, ' '));
       }
+    } else {
+      // Set the internal title based on the provided page slug
+      setInternalTitle(pageSlug.replace(/_/g, ' '));
     }
   }, [router, pageSlug]);
   
@@ -54,6 +60,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       const newPost = await httpPost(
         '/api/posts/',
         {
+          title: internalTitle, // Send the internal title to ensure primary_slug is set from the page
           content,
           status,
           page_slug: actualPageSlug

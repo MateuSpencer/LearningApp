@@ -15,49 +15,74 @@
 .filterLabel {
   font-weight: 500;
   font-size: 0.9rem;
+  color: var(--text-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .filterSelect {
   padding: 0.5rem;
   border-radius: 4px;
-  border: 1px solid #ddd;
-  background-color: white;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   min-width: 120px;
   cursor: pointer;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
 }
 
 .filterSelect:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--bg-disabled, #f5f5f5);
   cursor: not-allowed;
 }
 
 .searchInput {
   padding: 0.5rem;
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   min-width: 200px;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
 }
 
 .searchInput:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--bg-disabled, #f5f5f5);
   cursor: not-allowed;
 }
 
 .clearButton {
   padding: 0.5rem 1rem;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var (--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
-.clearButton:hover {
-  background-color: #e5e5e5;
+.clearButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
 }
 
 .clearButton:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--bg-disabled, #f5f5f5);
   cursor: not-allowed;
   opacity: 0.7;
 }
