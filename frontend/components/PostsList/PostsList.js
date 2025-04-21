@@ -1,241 +1,302 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Post from '../Post';
 import EditPostForm from '../EditPostForm';
-import { httpDelete } from '../../utils/Http';
+import { PostsFilter, PostsSort, PostsPagination } from '../PostsControls';
 import { useCSRFToken } from '../../context/CSRFTokenContext';
+import usePosts from '../../hooks/usePosts';
 import s from './PostsList.module.css';
 
-const PostsList = ({ pageSlug, onNewPost, showOnlyMyPosts, sortBy, filterType }) => {
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [editingPostId, setEditingPostId] = useState(null);
-    const [currentUser, setCurrentUser] = useState(null);
-    const [deleteError, setDeleteError] = useState(null);
+/**
+ * PostsList component - displays a list of posts with filtering, sorting, and pagination
+ * 
+ * @param {Object} props Component props
+ * @param {string} props.pageSlug Filter posts by this page slug (for wiki pages)
+ * @param {Function} props.onNewPost Callback for creating a new post
+ * @param {boolean} props.showOnlyMyPosts Show only the current user's posts
+ * @param {Array} props.allowedFilters Array of allowed filter types
+ * @param {Array} props.allowedSortFields Array of allowed sort fields
+ * @param {Object} props.fixedFilters Filters that cannot be changed by the user
+ */
+const PostsList = ({ 
+  pageSlug, 
+  onNewPost, 
+  showOnlyMyPosts = false,
+  allowedFilters = ['status', 'timeframe', 'search'],
+  allowedSortFields = ['created_at', 'updated_at', 'title', 'status'],
+  fixedFilters = {}
+}) => {
+  // Track changes to dependencies 
+  const prevDepsRef = useRef({ currentUser: null, showOnlyMyPosts: false });
+  
+  // Track which post is being edited
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  
+  // Get CSRF token
+  const { token: csrfToken, loading: tokenLoading, error: tokenError } = useCSRFToken();
+  
+  // Set up fixed filters based on props
+  const computedFixedFilters = useMemo(() => {
+    const filters = { ...fixedFilters };
     
-    // Use the CSRF token from context
-    const { token: csrfToken, loading: tokenLoading, error: tokenError, refreshToken } = useCSRFToken();
+    // If pageSlug is provided, add it to fixed filters
+    if (pageSlug) {
+      filters.page_slug = pageSlug;
+    }
     
-    // Fetch the current user
-    useEffect(() => {
-        const fetchCurrentUser = async () => {
-            try {
-                const response = await fetch('/api/auth/user/');
-                if (response.ok) {
-                    const data = await response.json();
-                    setCurrentUser(data.id.toString());
-                }
-            } catch (err) {
-                console.error('Error fetching current user:', err);
-            }
-        };
-        
-        fetchCurrentUser();
-    }, []);
-
-    // Fetch posts
-    useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                setLoading(true);
-                
-                // Build the API URL with query parameters
-                let apiUrl = '/api/posts/';
-                const queryParams = [];
-                
-                if (pageSlug) {
-                    queryParams.push(`page=${pageSlug}`);
-                }
-                
-                if (showOnlyMyPosts) {
-                    queryParams.push('my_posts=true');
-                }
-                
-                if (filterType && filterType !== 'all') {
-                    queryParams.push(`status=${filterType}`);
-                }
-                
-                if (sortBy) {
-                    queryParams.push(`sort=${sortBy}`);
-                }
-                
-                if (queryParams.length > 0) {
-                    apiUrl += `?${queryParams.join('&')}`;
-                }
-                
-                const response = await fetch(apiUrl);
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch posts');
-                }
-                
-                const data = await response.json();
-                setPosts(data);
-                setError(null);
-            } catch (err) {
-                console.error('Error fetching posts:', err);
-                setError('Failed to load posts. Please try again later.');
-            } finally {
-                setLoading(false);
-            }
-        };
-        
-        fetchPosts();
-    }, [pageSlug, showOnlyMyPosts, sortBy, filterType, currentUser]);
-
-    // Keep the rest of the component as is
-    const handleEdit = (postId) => {
-        setEditingPostId(postId);
-    };
+    // If showOnlyMyPosts is true, add author filter
+    if (showOnlyMyPosts && currentUser) {
+      filters.author = currentUser;
+    }
     
-    const handleSaveEdit = (updatedPost) => {
-        setPosts(posts.map(post => 
-            post.id === updatedPost.id ? updatedPost : post
-        ));
-        setEditingPostId(null);
-    };
-    
-    const handleCancelEdit = () => {
-        setEditingPostId(null);
-    };
-    
-    const handleDelete = async (postId) => {
-        setDeleteError(null);
-
-        if (!csrfToken) {
-            setDeleteError('Security token not available. Please try again later.');
-            return;
+    return filters;
+  }, [fixedFilters, pageSlug, showOnlyMyPosts, currentUser]);
+  
+  // Use our custom hook for posts data and operations
+  const {
+    posts,
+    totalCount,
+    currentPage,
+    totalPages,
+    filters,
+    sortBy,
+    sortDirection,
+    loading,
+    error,
+    fetchPosts,
+    createPost,
+    updatePost,
+    deletePost,
+    updateFilter,
+    updateFilters,
+    clearFilters,
+    updateSort,
+    goToPage
+  } = usePosts({
+    fixedFilters: computedFixedFilters,
+    initialSortBy: 'created_at',
+    initialSortDirection: 'desc',
+    pageSize: 10
+  });
+  
+  // Create stable reference to fetchPosts
+  const fetchPostsRef = useRef(fetchPosts);
+  useEffect(() => {
+    fetchPostsRef.current = fetchPosts;
+  }, [fetchPosts]);
+  
+  // Create stable function for fetching posts
+  const stableFetchPosts = useCallback((options) => {
+    return fetchPostsRef.current(options);
+  }, []);
+  
+  // Fetch the current user
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch('/api/auth/user/');
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentUser(data.username);
         }
-
-        // Confirm deletion with the user
-        if (!window.confirm('Are you sure you want to delete this post?')) {
-            return;
-        }
-        
-        try {
-            // Use httpDelete with the token from context
-            await httpDelete(`/api/posts/${postId}/`, csrfToken);
-            
-            // Remove the deleted post from state
-            setPosts(posts.filter(post => post.id !== postId));
-            
-        } catch (err) {
-            console.error('Error deleting post:', err);
-            
-            // Check if it's a CSRF token issue (usually 403 Forbidden)
-            if (err.status === 403) {
-                setDeleteError('Your session may have expired. Refreshing...');
-                try {
-                    // Try to refresh the token
-                    await refreshToken();
-                    setDeleteError('Please try deleting again.');
-                } catch (refreshError) {
-                    setDeleteError('Failed to refresh security token. Please reload the page.');
-                }
-            } else {
-                setDeleteError(`Failed to delete post: ${err.message}`);
-            }
-        }
+      } catch (err) {
+        console.error('Error fetching current user:', err);
+      }
     };
+    
+    fetchCurrentUser();
+  }, []);
+  
+  // Store previous dependencies for comparison
+  useEffect(() => {
+    prevDepsRef.current = { 
+      currentUser, 
+      showOnlyMyPosts, 
+      fetchPosts: fetchPostsRef.current 
+    };
+  }, [currentUser, showOnlyMyPosts, fetchPosts]);
+  
+  // Refetch posts when currentUser changes and we're using showOnlyMyPosts
+  useEffect(() => {
+    // Only fetch if we have a user and either the user or showOnlyMyPosts flag changed
+    if (showOnlyMyPosts && currentUser && 
+        (prevDepsRef.current.currentUser !== currentUser || 
+         prevDepsRef.current.showOnlyMyPosts !== showOnlyMyPosts)) {
+      stableFetchPosts({ force: true });
+    }
+  }, [showOnlyMyPosts, currentUser, stableFetchPosts]);
+  
+  // Handle filter changes
+  const handleFilterChange = (filterName, value, clearAll = false) => {
+    if (clearAll) {
+      clearFilters();
+    } else {
+      updateFilter(filterName, value === 'all' ? '' : value);
+    }
+  };
+  
+  // Handle sort changes
+  const handleSortChange = (field, direction) => {
+    updateSort(field, direction);
+  };
+  
+  // Handle page changes
+  const handlePageChange = (page) => {
+    goToPage(page);
+  };
+  
+  // Handle post editing
+  const handleEdit = (postId) => {
+    setEditingPostId(postId);
+  };
+  
+  // Handle saving edits
+  const handleSaveEdit = async (updatedPostData) => {
+    try {
+      await updatePost(updatedPostData.id, updatedPostData);
+      setEditingPostId(null);
+    } catch (err) {
+      // Error is already handled by the hook
+      console.error('Failed to save edited post:', err);
+    }
+  };
+  
+  // Handle canceling edit
+  const handleCancelEdit = () => {
+    setEditingPostId(null);
+  };
+  
+  // Handle post deletion
+  const handleDelete = async (postId) => {
+    try {
+      await deletePost(postId);
+    } catch (err) {
+      // Error is already handled by the hook
+    }
+  };
 
-    // Modify the header based on whether we're showing our own posts
-    const headerTitle = showOnlyMyPosts ? "My Posts" : "Posts";
+  // Determine the header title
+  const headerTitle = showOnlyMyPosts ? "My Posts" : "Posts";
+  
+  // Are controls disabled?
+  const controlsDisabled = loading || !!error || tokenLoading || !!tokenError;
 
-    return (
-        <div className={s.container}>
-            {!showOnlyMyPosts && (
-                <div className={s.header}>
-                    <h2 className={s.title}>{headerTitle}</h2>
-                    {onNewPost && (
-                        <button 
-                            className={s.newPostButton}
-                            onClick={onNewPost}
-                            disabled={tokenLoading || !!tokenError} // Disable if token is loading or there's an error
-                        >
-                            Add New Post
-                        </button>
-                    )}
-                </div>
-            )}
-            
-            {/* Show token-related messages if needed */}
-            {tokenLoading && <p className={s.loading}>Loading security token...</p>}
-            {tokenError && (
-                <div className={s.errorContainer}>
-                    <p className={s.error}>Failed to load security token: {tokenError.message}</p>
-                    <button 
-                        onClick={refreshToken} 
-                        className={s.retryButton}
-                    >
-                        Retry
-                    </button>
-                </div>
-            )}
-            
-            {/* Show delete-specific errors */}
-            {deleteError && <p className={s.error}>{deleteError}</p>}
-            
-            {/* Show post loading and errors */}
-            {loading && <p className={s.loading}>Loading posts...</p>}
-            {error && <p className={s.error}>{error}</p>}
-            
-            {!loading && !error && posts.length === 0 && (
-                <p className={s.emptyMessage}>
-                    {showOnlyMyPosts 
-                        ? "You haven't created any posts yet."
-                        : "No posts yet. Be the first to contribute!"}
-                </p>
-            )}
-            
-            <div className={s.postsList}>
-                {posts.map(post => {
-                    if (editingPostId === post.id) {
-                        return (
-                            <EditPostForm
-                                key={post.id}
-                                post={post}
-                                onSave={handleSaveEdit}
-                                onCancel={handleCancelEdit}
-                            />
-                        );
-                    }
-                    return (
-                        <Post
-                            key={post.id}
-                            id={post.id}
-                            title={post.title}
-                            content={post.content}
-                            author={post.author}
-                            createdAt={post.created_at}
-                            currentUser={currentUser}
-                            slug={pageSlug}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            // Disable edit/delete if token is not available
-                            canModify={!!csrfToken && !tokenLoading && !tokenError}
-                        />
-                    );
-                })}
-            </div>
+  return (
+    <div className={s.container}>
+      <div className={s.header}>
+        <h2 className={s.title}>{headerTitle}</h2>
+        {onNewPost && !showOnlyMyPosts && (
+          <button 
+            className={s.newPostButton}
+            onClick={onNewPost}
+            disabled={tokenLoading || !!tokenError}
+          >
+            Add New Post
+          </button>
+        )}
+      </div>
+      
+      <div className={s.controls}>
+        {/* Filter and Sort controls */}
+        <div className={s.filtersRow}>
+          <PostsFilter 
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            allowedFilters={allowedFilters}
+            disabled={controlsDisabled}
+          />
+          
+          <PostsSort 
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            onSortChange={handleSortChange}
+            allowedSortFields={allowedSortFields}
+            disabled={controlsDisabled}
+          />
         </div>
-    );
+      </div>
+      
+      {/* Show token-related errors */}
+      {tokenLoading && <p className={s.loading}>Loading security token...</p>}
+      {tokenError && (
+        <div className={s.errorContainer}>
+          <p className={s.error}>Failed to load security token: {tokenError.message}</p>
+        </div>
+      )}
+      
+      {/* Show post loading and errors */}
+      {loading && <p className={s.loading}>Loading posts...</p>}
+      {error && <p className={s.error}>{error}</p>}
+      
+      {!loading && !error && posts.length === 0 && (
+        <p className={s.emptyMessage}>
+          {showOnlyMyPosts 
+            ? "You haven't created any posts yet."
+            : "No posts yet. Be the first to contribute!"}
+        </p>
+      )}
+      
+      {/* Display the posts */}
+      <div className={s.postsList}>
+        {posts.map(post => {
+          if (editingPostId === post.id) {
+            return (
+              <EditPostForm
+                key={post.id}
+                post={post}
+                onSave={handleSaveEdit}
+                onCancel={handleCancelEdit}
+              />
+            );
+          }
+          return (
+            <Post
+              key={post.id}
+              id={post.id}
+              title={post.title}
+              content={post.content}
+              author={post.author_username}
+              createdAt={post.created_at}
+              currentUser={currentUser}
+              slug={pageSlug}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              status={post.status}
+              // Disable edit/delete if token is not available
+              canModify={!!csrfToken && !tokenLoading && !tokenError}
+            />
+          );
+        })}
+      </div>
+      
+      {/* Pagination controls */}
+      <PostsPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        disabled={controlsDisabled}
+      />
+    </div>
+  );
 };
 
 PostsList.propTypes = {
-    pageSlug: PropTypes.string,
-    onNewPost: PropTypes.func,
-    showOnlyMyPosts: PropTypes.bool,
-    sortBy: PropTypes.string,
-    filterType: PropTypes.string
+  pageSlug: PropTypes.string,
+  onNewPost: PropTypes.func,
+  showOnlyMyPosts: PropTypes.bool,
+  allowedFilters: PropTypes.arrayOf(PropTypes.string),
+  allowedSortFields: PropTypes.arrayOf(PropTypes.string),
+  fixedFilters: PropTypes.object
 };
 
 PostsList.defaultProps = {
-    pageSlug: '',
-    onNewPost: null,
-    showOnlyMyPosts: false,
-    sortBy: 'newest',
-    filterType: 'all'
+  pageSlug: '',
+  onNewPost: null,
+  showOnlyMyPosts: false,
+  allowedFilters: ['status', 'timeframe', 'search'],
+  allowedSortFields: ['created_at', 'updated_at', 'title', 'status'],
+  fixedFilters: {}
 };
 
 export default PostsList;

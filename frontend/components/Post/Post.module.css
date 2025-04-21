@@ -9,6 +9,7 @@
                 background-color var(--theme-transition-speed) var(--theme-transition-timing),
                 border-color var(--theme-transition-speed) var(--theme-transition-timing),
                 box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
+    position: relative;
 }
 
 .post:hover {
@@ -94,4 +95,39 @@
     margin-left: 10px;
     font-style: italic;
     color: var(--color-primary);
+}
+
+/* Status styles */
+.status {
+    margin-left: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.statusPublished {
+    color: #28a745;
+}
+
+.statusDraft {
+    color: #ffc107;
+}
+
+.statusArchived {
+    color: #6c757d;
+}
+
+/* Status indicator on post */
+.post.statusDraft {
+    border-left: 3px solid #ffc107;
+}
+
+.post.statusPublished {
+    border-left: 3px solid #28a745;
+}
+
+.post.statusArchived {
+    border-left: 3px solid #6c757d;
+    opacity: 0.8;
 }

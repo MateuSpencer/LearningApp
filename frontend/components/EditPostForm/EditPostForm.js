@@ -7,6 +7,7 @@ import s from './EditPostForm.module.css';
 const EditPostForm = ({ post, onSave, onCancel }) => {
   const [title, setTitle] = useState(post?.title || '');
   const [content, setContent] = useState(post?.content || '');
+  const [status, setStatus] = useState(post?.status || 'published');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
@@ -16,8 +17,8 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!title.trim() || !content.trim()) {
-      setError('Title and content are required');
+    if (!content.trim()) {
+      setError('Content is required');
       return;
     }
     
@@ -36,6 +37,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
         {
           title,
           content,
+          status,
           page_slug: post.page_slug
         },
         csrfToken
@@ -94,7 +96,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
       
       <form onSubmit={handleSubmit} className={s.form}>
         <div className={s.formGroup}>
-          <label htmlFor="title" className={s.label}>Title</label>
+          <label htmlFor="title" className={s.label}>Title (Optional)</label>
           <input
             type="text"
             id="title"
@@ -102,11 +104,12 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
             onChange={(e) => setTitle(e.target.value)}
             className={s.input}
             disabled={submitting || !csrfToken}
+            placeholder="Untitled Post"
           />
         </div>
         
         <div className={s.formGroup}>
-          <label htmlFor="content" className={s.label}>Content</label>
+          <label htmlFor="content" className={s.label}>Content *</label>
           <textarea
             id="content"
             value={content}
@@ -114,7 +117,23 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
             className={s.textarea}
             disabled={submitting || !csrfToken}
             rows={5}
+            required
           />
+        </div>
+        
+        <div className={s.formGroup}>
+          <label htmlFor="status" className={s.label}>Status</label>
+          <select
+            id="status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className={s.select}
+            disabled={submitting || !csrfToken}
+          >
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
         </div>
         
         <div className={s.buttonGroup}>
@@ -141,9 +160,10 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
 
 EditPostForm.propTypes = {
   post: PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     title: PropTypes.string,
     content: PropTypes.string,
+    status: PropTypes.string,
     page_slug: PropTypes.string
   }),
   onSave: PropTypes.func,
@@ -151,7 +171,9 @@ EditPostForm.propTypes = {
 };
 
 EditPostForm.defaultProps = {
-  post: { title: '', content: '' },
+  post: { title: '', content: '', status: 'published' },
+  onSave: () => {},
+  onCancel: () => {},
 };
 
 export default EditPostForm;

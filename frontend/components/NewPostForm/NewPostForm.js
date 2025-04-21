@@ -7,6 +7,7 @@ import s from './NewPostForm.module.css';
 const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [status, setStatus] = useState('published');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
@@ -16,8 +17,8 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!title.trim() || !content.trim()) {
-      setError('Title and content are required');
+    if (!content.trim()) {
+      setError('Content is required');
       return;
     }
     
@@ -36,6 +37,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
         {
           title,
           content,
+          status,
           page_slug: pageSlug
         },
         csrfToken
@@ -43,6 +45,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       
       setTitle('');
       setContent('');
+      setStatus('published');
       onSubmit(newPost);
       
     } catch (err) {
@@ -96,7 +99,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       
       <form onSubmit={handleSubmit} className={s.form}>
         <div className={s.formGroup}>
-          <label htmlFor="title" className={s.label}>Title</label>
+          <label htmlFor="title" className={s.label}>Title (Optional)</label>
           <input
             type="text"
             id="title"
@@ -104,12 +107,12 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             onChange={(e) => setTitle(e.target.value)}
             className={s.input}
             disabled={submitting || !csrfToken}
-            placeholder="Give your post a title"
+            placeholder="Untitled Post"
           />
         </div>
         
         <div className={s.formGroup}>
-          <label htmlFor="content" className={s.label}>Content</label>
+          <label htmlFor="content" className={s.label}>Content *</label>
           <textarea
             id="content"
             value={content}
@@ -117,8 +120,24 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             className={s.textarea}
             disabled={submitting || !csrfToken}
             rows={5}
+            required
             placeholder="Share your knowledge, ideas, or questions..."
           />
+        </div>
+        
+        <div className={s.formGroup}>
+          <label htmlFor="status" className={s.label}>Status</label>
+          <select
+            id="status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className={s.select}
+            disabled={submitting || !csrfToken}
+          >
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
         </div>
         
         <div className={s.buttonGroup}>
@@ -133,7 +152,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
           <button 
             type="submit" 
             className={s.submitButton}
-            disabled={submitting || !csrfToken}
+            disabled={submitting || !csrfToken || !content.trim()}
           >
             {submitting ? 'Posting...' : 'Post'}
           </button>

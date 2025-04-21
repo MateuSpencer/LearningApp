@@ -10,6 +10,7 @@ const Post = ({
   createdAt, 
   currentUser, 
   slug, 
+  status,
   onEdit, 
   onDelete,
   canModify
@@ -26,14 +27,31 @@ const Post = ({
             .join(' ') 
         : '';
     
+    // Get status label and CSS class
+    const getStatusInfo = () => {
+        switch(status) {
+            case 'published':
+                return { label: 'Published', className: s.statusPublished };
+            case 'draft':
+                return { label: 'Draft', className: s.statusDraft };
+            case 'archived':
+                return { label: 'Archived', className: s.statusArchived };
+            default:
+                return { label: 'Unknown', className: '' };
+        }
+    };
+    
+    const statusInfo = getStatusInfo();
+    
     return (
-        <div className={s.post}>
-            <h3 className={s.title}>{title}</h3>
+        <div className={`${s.post} ${statusInfo.className}`}>
+            <h3 className={s.title}>{title || 'Untitled Post'}</h3>
             <div className={s.content}>{content}</div>
             <div className={s.meta}>
                 <span className={s.author}>By: {author}</span>
                 <span className={s.date}>{new Date(createdAt).toLocaleDateString()}</span>
                 {slug && <span className={s.topic}>Topic: {formattedSlug}</span>}
+                {status && <span className={`${s.status} ${statusInfo.className}`}>{statusInfo.label}</span>}
             </div>
             
             {isAuthor && (
@@ -63,22 +81,25 @@ const Post = ({
 };
 
 Post.propTypes = {
-    id: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title: PropTypes.string,
     content: PropTypes.string.isRequired,
     author: PropTypes.string,
     createdAt: PropTypes.string,
     currentUser: PropTypes.string,
     slug: PropTypes.string,
+    status: PropTypes.oneOf(['published', 'draft', 'archived']),
     onEdit: PropTypes.func,
     onDelete: PropTypes.func,
     canModify: PropTypes.bool
 };
 
 Post.defaultProps = {
+    title: '',
     author: 'Anonymous',
     createdAt: new Date().toISOString(),
     slug: '',
+    status: 'published',
     onEdit: () => {},
     onDelete: () => {},
     canModify: true

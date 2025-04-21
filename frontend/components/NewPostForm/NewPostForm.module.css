@@ -1,130 +1,158 @@
 .formContainer {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
-                border-color var(--theme-transition-speed) var(--theme-transition-timing);
-    /* Add these properties to match post list width */
-    width: 100%;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .formTitle {
-    margin-top: 0;
-    margin-bottom: 16px;
-    font-size: 1.25rem;
-    font-weight: 600;
-    text-align: center;
-    color: var(--text-primary);
-    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .formGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .label {
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: var(--text-primary);
-    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
-.input, .textarea {
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 1rem;
-    font-family: inherit;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
-                background-color var(--theme-transition-speed) var(--theme-transition-timing),
-                color var(--theme-transition-speed) var(--theme-transition-timing);
-}
-
-.input:focus, .textarea:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+.input, .textarea, .select {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .textarea {
-    resize: vertical;
-    min-height: 140px;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.select {
+  width: 100%;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.input:disabled, .textarea:disabled, .select:disabled {
+  background-color: var(--bg-disabled, #f5f5f5);
+  cursor: not-allowed;
+}
+
+.loading {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.errorContainer {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
 }
 
 .errorMessage {
-    background-color: rgba(var(--color-secondary-rgb), 0.1);
-    color: var(--color-secondary);
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 16px;
-    font-size: 0.9rem;
+  background-color: rgba(231, 76, 60, 0.1);
+  color: var(--color-secondary);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.retryButton {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+}
+
+.retryButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .buttonGroup {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .submitButton, .cancelButton {
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border: none;
 }
 
 .submitButton {
-    background-color: var(--color-primary);
-    color: white;
-    font-weight: 500;
+  background-color: var(--color-primary);
+  color: white;
 }
 
-.submitButton:hover {
-    background-color: var(--color-primary-dark);
-    transform: translateY(-1px);
-}
-
-.submitButton:active {
-    transform: translateY(0);
+.submitButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
 }
 
 .submitButton:disabled {
-    background-color: var(--color-grey-400);
-    cursor: not-allowed;
-    transform: none;
+  background-color: var(--color-grey-400, #aaa);
+  cursor: not-allowed;
 }
 
 .cancelButton {
-    background-color: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
-.cancelButton:hover {
-    background-color: var(--bg-hover);
-    color: var(--text-primary);
+.cancelButton:hover:not(:disabled) {
+  background-color: var(--color-grey-200, #eee);
 }
 
 .cancelButton:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
