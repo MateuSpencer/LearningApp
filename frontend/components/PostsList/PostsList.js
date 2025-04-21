@@ -176,16 +176,12 @@ const PostsList = ({
     }
   };
 
-  // Determine the header title
-  const headerTitle = showOnlyMyPosts ? "My Posts" : "Posts";
-  
   // Are controls disabled?
   const controlsDisabled = loading || !!error || tokenLoading || !!tokenError;
 
   return (
     <div className={s.container}>
       <div className={s.header}>
-        <h2 className={s.title}>{headerTitle}</h2>
         {onNewPost && !showOnlyMyPosts && (
           <button 
             className={s.newPostButton}
