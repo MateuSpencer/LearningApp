@@ -28,6 +28,8 @@
 
 .content {
     margin-bottom: 16px;
+    white-space: pre-wrap;
+    word-break: break-word;
     font-size: 1rem;
     line-height: 1.5;
     color: var(--text-primary);
@@ -36,33 +38,37 @@
 
 .meta {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
     color: var(--text-secondary);
-    font-size: 0.875rem;
+    margin-top: 10px;
+    gap: 10px;
+    align-items: center;
     transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
-.author {
-    font-style: italic;
+.author, .date {
+    margin-right: 10px;
 }
 
 .actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
     display: flex;
-    gap: 10px;
-    margin-top: 12px;
-    justify-content: flex-end;
+    gap: 8px;
 }
 
 .actionButton {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    border: none;
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .actionButton:hover {
@@ -95,6 +101,21 @@
     margin-left: 10px;
     font-style: italic;
     color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pageLink {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.pageLink:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
 }
 
 /* Status styles */

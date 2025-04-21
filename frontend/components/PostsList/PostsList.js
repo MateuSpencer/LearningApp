@@ -260,9 +260,11 @@ const PostsList = ({
               createdAt={post.created_at}
               currentUser={currentUser}
               slug={pageSlug}
+              primary_slug={post.primary_slug}
+              page_slug={post.page_slug}
+              status={post.status}
               onEdit={handleEdit}
               onDelete={handleDelete}
-              status={post.status}
               // Disable edit/delete if token is not available
               canModify={!!csrfToken && !tokenLoading && !tokenError}
             />

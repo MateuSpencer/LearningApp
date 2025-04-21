@@ -1,15 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { httpPost } from '../../utils/Http';
 import { useCSRFToken } from '../../context/CSRFTokenContext';
+import { useRouter } from 'next/router';
 import s from './NewPostForm.module.css';
 
 const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
-  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('published');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [actualPageSlug, setActualPageSlug] = useState(pageSlug);
+  
+  // Get router to extract current path
+  const router = useRouter();
+  
+  // Extract the pageSlug from the URL path if it's not provided
+  useEffect(() => {
+    if (!pageSlug) {
+      const path = router.asPath;
+      // Remove query parameters and trailing slash
+      const cleanPath = path.split('?')[0].replace(/\/$/, '');
+      // Extract the last part of the path (which should be the slug)
+      const pathParts = cleanPath.split('/').filter(Boolean);
+      if (pathParts.length > 0) {
+        const extractedSlug = pathParts[pathParts.length - 1];
+        setActualPageSlug(extractedSlug);
+      }
+    }
+  }, [router, pageSlug]);
   
   // Use the CSRF token from context instead of fetching it in the component
   const { token: csrfToken, loading: tokenLoading, error: tokenError, refreshToken } = useCSRFToken();
@@ -31,19 +50,17 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       setSubmitting(true);
       setError(null);
       
-      // Use httpPost with the token from context
+      // Use httpPost with the token from context and the extracted page slug
       const newPost = await httpPost(
         '/api/posts/',
         {
-          title,
           content,
           status,
-          page_slug: pageSlug
+          page_slug: actualPageSlug
         },
         csrfToken
       );
       
-      setTitle('');
       setContent('');
       setStatus('published');
       onSubmit(newPost);
@@ -99,19 +116,6 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       
       <form onSubmit={handleSubmit} className={s.form}>
         <div className={s.formGroup}>
-          <label htmlFor="title" className={s.label}>Title (Optional)</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={s.input}
-            disabled={submitting || !csrfToken}
-            placeholder="Untitled Post"
-          />
-        </div>
-        
-        <div className={s.formGroup}>
           <label htmlFor="content" className={s.label}>Content *</label>
           <textarea
             id="content"
@@ -163,9 +167,13 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
 };
 
 NewPostForm.propTypes = {
-  pageSlug: PropTypes.string.isRequired,
+  pageSlug: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired
+};
+
+NewPostForm.defaultProps = {
+  pageSlug: '',
 };
 
 export default NewPostForm;

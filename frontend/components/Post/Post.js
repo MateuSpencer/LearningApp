@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Link from 'next/link';
 import s from './Post.module.css';
 
 const Post = ({ 
@@ -9,7 +10,9 @@ const Post = ({
   author, 
   createdAt, 
   currentUser, 
-  slug, 
+  slug,
+  primary_slug,
+  page_slug,
   status,
   onEdit, 
   onDelete,
@@ -19,13 +22,19 @@ const Post = ({
     const currentUserStr = String(currentUser).trim();
     const isAuthor = currentUser && authorStr === currentUserStr;
     
-    // Format slug for display (replace underscores with spaces and capitalize)
-    const formattedSlug = slug ? 
-        slug.replace(/_/g, ' ')
+    // Format slugs for display (replace underscores with spaces and capitalize)
+    const formatForDisplay = (slugText) => {
+        if (!slugText) return '';
+        return slugText
+            .replace(/_/g, ' ')
             .split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ') 
-        : '';
+            .join(' ');
+    };
+    
+    // Get formatted versions of slugs
+    const formattedSlug = formatForDisplay(slug);
+    const formattedPageSlug = formatForDisplay(page_slug);
     
     // Get status label and CSS class
     const getStatusInfo = () => {
@@ -45,12 +54,24 @@ const Post = ({
     
     return (
         <div className={`${s.post} ${statusInfo.className}`}>
-            <h3 className={s.title}>{title || 'Untitled Post'}</h3>
+            {title && <h3 className={s.title}>{title}</h3>}
             <div className={s.content}>{content}</div>
             <div className={s.meta}>
                 <span className={s.author}>By: {author}</span>
                 <span className={s.date}>{new Date(createdAt).toLocaleDateString()}</span>
-                {slug && <span className={s.topic}>Topic: {formattedSlug}</span>}
+                
+                {page_slug && (
+                    <span className={s.topic}>
+                        Page: 
+                        <Link 
+                            href={`/wiki/${page_slug}`}
+                            className={s.pageLink}
+                        >
+                            {formattedPageSlug}
+                        </Link>
+                    </span>
+                )}
+                
                 {status && <span className={`${s.status} ${statusInfo.className}`}>{statusInfo.label}</span>}
             </div>
             
@@ -88,6 +109,8 @@ Post.propTypes = {
     createdAt: PropTypes.string,
     currentUser: PropTypes.string,
     slug: PropTypes.string,
+    primary_slug: PropTypes.string,
+    page_slug: PropTypes.string,
     status: PropTypes.oneOf(['published', 'draft', 'archived']),
     onEdit: PropTypes.func,
     onDelete: PropTypes.func,
@@ -99,6 +122,8 @@ Post.defaultProps = {
     author: 'Anonymous',
     createdAt: new Date().toISOString(),
     slug: '',
+    primary_slug: '',
+    page_slug: '',
     status: 'published',
     onEdit: () => {},
     onDelete: () => {},
