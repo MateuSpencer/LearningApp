@@ -41,6 +41,7 @@ const WikiArticlePage = ({ title, articleSlug }) => {
             pageSlug={articleSlug}
             onNewPost={() => setShowNewPostForm(true)}
             key={`posts-list-${refreshPosts}`} // Force refresh when posts change
+            allowedFilters={['timeframe', 'search']} // Only show timeframe and search filters, excluding status
           />
         </div>
       </div>

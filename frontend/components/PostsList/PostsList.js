@@ -4,6 +4,7 @@ import Post from '../Post';
 import EditPostForm from '../EditPostForm';
 import { PostsFilter, PostsSort, PostsPagination } from '../PostsControls';
 import { useCSRFToken } from '../../context/CSRFTokenContext';
+import ConfirmationModal from '../ConfirmationModal';
 import usePosts from '../../hooks/usePosts';
 import s from './PostsList.module.css';
 
@@ -32,6 +33,10 @@ const PostsList = ({
   // Track which post is being edited
   const [editingPostId, setEditingPostId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  
+  // State for delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
   
   // Get CSRF token
   const { token: csrfToken, loading: tokenLoading, error: tokenError } = useCSRFToken();
@@ -167,13 +172,29 @@ const PostsList = ({
     setEditingPostId(null);
   };
   
-  // Handle post deletion
-  const handleDelete = async (postId) => {
+  // Open confirmation modal for post deletion
+  const handleDeleteClick = (postId) => {
+    setPostToDelete(postId);
+    setDeleteModalOpen(true);
+  };
+  
+  // Handle actual post deletion after confirmation
+  const handleConfirmDelete = async () => {
     try {
-      await deletePost(postId);
+      await deletePost(postToDelete);
+      setDeleteModalOpen(false);
+      setPostToDelete(null);
     } catch (err) {
       // Error is already handled by the hook
+      setDeleteModalOpen(false);
+      setPostToDelete(null);
     }
+  };
+  
+  // Handle cancellation of delete
+  const handleCancelDelete = () => {
+    setDeleteModalOpen(false);
+    setPostToDelete(null);
   };
 
   // Are controls disabled?
@@ -181,6 +202,17 @@ const PostsList = ({
 
   return (
     <div className={s.container}>
+      {/* Delete confirmation modal */}
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        title="Delete Post"
+        message="Are you sure you want to delete this post? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
+      
       <div className={s.header}>
         {onNewPost && !showOnlyMyPosts && (
           <button 
@@ -259,7 +291,7 @@ const PostsList = ({
               page_slug={post.page_slug}
               status={post.status}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={handleDeleteClick}
               // Disable edit/delete if token is not available
               canModify={!!csrfToken && !tokenLoading && !tokenError}
             />

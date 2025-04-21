@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styles from './PostsFilter.module.css';
 
@@ -12,9 +12,44 @@ const PostsFilter = ({
   allowedFilters = ['status'],
   disabled = false 
 }) => {
+  // Add state for managing the search input independently
+  const [searchValue, setSearchValue] = useState(filters.search || '');
+  // Reference to store the timeout ID for debouncing
+  const searchTimeoutRef = useRef(null);
+  
+  // Update searchValue when filters.search changes from outside this component
+  useEffect(() => {
+    setSearchValue(filters.search || '');
+  }, [filters.search]);
+
   const handleFilterChange = (filterName, value) => {
     onFilterChange(filterName, value);
   };
+  
+  // Handle search input changes with debounce
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    
+    // Clear any existing timeout to implement debouncing
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Set a new timeout to delay the search execution
+    searchTimeoutRef.current = setTimeout(() => {
+      onFilterChange('search', value);
+    }, 400); // 400ms delay
+  };
+  
+  // Clear timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -58,8 +93,8 @@ const PostsFilter = ({
             type="text"
             className={styles.searchInput}
             placeholder="Search posts..."
-            value={filters.search || ''}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
+            value={searchValue}
+            onChange={handleSearchChange}
             disabled={disabled}
           />
         </div>

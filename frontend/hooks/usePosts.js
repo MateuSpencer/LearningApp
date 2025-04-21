@@ -174,11 +174,6 @@ export function usePosts({
       throw new Error('CSRF token not available. Please try again later.');
     }
     
-    // Confirm deletion with the user
-    if (!window.confirm('Are you sure you want to delete this post?')) {
-      return false;
-    }
-    
     try {
       setLoading(true);
       await httpDelete(`${API_BASE_URL}/${id}/`, csrfToken);
