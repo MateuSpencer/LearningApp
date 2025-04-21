@@ -5,7 +5,6 @@ import s from './Post.module.css';
 
 const Post = ({ 
   id, 
-  title, 
   content, 
   author, 
   createdAt, 
@@ -54,7 +53,6 @@ const Post = ({
     
     return (
         <div className={`${s.post} ${statusInfo.className}`}>
-            {/* Removed title rendering */}
             <div className={s.content}>{content}</div>
             <div className={s.meta}>
                 <span className={s.author}>By: {author}</span>
@@ -103,7 +101,6 @@ const Post = ({
 
 Post.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    title: PropTypes.string,
     content: PropTypes.string.isRequired,
     author: PropTypes.string,
     createdAt: PropTypes.string,
@@ -118,7 +115,6 @@ Post.propTypes = {
 };
 
 Post.defaultProps = {
-    title: '',
     author: 'Anonymous',
     createdAt: new Date().toISOString(),
     slug: '',

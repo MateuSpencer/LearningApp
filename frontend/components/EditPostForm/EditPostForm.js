@@ -5,7 +5,6 @@ import { useCSRFToken } from '../../context/CSRFTokenContext';
 import s from './EditPostForm.module.css';
 
 const EditPostForm = ({ post, onSave, onCancel }) => {
-  const [title, setTitle] = useState(post?.title || '');
   const [content, setContent] = useState(post?.content || '');
   const [status, setStatus] = useState(post?.status || 'published');
   const [error, setError] = useState(null);
@@ -31,14 +30,14 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
       setSubmitting(true);
       setError(null);
       
-      // Use httpPut with the token from context
+      // Make sure we're sending the page_slug in the request
+      // This ensures we're keeping the original page association
       const updatedPost = await httpPut(
         `/api/posts/${post.id}/`,
         {
-          title,
           content,
           status,
-          page_slug: post.page_slug
+          page_slug: post.page_slug // Explicitly include the page_slug
         },
         csrfToken
       );
@@ -96,19 +95,6 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
       
       <form onSubmit={handleSubmit} className={s.form}>
         <div className={s.formGroup}>
-          <label htmlFor="title" className={s.label}>Title (Optional)</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={s.input}
-            disabled={submitting || !csrfToken}
-            placeholder="Untitled Post"
-          />
-        </div>
-        
-        <div className={s.formGroup}>
           <label htmlFor="content" className={s.label}>Content *</label>
           <textarea
             id="content"
@@ -161,7 +147,6 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
 EditPostForm.propTypes = {
   post: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    title: PropTypes.string,
     content: PropTypes.string,
     status: PropTypes.string,
     page_slug: PropTypes.string
@@ -171,7 +156,7 @@ EditPostForm.propTypes = {
 };
 
 EditPostForm.defaultProps = {
-  post: { title: '', content: '', status: 'published' },
+  post: { content: '', status: 'published' },
   onSave: () => {},
   onCancel: () => {},
 };

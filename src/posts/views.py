@@ -208,7 +208,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     Sorting:
     - ordering: Sort by field (e.g., ?ordering=title or ?ordering=-created_at)
-       Available fields: created_at, updated_at, title, status
+       Available fields: created_at, updated_at, status
     """
 
     serializer_class = PostSerializer
@@ -220,11 +220,10 @@ class PostViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
     ]
     filterset_class = PostFilter
-    search_fields = ["title", "content", "primary_slug", "author__username"]
+    search_fields = ["content", "primary_slug", "author__username"]
     ordering_fields = [
         "created_at",
         "updated_at",
-        "title",
         "status",
         "author__username",
         "primary_slug",
@@ -241,3 +240,7 @@ class PostViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(status="published")
 
         return queryset
+
+    def perform_create(self, serializer):
+        # Call the serializer's save method
+        serializer.save()

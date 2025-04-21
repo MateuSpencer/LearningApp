@@ -53,7 +53,6 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             "id",
-            "title",
             "content",
             "primary_slug",
             "page_slug",
@@ -78,7 +77,6 @@ class PostSerializer(serializers.ModelSerializer):
             "updated_at",
             "author",
             "primary_slug",
-            "page_slug",
         ]
 
     def get_author_name(self, obj):

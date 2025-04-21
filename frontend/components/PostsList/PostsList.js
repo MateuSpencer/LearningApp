@@ -23,7 +23,7 @@ const PostsList = ({
   onNewPost, 
   showOnlyMyPosts = false,
   allowedFilters = ['status', 'timeframe', 'search'],
-  allowedSortFields = ['created_at', 'updated_at', 'title', 'status'],
+  allowedSortFields = ['created_at', 'updated_at', 'status'],
   fixedFilters = {}
 }) => {
   // Track changes to dependencies 
@@ -254,7 +254,6 @@ const PostsList = ({
             <Post
               key={post.id}
               id={post.id}
-              title={post.title}
               content={post.content}
               author={post.author_username}
               createdAt={post.created_at}
@@ -297,7 +296,7 @@ PostsList.defaultProps = {
   onNewPost: null,
   showOnlyMyPosts: false,
   allowedFilters: ['status', 'timeframe', 'search'],
-  allowedSortFields: ['created_at', 'updated_at', 'title', 'status'],
+  allowedSortFields: ['created_at', 'updated_at', 'status'],
   fixedFilters: {}
 };
 

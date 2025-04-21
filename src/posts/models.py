@@ -3,6 +3,7 @@ from django.conf import settings
 from main.mixins import TimestampMixin
 import uuid
 from django.utils.text import slugify
+import time
 
 
 class Tag(models.Model):
@@ -89,7 +90,7 @@ class Post(TimestampMixin, models.Model):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=255, verbose_name="Title", blank=True)
+    # title field removed
     content = models.TextField(verbose_name="Content")
     primary_slug = models.SlugField(
         max_length=255,
@@ -123,52 +124,30 @@ class Post(TimestampMixin, models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        # Ensure page_slug is not modified by content
-        # If page_slug is provided but primary_slug is not, use page_slug as primary_slug base
-        if self.page_slug and not self.primary_slug:
-            # Use exactly the page slug provided from the frontend (clean path)
+        # Generate primary_slug if it doesn't exist
+        if not self.primary_slug:
+            # Make sure we have a valid page_slug
+            if not self.page_slug or self.page_slug.strip() == "":
+                # If no page_slug is set, use a default value - but this should rarely happen
+                # as the frontend should always send a page_slug
+                self.page_slug = "post"
+
+            # Always use page_slug as base for primary_slug
             base_slug = self.page_slug
 
-            # Add a random suffix to ensure uniqueness
-            import random
-            import string
+            # Add timestamp for uniqueness
+            timestamp = int(time.time())
+            self.primary_slug = f"{base_slug}-{timestamp}"
 
-            suffix = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=8)
-            )
-            self.primary_slug = f"{base_slug}-{suffix}"
-
-            # Make sure primary_slug is unique
+            # Ensure uniqueness with counter if needed
             original_slug = self.primary_slug
             counter = 1
             while Post.objects.filter(primary_slug=self.primary_slug).exists():
                 self.primary_slug = f"{original_slug}-{counter}"
                 counter += 1
-        # Fall back to old behavior if page_slug not provided
-        elif not self.primary_slug:
-            # Use title if available, otherwise use a truncated version of content
-            if self.title:
-                base_slug = self.title
-            else:
-                # Use first 50 chars of content for slug generation
-                base_slug = self.content[:50]
-
-            self.primary_slug = slugify(base_slug)
-
-            # Make sure slug is unique
-            original_slug = self.primary_slug
-            counter = 1
-            while Post.objects.filter(primary_slug=self.primary_slug).exists():
-                self.primary_slug = f"{original_slug}-{counter}"
-                counter += 1
-
-        # Make sure page_slug is always set
-        # If it's still not set after above logic, copy from primary_slug
-        if not self.page_slug and self.primary_slug:
-            # Extract the base page slug from primary_slug
-            self.page_slug = self.primary_slug.split("-")[0]
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.title or f"Post {self.id}"
+        # Update string representation to use content instead of title
+        return f"Post {self.id}"
