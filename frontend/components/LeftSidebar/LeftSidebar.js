@@ -40,7 +40,10 @@ const LeftSidebar = ({ items }) => {
                         <li className={s.NavItem}>
                             <Link href="/my-posts" className={s.NavLink}>
                                 <span className={s.NavIcon}>📝</span>
-                                <span className={s.NavText}>My Posts</span>
+                                {/* NEW wrapper */}
+                                <div className={s.NavTextWrapper}>
+                                <span className={s.NavText}>My Posts</span>
+                                </div>
                             </Link>
                         </li>
                     </ul>

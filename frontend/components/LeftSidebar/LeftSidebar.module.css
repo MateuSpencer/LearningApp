@@ -1,7 +1,9 @@
 .LeftSidebar {
     position: fixed;
     height: 100%;
-    width: 100%;
+    /* replace width with a max/min width pair */
+    max-width: 250px;   /* expanded width */
+    min-width: 60px;    /* collapsed width */
     background-color: var(--bg-secondary);
     border-right: 1px solid var(--border-color);
     border-radius: 0 15px 15px 0;
@@ -9,17 +11,19 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: width var(--theme-transition-speed) var(--theme-transition-timing), 
-    background-color var(--theme-transition-speed) var(--theme-transition-timing), 
-    border-color var(--theme-transition-speed) var(--theme-transition-timing);
+    /* transition only the max-width */
+    transition:
+      max-width var(--theme-transition-speed) var(--theme-transition-timing),
+      background-color var(--theme-transition-speed) var(--theme-transition-timing),
+      border-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .Collapsed {
-    width: 60px;
+    max-width: 60px;
 }
 
 .Expanded {
-    width: 250px;
+    max-width: 250px;
 }
 
 .Content {
@@ -156,15 +160,15 @@ width: 100%;
 }
 
 .NavLink {
-display: flex;
-align-items: center;
-justify-content: flex-start;
-padding: 12px 10px; 
-border-radius: 8px;
-text-decoration: none;
-color: var(--text-primary);
-transition: background-color 0.2s ease;
-line-height: 1.2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background-color 0.2s ease,
+                padding-left var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .NavLink:hover {
@@ -172,34 +176,27 @@ background-color: var(--bg-hover);
 }
 
 .NavIcon {
-font-size: 22px;
-min-width: 24px;
-margin-right: 15px;
-display: flex; /* Add display flex */
-align-items: center; /* Center icon vertically */
-justify-content: center; /* Center icon horizontally */
+    font-size: 22px;
+    min-width: 24px;
+    margin-right: 15px;   
+    margin-left: -10px;           /* stays the same in collapsed & expanded */
+    transition: margin-right var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
-.Collapsed .NavLink {
-justify-content: center; /* Center the content when collapsed */
+.NavTextWrapper {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    opacity: 1;
+    white-space: nowrap;
+    transition:
+        max-width var(--theme-transition-speed) var(--theme-transition-timing),
+        opacity   var(--theme-transition-speed) var(--theme-transition-timing),
+        margin-left var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
-.Collapsed .NavIcon {
-margin: 0 auto; /* Center icon when collapsed */
-margin-right: 0; /* Remove right margin when collapsed */
-}
-
-.NavText {
-font-size: 16px;
-transition: opacity var(--theme-transition-speed) var(--theme-transition-timing),
-            max-width var(--theme-transition-speed) var(--theme-transition-timing);
-opacity: 1;
-max-width: 200px;
-overflow: hidden;
-white-space: nowrap;
-}
-
-.Collapsed .NavText {
-opacity: 0;
-max-width: 0;
+.Collapsed .NavTextWrapper {
+    max-width: 0;
+    opacity: 0;
+    margin-left: -10px;
 }
