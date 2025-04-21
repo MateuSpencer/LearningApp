@@ -235,8 +235,16 @@ class PostViewSet(viewsets.ModelViewSet):
             "tags", "categories", "secondary_slugs"
         )
 
-        # Filter by status if not authenticated
-        if not self.request.user.is_authenticated:
+        # For authenticated users, filter to show only:
+        # - their own draft and archived posts
+        # - anyone's published posts
+        if self.request.user.is_authenticated:
+            queryset = queryset.filter(
+                Q(status="published")
+                | Q(status__in=["draft", "archived"], author=self.request.user)
+            )
+        else:
+            # For non-authenticated users, only show published posts
             queryset = queryset.filter(status="published")
 
         return queryset
