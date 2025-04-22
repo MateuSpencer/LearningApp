@@ -37,6 +37,14 @@ const PostsList = ({
   // State for delete confirmation modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
+
+  // State for filter and sort toggles
+  const [showFilters, setShowFilters] = useState(false);
+  const [showSort, setShowSort] = useState(false);
+  
+  // State for search value
+  const [searchValue, setSearchValue] = useState('');
+  const searchTimeoutRef = useRef(null);
   
   // Get CSRF token
   const { token: csrfToken, loading: tokenLoading, error: tokenError } = useCSRFToken();
@@ -136,8 +144,60 @@ const PostsList = ({
   const handleFilterChange = (filterName, value, clearAll = false) => {
     if (clearAll) {
       clearFilters();
+      setSearchValue('');
     } else {
       updateFilter(filterName, value === 'all' ? '' : value);
+      if (filterName === 'search') {
+        setSearchValue(value);
+      }
+    }
+  };
+  
+  // Handle search input changes with debounce
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    
+    // Clear any existing timeout to implement debouncing
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Set a new timeout to delay the search execution
+    searchTimeoutRef.current = setTimeout(() => {
+      updateFilter('search', value);
+    }, 400); // 400ms delay
+  };
+  
+  // Clean up search timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+  
+  // Update searchValue when filters.search changes from outside
+  useEffect(() => {
+    setSearchValue(filters.search || '');
+  }, [filters.search]);
+  
+  // Toggle filter visibility
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+    // Hide sort when showing filters
+    if (showSort && !showFilters) {
+      setShowSort(false);
+    }
+  };
+  
+  // Toggle sort visibility
+  const toggleSort = () => {
+    setShowSort(!showSort);
+    // Hide filters when showing sort
+    if (showFilters && !showSort) {
+      setShowFilters(false);
     }
   };
   
@@ -200,6 +260,25 @@ const PostsList = ({
   // Are controls disabled?
   const controlsDisabled = loading || !!error || tokenLoading || !!tokenError;
 
+  // SVG Icons for buttons
+  const FilterIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z"/>
+    </svg>
+  );
+
+  const SortIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M3.5 3.5a.5.5 0 0 0-1 0v8.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L3.5 12.293V3.5zm4 .5a.5.5 0 0 1 0-1h1a.5.5 0 0 1 0 1h-1zm0 3a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1h-3zm0 3a.5.5 0 0 1 0-1h5a.5.5 0 0 1 0 1h-5zM7 12.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 0-1h-7a.5.5 0 0 0-.5.5z"/>
+    </svg>
+  );
+
+  const SearchIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className={s.searchIcon} viewBox="0 0 16 16">
+      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+    </svg>
+  );
+
   return (
     <div className={s.container}>
       {/* Delete confirmation modal */}
@@ -213,36 +292,102 @@ const PostsList = ({
         cancelText="Cancel"
       />
       
-      <div className={s.header}>
-        {onNewPost && !showOnlyMyPosts && (
-          <button 
-            className={s.newPostButton}
-            onClick={onNewPost}
-            disabled={tokenLoading || !!tokenError}
-          >
-            Add New Post
-          </button>
-        )}
-      </div>
-      
-      <div className={s.controls}>
-        {/* Filter and Sort controls */}
-        <div className={s.filtersRow}>
-          <PostsFilter 
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            allowedFilters={allowedFilters}
-            disabled={controlsDisabled}
-          />
+      <div className={s.controlsWrapper}>
+        <div className={s.controlsBar}>
+          <div className={s.controlsLeft}>
+            {/* Filter toggle button */}
+            <button 
+              className={`${s.iconButton} ${showFilters ? s.active : ''}`}
+              onClick={toggleFilters}
+              disabled={controlsDisabled}
+              aria-label="Toggle filters"
+              title="Toggle filters"
+            >
+              <span className={s.icon}><FilterIcon /></span>
+              <span className={s.iconText}>Filter</span>
+            </button>
+            
+            {/* Sort toggle button */}
+            <button 
+              className={`${s.iconButton} ${showSort ? s.active : ''}`}
+              onClick={toggleSort}
+              disabled={controlsDisabled}
+              aria-label="Toggle sort options"
+              title="Toggle sort options"
+            >
+              <span className={s.icon}><SortIcon /></span>
+              <span className={s.iconText}>Sort</span>
+            </button>
+            
+            {/* Search input - always visible */}
+            <div className={s.searchContainer}>
+              <input
+                type="text"
+                className={s.searchInput}
+                placeholder="Search posts..."
+                value={searchValue}
+                onChange={handleSearchChange}
+                disabled={controlsDisabled}
+              />
+              {searchValue && (
+                <button 
+                  className={s.clearSearchButton}
+                  onClick={() => {
+                    setSearchValue('');
+                    updateFilter('search', '');
+                  }}
+                  disabled={controlsDisabled}
+                  aria-label="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+              {!searchValue && (
+                <span className={s.searchIconWrapper}>
+                  <SearchIcon />
+                </span>
+              )}
+            </div>
+          </div>
           
-          <PostsSort 
-            sortBy={sortBy}
-            sortDirection={sortDirection}
-            onSortChange={handleSortChange}
-            allowedSortFields={allowedSortFields}
-            disabled={controlsDisabled}
-          />
+          <div className={s.controlsRight}>
+            {/* Add New Post button */}
+            {onNewPost && !showOnlyMyPosts && (
+              <button 
+                className={s.newPostButton}
+                onClick={onNewPost}
+                disabled={tokenLoading || !!tokenError}
+              >
+                Add New Post
+              </button>
+            )}
+          </div>
         </div>
+        
+        {/* Collapsible filter panel */}
+        {showFilters && (
+          <div className={s.filterPanel}>
+            <PostsFilter 
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              allowedFilters={allowedFilters.filter(f => f !== 'search')} // Exclude search as we handle it separately
+              disabled={controlsDisabled}
+            />
+          </div>
+        )}
+        
+        {/* Collapsible sort panel */}
+        {showSort && (
+          <div className={s.sortPanel}>
+            <PostsSort 
+              sortBy={sortBy}
+              sortDirection={sortDirection}
+              onSortChange={handleSortChange}
+              allowedSortFields={allowedSortFields}
+              disabled={controlsDisabled}
+            />
+          </div>
+        )}
       </div>
       
       {/* Show token-related errors */}
