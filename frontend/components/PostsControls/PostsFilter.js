@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 import styles from './PostsFilter.module.css';
 
 /**
@@ -72,18 +74,33 @@ const PostsFilter = ({
 
       {allowedFilters.includes('timeframe') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Time:</label>
-          <select
-            className={styles.filterSelect}
-            value={filters.timeframe || 'anytime'}
-            onChange={(e) => handleFilterChange('timeframe', e.target.value)}
-            disabled={disabled}
-          >
-            <option value="anytime">Anytime</option>
-            <option value="today">Today</option>
-            <option value="this_week">This Week</option>
-            <option value="this_month">This Month</option>
-          </select>
+          <label className={styles.filterLabel}>Date Range:</label>
+          <div className={styles.dateRangeContainer}>
+            <div className={styles.dateInputWrapper}>
+              <label className={styles.dateLabel}>From:</label>
+              <DatePicker
+                selected={filters.created_after ? new Date(filters.created_after) : null}
+                onChange={(date) => handleFilterChange('created_after_date', date)}
+                className={styles.dateInput}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Select start date"
+                disabled={disabled}
+                isClearable
+              />
+            </div>
+            <div className={styles.dateInputWrapper}>
+              <label className={styles.dateLabel}>To:</label>
+              <DatePicker
+                selected={filters.created_before ? new Date(filters.created_before) : null}
+                onChange={(date) => handleFilterChange('created_before_date', date)}
+                className={styles.dateInput}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Select end date"
+                disabled={disabled}
+                isClearable
+              />
+            </div>
+          </div>
         </div>
       )}
 

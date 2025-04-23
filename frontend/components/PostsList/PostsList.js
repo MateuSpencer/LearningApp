@@ -146,9 +146,79 @@ const PostsList = ({
       clearFilters();
       setSearchValue('');
     } else {
-      updateFilter(filterName, value === 'all' ? '' : value);
-      if (filterName === 'search') {
-        setSearchValue(value);
+      if (filterName === 'created_after_date' || filterName === 'created_before_date') {
+        // Handle date range filter
+        const newFilters = { ...filters };
+        
+        if (filterName === 'created_after_date') {
+          if (value) {
+            // Set the time to 00:00:00 for the start date
+            const startDate = new Date(value);
+            startDate.setHours(0, 0, 0, 0);
+            newFilters.created_after = startDate.toISOString();
+            newFilters.created_after_date = value;
+          } else {
+            // If date is cleared, remove the filter
+            delete newFilters.created_after;
+            delete newFilters.created_after_date;
+          }
+        } else if (filterName === 'created_before_date') {
+          if (value) {
+            // Set the time to 23:59:59 for the end date to include the entire day
+            const endDate = new Date(value);
+            endDate.setHours(23, 59, 59, 999);
+            newFilters.created_before = endDate.toISOString();
+            newFilters.created_before_date = value;
+          } else {
+            // If date is cleared, remove the filter
+            delete newFilters.created_before;
+            delete newFilters.created_before_date;
+          }
+        }
+        
+        // Clear the old timeframe filter if it exists
+        delete newFilters.timeframe;
+        delete newFilters.created_today;
+        delete newFilters.created_this_week;
+        delete newFilters.created_this_month;
+        
+        updateFilters(newFilters);
+      } else if (filterName === 'timeframe') {
+        // For backward compatibility with the old timeframe filter
+        const timeframeFilters = {
+          today: { created_today: true },
+          this_week: { created_this_week: true },
+          this_month: { created_this_month: true },
+          anytime: {}
+        };
+        
+        // Clear any previous timeframe filters and date range filters
+        const newFilters = { ...filters };
+        delete newFilters.created_today;
+        delete newFilters.created_this_week;
+        delete newFilters.created_this_month;
+        delete newFilters.created_after;
+        delete newFilters.created_before;
+        delete newFilters.created_after_date;
+        delete newFilters.created_before_date;
+        
+        // Apply the new timeframe filter if it's not "anytime"
+        if (value !== 'anytime') {
+          updateFilters({
+            ...newFilters,
+            timeframe: value,
+            ...timeframeFilters[value]
+          });
+        } else {
+          // Clear timeframe selection
+          const { timeframe, ...restFilters } = newFilters;
+          updateFilters(restFilters);
+        }
+      } else {
+        updateFilter(filterName, value === 'all' ? '' : value);
+        if (filterName === 'search') {
+          setSearchValue(value);
+        }
       }
     }
   };
