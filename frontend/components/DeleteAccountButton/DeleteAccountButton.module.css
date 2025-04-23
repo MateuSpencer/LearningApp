@@ -1,0 +1,110 @@
+.DeleteButton {
+  background-color: var(--color-error, #dc3545);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.DeleteButton:hover {
+  background-color: var(--color-error-dark, #bd2130);
+}
+
+.DeleteButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.ConfirmationContainer {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.ConfirmationMessage {
+  background-color: var(--bg-secondary, #f8f9fa);
+  border: 1px solid var(--color-border, #ddd);
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ConfirmationTitle {
+  color: var(--color-error, #dc3545);
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.25rem;
+}
+
+.ConfirmationText {
+  margin-bottom: 15px;
+  line-height: 1.5;
+  color: var(--color-text-dark, #343a40);
+}
+
+.ConfirmationInstruction {
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.ConfirmationInput {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 4px;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.ConfirmationInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb, 0, 123, 255), 0.25);
+}
+
+.ButtonGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.CancelButton {
+  background-color: var(--color-secondary, #6c757d);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex: 1;
+}
+
+.CancelButton:hover {
+  background-color: var(--color-secondary-dark, #5a6268);
+}
+
+.ConfirmButton {
+  background-color: var(--color-error, #dc3545);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex: 1;
+}
+
+.ConfirmButton:hover {
+  background-color: var(--color-error-dark, #bd2130);
+}
+
+.ConfirmButton:disabled {
+  background-color: var(--color-disabled, #6c757d);
+  cursor: not-allowed;
+  opacity: 0.65;
+}

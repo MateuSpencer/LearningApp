@@ -49,5 +49,53 @@
 }
 
 .LogoutSection {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.AccountActions {
   margin-top: 30px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.ChangePasswordButton {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.ChangePasswordButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.DangerZone {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  width: 100%;
+}
+
+.DangerZoneTitle {
+  color: var(--color-error, #dc3545);
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.SuccessMessage {
+  background-color: var(--color-success-light, #d4edda);
+  color: var(--color-success, #28a745);
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 500;
+  width: 100%;
+  max-width: 400px;
 }
