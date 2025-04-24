@@ -7,8 +7,10 @@ import s from './NewPostForm.module.css';
 
 const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
   const [content, setContent] = useState('');
+  const [resourceUrl, setResourceUrl] = useState('');
   const [status, setStatus] = useState('published');
   const [error, setError] = useState(null);
+  const [urlError, setUrlError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [actualPageSlug, setActualPageSlug] = useState(pageSlug);
   
@@ -39,11 +41,36 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
   // Use the CSRF token from context instead of fetching it in the component
   const { token: csrfToken, loading: tokenLoading, error: tokenError, refreshToken } = useCSRFToken();
 
+  // Simple URL validation on the client side
+  const validateUrl = (url) => {
+    if (!url) return true; // Empty URLs are allowed
+    
+    // Basic URL format validation
+    const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
+    return urlPattern.test(url);
+  };
+
+  const handleUrlChange = (e) => {
+    const value = e.target.value;
+    setResourceUrl(value);
+    
+    if (value && !validateUrl(value)) {
+      setUrlError('Please enter a valid URL (e.g., https://example.com)');
+    } else {
+      setUrlError(null);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!content.trim()) {
       setError('Content is required');
+      return;
+    }
+    
+    if (resourceUrl && !validateUrl(resourceUrl)) {
+      setUrlError('Please enter a valid URL (e.g., https://example.com)');
       return;
     }
     
@@ -61,6 +88,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
         '/api/posts/',
         {
           content,
+          resource_url: resourceUrl,
           status,
           page_slug: actualPageSlug
         },
@@ -68,6 +96,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       );
       
       setContent('');
+      setResourceUrl('');
       setStatus('published');
       onSubmit(newPost);
       
@@ -83,6 +112,10 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
         } catch (refreshError) {
           setError('Failed to refresh security token. Please reload the page.');
         }
+      } else if (err.data && err.data.resource_url) {
+        // Handle specific resource URL validation errors from the server
+        setUrlError(err.data.resource_url);
+        setError(null);
       } else {
         setError(`Failed to create post: ${err.message}`);
       }
@@ -119,6 +152,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       <h3 className={s.formTitle}>Share Your Thoughts</h3>
       
       {error && <div className={s.errorMessage}>{error}</div>}
+      {urlError && <div className={s.errorMessage}>{urlError}</div>}
       
       <form onSubmit={handleSubmit} className={s.form}>
         <div className={s.formGroup}>
@@ -132,6 +166,19 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             rows={5}
             required
             placeholder="Share your knowledge, ideas, or questions..."
+          />
+        </div>
+        
+        <div className={s.formGroup}>
+          <label htmlFor="resourceUrl" className={s.label}>Resource URL</label>
+          <input
+            id="resourceUrl"
+            type="url"
+            value={resourceUrl}
+            onChange={handleUrlChange}
+            className={s.input}
+            disabled={submitting || !csrfToken}
+            placeholder="https://example.com"
           />
         </div>
         

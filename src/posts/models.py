@@ -92,6 +92,12 @@ class Post(TimestampMixin, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # title field removed
     content = models.TextField(verbose_name="Content")
+    resource_url = models.URLField(
+        verbose_name="Resource URL",
+        blank=True,
+        null=True,
+        help_text="URL to an external resource",
+    )
     primary_slug = models.SlugField(
         max_length=255,
         db_index=True,

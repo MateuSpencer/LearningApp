@@ -54,6 +54,7 @@ class PostSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "content",
+            "resource_url",
             "primary_slug",
             "page_slug",
             "author",

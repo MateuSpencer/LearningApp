@@ -1,5 +1,5 @@
 from rest_framework import viewsets, permissions, filters
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import (
     DjangoFilterBackend,
@@ -12,6 +12,9 @@ from django_filters.rest_framework import (
 from django.db.models import Q
 from django.utils import timezone
 import datetime
+import requests
+from requests.exceptions import RequestException
+import re
 from .models import Post, Tag, Category
 from .serializers import PostSerializer
 from django.utils.decorators import method_decorator
@@ -249,6 +252,58 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def validate_resource_url(self, url):
+        """
+        Validate that a URL exists and returns a success status code
+        """
+        if not url:
+            return True  # No URL provided, validation passes
+
+        # Check for valid URL format
+        url_pattern = re.compile(
+            r"^(?:http|https)://"  # http:// or https://
+            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain
+            r"localhost|"  # localhost
+            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # or ipv4
+            r"(?::\d+)?"  # optional port
+            r"(?:/?|[/?]\S+)$",
+            re.IGNORECASE,
+        )
+
+        if not url_pattern.match(url):
+            raise ValidationError({"resource_url": "Invalid URL format"})
+
+        # Try to fetch the URL to see if it exists
+        try:
+            response = requests.head(url, timeout=5, allow_redirects=True)
+
+            # Check if the request was successful
+            if response.status_code >= 400:
+                raise ValidationError(
+                    {"resource_url": f"URL returned status code {response.status_code}"}
+                )
+
+        except RequestException as e:
+            raise ValidationError(
+                {"resource_url": f"URL could not be accessed: {str(e)}"}
+            )
+
+        return True
+
     def perform_create(self, serializer):
+        # Validate resource URL if provided
+        resource_url = self.request.data.get("resource_url")
+        if resource_url:
+            self.validate_resource_url(resource_url)
+
         # Call the serializer's save method
+        serializer.save()
+
+    def perform_update(self, serializer):
+        # Validate resource URL if provided
+        resource_url = self.request.data.get("resource_url")
+        if resource_url:
+            self.validate_resource_url(resource_url)
+
+        # Update the post
         serializer.save()

@@ -498,6 +498,7 @@ const PostsList = ({
               key={post.id}
               id={post.id}
               content={post.content}
+              resource_url={post.resource_url}
               author={post.author_username}
               createdAt={post.created_at}
               currentUser={currentUser}

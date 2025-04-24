@@ -152,3 +152,57 @@
     border-left: 3px solid #6c757d;
     opacity: 0.8;
 }
+
+/* Resource URL styles */
+.resourceUrl {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    word-break: break-all;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.resourceLink {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    font-weight: 500;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.resourceLink:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+.resourceButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: var(--color-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.resourceButton:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.linkIcon, .externalIcon {
+    flex-shrink: 0;
+}

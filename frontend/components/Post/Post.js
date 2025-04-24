@@ -6,6 +6,7 @@ import s from './Post.module.css';
 const Post = ({ 
   id, 
   content, 
+  resource_url,
   author, 
   createdAt, 
   currentUser, 
@@ -53,6 +54,19 @@ const Post = ({
     
     return (
         <div className={`${s.post} ${statusInfo.className}`}>
+            {resource_url && (
+                <div className={s.resourceUrl}>
+                    <strong>Resource:</strong> 
+                    <a 
+                        href={resource_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={s.resourceLink}
+                    >
+                        {resource_url}
+                    </a>
+                </div>
+            )}
             <div className={s.content}>{content}</div>
             <div className={s.meta}>
                 <span className={s.author}>By: {author}</span>
@@ -102,6 +116,7 @@ const Post = ({
 Post.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     content: PropTypes.string.isRequired,
+    resource_url: PropTypes.string,
     author: PropTypes.string,
     createdAt: PropTypes.string,
     currentUser: PropTypes.string,
@@ -117,6 +132,7 @@ Post.propTypes = {
 Post.defaultProps = {
     author: 'Anonymous',
     createdAt: new Date().toISOString(),
+    resource_url: '',
     slug: '',
     primary_slug: '',
     page_slug: '',

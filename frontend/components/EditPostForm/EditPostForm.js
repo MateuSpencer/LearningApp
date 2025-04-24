@@ -6,18 +6,45 @@ import s from './EditPostForm.module.css';
 
 const EditPostForm = ({ post, onSave, onCancel }) => {
   const [content, setContent] = useState(post?.content || '');
+  const [resourceUrl, setResourceUrl] = useState(post?.resource_url || '');
   const [status, setStatus] = useState(post?.status || 'published');
   const [error, setError] = useState(null);
+  const [urlError, setUrlError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
   // Use the CSRF token from context instead of fetching it in the component
   const { token: csrfToken, loading: tokenLoading, error: tokenError, refreshToken } = useCSRFToken();
+
+  // Simple URL validation on the client side
+  const validateUrl = (url) => {
+    if (!url) return true; // Empty URLs are allowed
+    
+    // Basic URL format validation
+    const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
+    return urlPattern.test(url);
+  };
+
+  const handleUrlChange = (e) => {
+    const value = e.target.value;
+    setResourceUrl(value);
+    
+    if (value && !validateUrl(value)) {
+      setUrlError('Please enter a valid URL (e.g., https://example.com)');
+    } else {
+      setUrlError(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!content.trim()) {
       setError('Content is required');
+      return;
+    }
+    
+    if (resourceUrl && !validateUrl(resourceUrl)) {
+      setUrlError('Please enter a valid URL (e.g., https://example.com)');
       return;
     }
     
@@ -36,6 +63,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
         `/api/posts/${post.id}/`,
         {
           content,
+          resource_url: resourceUrl,
           status,
           page_slug: post.page_slug // Explicitly include the page_slug
         },
@@ -56,6 +84,10 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
         } catch (refreshError) {
           setError('Failed to refresh security token. Please reload the page.');
         }
+      } else if (err.data && err.data.resource_url) {
+        // Handle specific resource URL validation errors from the server
+        setUrlError(err.data.resource_url);
+        setError(null);
       } else {
         setError(`Failed to update post: ${err.message}`);
       }
@@ -92,6 +124,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
       <h3 className={s.formTitle}>Edit Post</h3>
       
       {error && <div className={s.errorMessage}>{error}</div>}
+      {urlError && <div className={s.errorMessage}>{urlError}</div>}
       
       <form onSubmit={handleSubmit} className={s.form}>
         <div className={s.formGroup}>
@@ -104,6 +137,18 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
             disabled={submitting || !csrfToken}
             rows={5}
             required
+          />
+        </div>
+        
+        <div className={s.formGroup}>
+          <label htmlFor="resourceUrl" className={s.label}>Resource URL</label>
+          <input
+            id="resourceUrl"
+            type="url"
+            value={resourceUrl}
+            onChange={handleUrlChange}
+            className={s.input}
+            disabled={submitting || !csrfToken}
           />
         </div>
         
