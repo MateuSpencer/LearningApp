@@ -14,12 +14,19 @@ const Post = ({
   primary_slug,
   page_slug,
   status,
+  upvotes_count,
+  downvotes_count,
+  votes_score,
+  user_vote,
   onEdit, 
   onDelete,
-  canModify
+  onUpvote,
+  onDownvote,
+  canModify,
+  canVote
 }) => {
     const authorStr = String(author).trim();
-    const currentUserStr = String(currentUser).trim();
+    const currentUserStr = currentUser ? String(currentUser).trim() : '';
     const isAuthor = currentUser && authorStr === currentUserStr;
     
     // Format slugs for display (replace underscores with spaces and capitalize)
@@ -52,63 +59,106 @@ const Post = ({
     
     const statusInfo = getStatusInfo();
     
+    // Handle vote button clicks
+    const handleUpvote = () => {
+        if (onUpvote && canVote) {
+            onUpvote(id);
+        }
+    };
+    
+    const handleDownvote = () => {
+        if (onDownvote && canVote) {
+            onDownvote(id);
+        }
+    };
+    
     return (
         <div className={`${s.post} ${statusInfo.className}`}>
-            {resource_url && (
-                <div className={s.resourceUrl}>
-                    <strong>Resource:</strong> 
-                    <a 
-                        href={resource_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className={s.resourceLink}
+            <div className={s.postLayout}>
+                {/* Vote controls on the left */}
+                <div className={s.voteControls}>
+                    <button 
+                        onClick={handleUpvote}
+                        className={`${s.voteButton} ${user_vote === 'upvote' ? s.upvoted : ''}`}
+                        aria-label="Upvote"
+                        title="Upvote"
+                        disabled={!canVote}
                     >
-                        {resource_url}
-                    </a>
+                        <span className={s.voteIcon}>▲</span>
+                    </button>
+                    
+                    <span className={s.voteScore}>{votes_score}</span>
+                    
+                    <button 
+                        onClick={handleDownvote}
+                        className={`${s.voteButton} ${user_vote === 'downvote' ? s.downvoted : ''}`}
+                        aria-label="Downvote"
+                        title="Downvote"
+                        disabled={!canVote}
+                    >
+                        <span className={s.voteIcon}>▼</span>
+                    </button>
                 </div>
-            )}
-            <div className={s.content}>{content}</div>
-            <div className={s.meta}>
-                <span className={s.author}>By: {author}</span>
-                <span className={s.date}>{new Date(createdAt).toLocaleDateString()}</span>
                 
-                {page_slug && (
-                    <span className={s.topic}>
-                        Page: 
-                        <Link 
-                            href={`/wiki/${page_slug}`}
-                            className={s.pageLink}
-                        >
-                            {formattedPageSlug}
-                        </Link>
-                    </span>
-                )}
-                
-                {status && <span className={`${s.status} ${statusInfo.className}`}>{statusInfo.label}</span>}
+                {/* Post content on the right */}
+                <div className={s.postContent}>
+                    {resource_url && (
+                        <div className={s.resourceUrl}>
+                            <strong>Resource:</strong> 
+                            <a 
+                                href={resource_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className={s.resourceLink}
+                            >
+                                {resource_url}
+                            </a>
+                        </div>
+                    )}
+                    <div className={s.content}>{content}</div>
+                    <div className={s.meta}>
+                        <span className={s.author}>By: {author}</span>
+                        <span className={s.date}>{new Date(createdAt).toLocaleDateString()}</span>
+                        
+                        {page_slug && (
+                            <span className={s.topic}>
+                                Page: 
+                                <Link 
+                                    href={`/wiki/${page_slug}`}
+                                    className={s.pageLink}
+                                >
+                                    {formattedPageSlug}
+                                </Link>
+                            </span>
+                        )}
+                        
+                        {status && <span className={`${s.status} ${statusInfo.className}`}>{statusInfo.label}</span>}
+                    </div>
+                    
+                    {isAuthor && (
+                        <div className={s.actions}>
+                            <button 
+                                onClick={() => onEdit(id)} 
+                                className={`${s.actionButton} ${s.editButton}`}
+                                aria-label="Edit post"
+                                title="Edit post"
+                                disabled={!canModify}
+                            >
+                                <span className={s.icon}>✎</span>
+                            </button>
+                            <button 
+                                onClick={() => onDelete(id)} 
+                                className={`${s.actionButton} ${s.deleteButton}`}
+                                aria-label="Delete post"
+                                title="Delete post"
+                                disabled={!canModify}
+                            >
+                                <span className={s.icon}>✕</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
-            
-            {isAuthor && (
-                <div className={s.actions}>
-                    <button 
-                        onClick={() => onEdit(id)} 
-                        className={`${s.actionButton} ${s.editButton}`}
-                        aria-label="Edit post"
-                        title="Edit post"
-                        disabled={!canModify}
-                    >
-                        <span className={s.icon}>✎</span>
-                    </button>
-                    <button 
-                        onClick={() => onDelete(id)} 
-                        className={`${s.actionButton} ${s.deleteButton}`}
-                        aria-label="Delete post"
-                        title="Delete post"
-                        disabled={!canModify}
-                    >
-                        <span className={s.icon}>✕</span>
-                    </button>
-                </div>
-            )}
         </div>
     );
 };
@@ -124,9 +174,16 @@ Post.propTypes = {
     primary_slug: PropTypes.string,
     page_slug: PropTypes.string,
     status: PropTypes.oneOf(['published', 'draft', 'archived']),
+    upvotes_count: PropTypes.number,
+    downvotes_count: PropTypes.number, 
+    votes_score: PropTypes.number,
+    user_vote: PropTypes.string,
     onEdit: PropTypes.func,
     onDelete: PropTypes.func,
-    canModify: PropTypes.bool
+    onUpvote: PropTypes.func,
+    onDownvote: PropTypes.func,
+    canModify: PropTypes.bool,
+    canVote: PropTypes.bool
 };
 
 Post.defaultProps = {
@@ -137,9 +194,16 @@ Post.defaultProps = {
     primary_slug: '',
     page_slug: '',
     status: 'published',
+    upvotes_count: 0,
+    downvotes_count: 0,
+    votes_score: 0,
+    user_vote: null,
     onEdit: () => {},
     onDelete: () => {},
-    canModify: true
+    onUpvote: () => {},
+    onDownvote: () => {},
+    canModify: true,
+    canVote: true
 };
 
 export default Post;

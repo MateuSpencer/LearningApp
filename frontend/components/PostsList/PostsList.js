@@ -24,7 +24,7 @@ const PostsList = ({
   onNewPost, 
   showOnlyMyPosts = false,
   allowedFilters = ['status', 'timeframe', 'search'],
-  allowedSortFields = ['created_at', 'updated_at', 'status'],
+  allowedSortFields = ['votes_score', 'created_at', 'updated_at', 'status'],
   fixedFilters = {}
 }) => {
   // Track changes to dependencies 
@@ -85,10 +85,12 @@ const PostsList = ({
     updateFilters,
     clearFilters,
     updateSort,
-    goToPage
+    goToPage,
+    upvotePost,      // Include upvote functionality
+    downvotePost     // Include downvote functionality
   } = usePosts({
     fixedFilters: computedFixedFilters,
-    initialSortBy: 'created_at',
+    initialSortBy: 'votes_score',  // Default to sorting by vote score
     initialSortDirection: 'desc',
     pageSize: 10
   });
@@ -327,6 +329,36 @@ const PostsList = ({
     setPostToDelete(null);
   };
 
+  // Handle upvoting a post
+  const handleUpvote = async (postId) => {
+    if (!currentUser) {
+      // If user is not logged in, redirect to login or show a message
+      alert('Please log in to vote on posts');
+      return;
+    }
+    
+    try {
+      await upvotePost(postId);
+    } catch (err) {
+      console.error('Failed to upvote post:', err);
+    }
+  };
+  
+  // Handle downvoting a post
+  const handleDownvote = async (postId) => {
+    if (!currentUser) {
+      // If user is not logged in, redirect to login or show a message
+      alert('Please log in to vote on posts');
+      return;
+    }
+    
+    try {
+      await downvotePost(postId);
+    } catch (err) {
+      console.error('Failed to downvote post:', err);
+    }
+  };
+
   // Are controls disabled?
   const controlsDisabled = loading || !!error || tokenLoading || !!tokenError;
 
@@ -506,10 +538,16 @@ const PostsList = ({
               primary_slug={post.primary_slug}
               page_slug={post.page_slug}
               status={post.status}
+              upvotes_count={post.upvotes_count}
+              downvotes_count={post.downvotes_count}
+              votes_score={post.votes_score}
+              user_vote={post.user_vote}
               onEdit={handleEdit}
               onDelete={handleDeleteClick}
-              // Disable edit/delete if token is not available
+              onUpvote={handleUpvote}
+              onDownvote={handleDownvote}
               canModify={!!csrfToken && !tokenLoading && !tokenError}
+              canVote={!!csrfToken && !tokenLoading && !tokenError && !!currentUser}
             />
           );
         })}
@@ -540,7 +578,7 @@ PostsList.defaultProps = {
   onNewPost: null,
   showOnlyMyPosts: false,
   allowedFilters: ['status', 'timeframe', 'search'],
-  allowedSortFields: ['created_at', 'updated_at', 'status'],
+  allowedSortFields: ['votes_score', 'created_at', 'updated_at', 'status'],
   fixedFilters: {}
 };
 

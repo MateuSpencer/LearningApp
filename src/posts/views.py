@@ -1,6 +1,8 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from django_filters.rest_framework import (
     DjangoFilterBackend,
     FilterSet,
@@ -15,8 +17,8 @@ import datetime
 import requests
 from requests.exceptions import RequestException
 import re
-from .models import Post, Tag, Category
-from .serializers import PostSerializer
+from .models import Post, Tag, Category, Vote
+from .serializers import PostSerializer, VoteSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 
@@ -211,7 +213,11 @@ class PostViewSet(viewsets.ModelViewSet):
 
     Sorting:
     - ordering: Sort by field (e.g., ?ordering=title or ?ordering=-created_at)
-       Available fields: created_at, updated_at, status
+       Available fields: created_at, updated_at, status, votes_score (vote difference)
+
+    Voting:
+    - POST /api/posts/{id}/upvote/ to upvote a post
+    - POST /api/posts/{id}/downvote/ to downvote a post
     """
 
     serializer_class = PostSerializer
@@ -230,8 +236,9 @@ class PostViewSet(viewsets.ModelViewSet):
         "status",
         "author__username",
         "primary_slug",
+        "votes_score",  # Add votes_score for sorting by vote difference
     ]
-    ordering = ["-created_at"]  # Default ordering
+    ordering = ["-votes_score", "-created_at"]  # Default to sort by votes and then date
 
     def get_queryset(self):
         queryset = Post.objects.select_related("author").prefetch_related(
@@ -307,3 +314,50 @@ class PostViewSet(viewsets.ModelViewSet):
 
         # Update the post
         serializer.save()
+
+    @action(
+        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def upvote(self, request, pk=None):
+        """
+        Upvote a post
+        Creates a new upvote if the user hasn't voted yet
+        Changes to an upvote if the user previously downvoted
+        Removes the vote if the user already upvoted (toggle off)
+        """
+        post = self.get_object()
+
+        serializer = VoteSerializer(
+            data={"post": post.id, "vote_type": "upvote"}, context={"request": request}
+        )
+
+        if serializer.is_valid():
+            vote = serializer.save()
+            # Re-fetch the post to get updated vote counts
+            post = self.get_object()
+            return Response(self.get_serializer(post).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def downvote(self, request, pk=None):
+        """
+        Downvote a post
+        Creates a new downvote if the user hasn't voted yet
+        Changes to a downvote if the user previously upvoted
+        Removes the vote if the user already downvoted (toggle off)
+        """
+        post = self.get_object()
+
+        serializer = VoteSerializer(
+            data={"post": post.id, "vote_type": "downvote"},
+            context={"request": request},
+        )
+
+        if serializer.is_valid():
+            vote = serializer.save()
+            # Re-fetch the post to get updated vote counts
+            post = self.get_object()
+            return Response(self.get_serializer(post).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

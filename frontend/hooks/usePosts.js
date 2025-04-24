@@ -19,7 +19,7 @@ const API_BASE_URL = '/api/posts';
 export function usePosts({
   fixedFilters = {},
   initialFilters = {},
-  initialSortBy = 'created_at',
+  initialSortBy = 'votes_score',  // Default to sorting by vote score
   initialSortDirection = 'desc',
   pageSize = 10,
   autoRefetch = true
@@ -196,6 +196,64 @@ export function usePosts({
     }
   }, [csrfToken, buildQueryString]);
   
+  // Upvote a post
+  const upvotePost = useCallback(async (id) => {
+    if (!csrfToken) {
+      throw new Error('CSRF token not available. Please try again later.');
+    }
+    
+    try {
+      setLoading(true);
+      const updatedPost = await httpPost(`${API_BASE_URL}/${id}/upvote/`, {}, csrfToken);
+      
+      // Invalidate cache for current query
+      const queryString = buildQueryString();
+      delete cacheRef.current[`${API_BASE_URL}/?${queryString}`];
+      
+      // Update local posts array (optimistic update)
+      setPosts(prevPosts => 
+        prevPosts.map(post => post.id === id ? updatedPost : post)
+      );
+      
+      return updatedPost;
+    } catch (err) {
+      setError(err.message || `Failed to upvote post: ${id}`);
+      console.error(`Error upvoting post: ${id}`, err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [csrfToken, buildQueryString]);
+  
+  // Downvote a post
+  const downvotePost = useCallback(async (id) => {
+    if (!csrfToken) {
+      throw new Error('CSRF token not available. Please try again later.');
+    }
+    
+    try {
+      setLoading(true);
+      const updatedPost = await httpPost(`${API_BASE_URL}/${id}/downvote/`, {}, csrfToken);
+      
+      // Invalidate cache for current query
+      const queryString = buildQueryString();
+      delete cacheRef.current[`${API_BASE_URL}/?${queryString}`];
+      
+      // Update local posts array (optimistic update)
+      setPosts(prevPosts => 
+        prevPosts.map(post => post.id === id ? updatedPost : post)
+      );
+      
+      return updatedPost;
+    } catch (err) {
+      setError(err.message || `Failed to downvote post: ${id}`);
+      console.error(`Error downvoting post: ${id}`, err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [csrfToken, buildQueryString]);
+
   // Update a specific filter
   const updateFilter = useCallback((key, value) => {
     setFilters(prev => ({
@@ -282,6 +340,8 @@ export function usePosts({
     clearFilters,
     updateSort,
     goToPage,
+    upvotePost,    // Add upvote method
+    downvotePost,  // Add downvote method
   };
 }
 

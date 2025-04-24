@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Tag, Category, SecondarySlug
+from .models import Post, Tag, Category, SecondarySlug, Vote
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 
@@ -48,6 +48,11 @@ class PostSerializer(serializers.ModelSerializer):
     category_names = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=False
     )
+    # Add vote-related fields
+    upvotes_count = serializers.IntegerField(read_only=True)
+    downvotes_count = serializers.IntegerField(read_only=True)
+    votes_score = serializers.IntegerField(read_only=True)
+    user_vote = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
@@ -71,6 +76,11 @@ class PostSerializer(serializers.ModelSerializer):
             "metadata",
             "tag_names",
             "category_names",
+            # Add vote-related fields
+            "upvotes_count",
+            "downvotes_count",
+            "votes_score",
+            "user_vote",
         ]
         read_only_fields = [
             "id",
@@ -78,6 +88,9 @@ class PostSerializer(serializers.ModelSerializer):
             "updated_at",
             "author",
             "primary_slug",
+            "upvotes_count",
+            "downvotes_count",
+            "votes_score",
         ]
 
     def get_author_name(self, obj):
@@ -157,3 +170,46 @@ class PostSerializer(serializers.ModelSerializer):
                 name=category_name, defaults={"slug": slugify(category_name)}
             )
             post.categories.add(category)
+
+    def get_user_vote(self, obj):
+        """Return the current user's vote on this post, if any"""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return None
+
+        try:
+            vote = obj.votes.get(user=request.user)
+            return vote.vote_type
+        except Vote.DoesNotExist:
+            return None
+
+
+class VoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vote
+        fields = ["id", "post", "vote_type", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+    def create(self, validated_data):
+        # Get the current user
+        user = self.context["request"].user
+        post = validated_data["post"]
+        vote_type = validated_data["vote_type"]
+
+        # Check if the user already has a vote for this post
+        try:
+            # If vote exists, update it
+            existing_vote = Vote.objects.get(post=post, user=user)
+            if existing_vote.vote_type == vote_type:
+                # If voting the same way, remove the vote (toggle off)
+                existing_vote.delete()
+                return None
+            else:
+                # Change vote type
+                existing_vote.vote_type = vote_type
+                existing_vote.save()
+                return existing_vote
+
+        except Vote.DoesNotExist:
+            # Create a new vote
+            return Vote.objects.create(post=post, user=user, vote_type=vote_type)

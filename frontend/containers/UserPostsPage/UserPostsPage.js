@@ -12,7 +12,7 @@ const UserPostsPage = () => {
         <PostsList 
           showOnlyMyPosts={true}
           allowedFilters={['status', 'timeframe', 'search']}
-          allowedSortFields={['created_at', 'updated_at', 'title', 'status']}
+          allowedSortFields={['votes_score', 'created_at', 'updated_at', 'title', 'status']}
         />
       </div>
     </div>

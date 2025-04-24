@@ -4,6 +4,7 @@ from main.mixins import TimestampMixin
 import uuid
 from django.utils.text import slugify
 import time
+from django.db.models import Sum
 
 
 class Tag(models.Model):
@@ -119,6 +120,11 @@ class Post(TimestampMixin, models.Model):
     categories = models.ManyToManyField(Category, related_name="posts", blank=True)
     metadata = models.JSONField(default=dict, blank=True)
 
+    # Cached vote count fields for faster sorting and display
+    upvotes_count = models.IntegerField(default=0)
+    downvotes_count = models.IntegerField(default=0)
+    votes_score = models.IntegerField(default=0, db_index=True)  # upvotes - downvotes
+
     class Meta:
         verbose_name = "Post"
         verbose_name_plural = "Posts"
@@ -127,6 +133,7 @@ class Post(TimestampMixin, models.Model):
             models.Index(fields=["-created_at"]),
             models.Index(fields=["status", "-created_at"]),
             models.Index(fields=["author", "-created_at"]),
+            models.Index(fields=["-votes_score"]),  # Index for sorting by vote score
         ]
 
     def save(self, *args, **kwargs):
@@ -157,3 +164,50 @@ class Post(TimestampMixin, models.Model):
     def __str__(self):
         # Update string representation to use content instead of title
         return f"Post {self.id}"
+
+    def update_vote_counts(self):
+        """Update the cached vote count fields"""
+        upvotes = self.votes.filter(vote_type="upvote").count()
+        downvotes = self.votes.filter(vote_type="downvote").count()
+
+        self.upvotes_count = upvotes
+        self.downvotes_count = downvotes
+        self.votes_score = upvotes - downvotes
+        self.save(update_fields=["upvotes_count", "downvotes_count", "votes_score"])
+
+
+class Vote(models.Model):
+    """
+    Model for tracking user votes on posts
+    """
+
+    VOTE_TYPES = (
+        ("upvote", "Upvote"),
+        ("downvote", "Downvote"),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="votes")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    vote_type = models.CharField(max_length=10, choices=VOTE_TYPES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Vote"
+        verbose_name_plural = "Votes"
+        # Ensure a user can only have one vote per post
+        unique_together = ("post", "user")
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        # After saving, update the post's vote counts
+        self.post.update_vote_counts()
+
+    def delete(self, *args, **kwargs):
+        post = self.post  # Keep reference before deletion
+        super().delete(*args, **kwargs)
+
+        # After deleting, update the post's vote counts
+        post.update_vote_counts()

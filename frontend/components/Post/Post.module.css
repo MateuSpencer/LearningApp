@@ -17,6 +17,80 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Layout for post with vote controls */
+.postLayout {
+    display: flex;
+    gap: 16px;
+}
+
+/* Vote controls container */
+.voteControls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 40px;
+}
+
+/* Post content (right side) */
+.postContent {
+    flex: 1;
+}
+
+/* Vote buttons styling */
+.voteButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 16px;
+    color: var(--text-secondary);
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.voteButton:hover:not(:disabled) {
+    color: var(--text-primary);
+    transform: scale(1.2);
+}
+
+.voteButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Selected vote states - changed to green for upvote and red for downvote */
+.upvoted {
+    color: #28a745 !important; /* Green upvote */
+}
+
+.downvoted {
+    color: #dc3545 !important; /* Red downvote */
+}
+
+/* Vote score display */
+.voteScore {
+    font-weight: 600;
+    font-size: 14px;
+    margin: 4px 0;
+    color: var(--text-primary);
+}
+
+/* Vote counts in meta section */
+.votes {
+    display: flex;
+    gap: 12px;
+    margin-left: auto;
+}
+
+.upvotes {
+    color: #ff4500;
+    font-size: 0.8rem;
+}
+
+.downvotes {
+    color: #7193ff;
+    font-size: 0.8rem;
+}
+
 .title {
     margin-top: 0;
     margin-bottom: 12px;
