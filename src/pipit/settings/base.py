@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
     "django.contrib.gis",
+    "django.contrib.sites",  # Required for allauth
     # Third party apps
     "wagtail.embeds",
     "wagtail.sites",
@@ -51,6 +52,10 @@ INSTALLED_APPS = [
     "wagtail_meta_preview",
     "wagtail_headless_preview",
     "rest_framework",
+    # Django AllAuth
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
     # Project specific apps
     "pipit",
     "sitesettings",
@@ -71,6 +76,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # Required for django-allauth
 ]
 
 ROOT_URLCONF = "pipit.urls"
@@ -177,6 +183,37 @@ WAGTAILSEARCH_BACKENDS = {
 WAGTAILIMAGES_FORMAT_CONVERSIONS = {
     "png": "jpeg",
     "webp": "webp",
+}
+
+# Django AllAuth settings
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+# Django AllAuth configuration
+ACCOUNT_LOGIN_METHODS = {
+    "email",
+    "username",
+}  # Allow login with either username or email
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*",
+    "username*",
+    "password1*",
+    "password2*",
+]  # Required fields during signup
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_LOGOUT_ON_GET = False  # POST request required for logout for CSRF protection
+ACCOUNT_PRESERVE_USERNAME_CASING = False  # Treat usernames as case insensitive
+
+# Custom adapter for allauth
+ACCOUNT_ADAPTER = "accounts.adapters.account_adapter.CustomAccountAdapter"
+
+# For API settings
+REST_AUTH_SERIALIZERS = {
+    "USER_DETAILS_SERIALIZER": "accounts.serializers.UserSerializer",
 }
 
 # Uploaded media

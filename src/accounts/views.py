@@ -1,4 +1,5 @@
-from django.contrib.auth import authenticate, login, logout
+from django.conf import settings
+from django.contrib.auth import login, logout
 from django.middleware import csrf as csrf_middleware
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
@@ -6,6 +7,11 @@ from rest_framework import status, views
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+
+from allauth.account.models import EmailAddress
+from allauth.account import app_settings as allauth_settings
+from allauth.account.utils import perform_login, complete_signup, user_username
+from allauth.account.adapter import get_adapter
 
 from .serializers import UserSerializer, RegistrationSerializer
 
@@ -29,12 +35,16 @@ class LoginView(views.APIView):
         if not username or not password:
             raise AuthenticationFailed("Please provide both username and password")
 
-        user = authenticate(request, username=username, password=password)
+        # Get the adapter to authenticate the user
+        user = get_adapter().authenticate(request, username=username, password=password)
 
         if user is None:
             raise AuthenticationFailed("Invalid username or password")
 
-        login(request, user)
+        # Log the user in using allauth's perform_login
+        perform_login(
+            request, user, email_verification=allauth_settings.EMAIL_VERIFICATION
+        )
 
         # Return the user data
         serializer = UserSerializer(user)
@@ -45,7 +55,8 @@ class LogoutView(views.APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        logout(request)
+        # Use the adapter's logout method
+        get_adapter().logout(request)
         return Response({"detail": "Successfully logged out"})
 
 
@@ -54,11 +65,23 @@ class RegisterView(views.APIView):
 
     @method_decorator(csrf_protect)
     def post(self, request):
-        serializer = RegistrationSerializer(data=request.data)
+        # Pass the request to the serializer context
+        serializer = RegistrationSerializer(
+            data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
+            # Use the serializer to create the user
             user = serializer.save()
-            # Log the user in after registration
-            login(request, user)
+
+            # Complete the signup process with allauth
+            # This handles email verification based on settings
+            complete_signup(
+                request,
+                user,
+                allauth_settings.EMAIL_VERIFICATION,
+                settings.LOGIN_REDIRECT_URL,
+            )
+
             return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -73,8 +96,8 @@ class UserView(views.APIView):
     @method_decorator(csrf_protect)
     def delete(self, request):
         user = request.user
-        # Log the user out first
-        logout(request)
+        # Log the user out first using allauth's logout
+        get_adapter().logout(request)
         # Then delete the user
         user.delete()
         return Response(
@@ -96,20 +119,26 @@ class ChangePasswordView(views.APIView):
         if not current_password or not new_password:
             raise ValidationError("Both current password and new password are required")
 
-        # Verify current password
-        if not user.check_password(current_password):
+        # Get the adapter for password management
+        adapter = get_adapter()
+
+        # Verify current password using allauth's adapter
+        if not adapter.check_password(user, current_password):
             raise ValidationError("Current password is incorrect")
 
-        # Validate new password (you can add more validation rules)
-        if len(new_password) < 8:
-            raise ValidationError("New password must be at least 8 characters long")
+        # Validate new password using allauth's adapter
+        try:
+            adapter.clean_password(new_password, user=user)
+        except ValidationError as e:
+            raise ValidationError(str(e))
 
-        # Set new password
-        user.set_password(new_password)
-        user.save()
+        # Set new password using allauth's adapter
+        adapter.set_password(user, new_password)
 
-        # Re-authenticate the user (since changing password logs them out)
-        login(request, user)
+        # Re-authenticate the user with allauth
+        perform_login(
+            request, user, email_verification=allauth_settings.EMAIL_VERIFICATION
+        )
 
         return Response(
             {"detail": "Password changed successfully"}, status=status.HTTP_200_OK

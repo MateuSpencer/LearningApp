@@ -66,7 +66,10 @@ urlpatterns += [
     path("wt/documents/", include(wagtaildocs_urls)),
     path("wt/sitemap.xml", sitemap, name="sitemap"),
     path("wt/health-check/", health_check, name="health_check"),
-    path("api/auth/", include("accounts.urls")),
+    path("api/auth/", include("accounts.urls")),  # Keep current accounts URLs
+    path(
+        "accounts/", include("allauth.urls")
+    ),  # Django-allauth URLs (for browser-based auth if needed)
     path("api/posts/", include("posts.urls")),
 ]
 
