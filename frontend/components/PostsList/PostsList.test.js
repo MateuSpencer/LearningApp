@@ -1,4 +1,4 @@
-import { render, /* screen */ } from '@testing-library/react';
+import { render } from '../../utils/test-utils';
 import PostsList from './';
 // import data from './PostsList.data';
 
