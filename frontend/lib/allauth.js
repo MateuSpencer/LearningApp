@@ -8,7 +8,7 @@ export const Client = Object.freeze({
 export const settings = {
   client: Client.BROWSER,
   baseUrl: `/api/_allauth/${Client.BROWSER}/v1`,
-  withCredentials: true
+  withCredentials: false
 };
 
 const ACCEPT_JSON = {
@@ -142,7 +142,29 @@ async function request(method, path, data, headers) {
   // Don't pass along authentication related headers to the config endpoint.
   if (path !== URLs.CONFIG) {
     if (settings.client === Client.BROWSER) {
-      options.headers['X-CSRFToken'] = getCSRFToken();
+      // Get CSRF token and ensure it's properly formatted
+      const csrfToken = getCSRFToken();
+      
+      // Make sure we have a valid CSRF token before proceeding
+      if (!csrfToken || csrfToken.length < 1) {
+        console.warn('CSRF token is missing or invalid. This will cause a 403 Forbidden error.');
+        
+        // Try to get the token from document cookie directly as a fallback
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.startsWith('csrftoken=')) {
+            const directToken = cookie.substring('csrftoken='.length, cookie.length);
+            if (directToken && directToken.length > 0) {
+              options.headers['X-CSRFToken'] = directToken;
+              console.log('Using direct cookie CSRF token');
+              break;
+            }
+          }
+        }
+      } else {
+        options.headers['X-CSRFToken'] = csrfToken;
+      }
     } else if (settings.client === Client.APP) {
       // IMPORTANT!: Do NOT use `Client.APP` in a browser context, as you will
       // be vulnerable to CSRF attacks. This logic is only here for
@@ -161,6 +183,12 @@ async function request(method, path, data, headers) {
   }
   
   const resp = await fetch(settings.baseUrl + path, options);
+  
+  // Log any CSRF issues for debugging
+  if (resp.status === 403 && resp.headers && resp.headers.get('Content-Type') && resp.headers.get('Content-Type').includes('text/html')) {
+    console.error('CSRF validation failed. Server returned a 403 Forbidden error with HTML content.');
+  }
+  
   const msg = await resp.json();
   
   if (msg.status === 410) {
@@ -195,7 +223,36 @@ export async function logout() {
 }
 
 export async function signUp(data) {
-  return await request('POST', URLs.SIGNUP, data);
+  // Format data to match what django-allauth expects
+  console.log('🚀 DEBUG signUp: Original data received:', { ...data, password: '******' });
+  
+  // Generate a username from the email if not provided (use part before @)
+  const username = data.username || data.email.split('@')[0];
+  
+  // Format data according to what the backend expects
+  const formattedData = {
+    username: username,       // Django allauth requires a username
+    email: data.email,
+    password: data.password,  // Backend wants 'password' not 'password1'
+    password1: data.password, // Keep these for compatibility
+    password2: data.password
+  };
+  
+  console.log('🚀 DEBUG signUp: Formatted data for django-allauth:', { 
+    ...formattedData, 
+    password: '******', 
+    password1: '******', 
+    password2: '******' 
+  });
+  
+  try {
+    const result = await request('POST', URLs.SIGNUP, formattedData);
+    console.log('🚀 DEBUG signUp: Request response:', result);
+    return result;
+  } catch (error) {
+    console.error('🚀 DEBUG signUp: Request error:', error);
+    throw error;
+  }
 }
 
 export async function signUpByPasskey(data) {
@@ -228,6 +285,10 @@ export async function confirmLoginCode(code) {
 
 export async function getEmailVerification(key) {
   return await request('GET', URLs.VERIFY_EMAIL, undefined, { 'X-Email-Verification-Key': key });
+}
+
+export async function verifyEmail(key) {
+  return await request('POST', URLs.VERIFY_EMAIL, { key });
 }
 
 export async function getEmailAddresses() {
@@ -295,10 +356,6 @@ export async function markEmailAsPrimary(email) {
 
 export async function requestEmailVerification(email) {
   return await request('PUT', URLs.EMAIL, { email });
-}
-
-export async function verifyEmail(key) {
-  return await request('POST', URLs.VERIFY_EMAIL, { key });
 }
 
 export async function getPasswordReset(key) {

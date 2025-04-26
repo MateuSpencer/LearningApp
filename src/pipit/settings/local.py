@@ -14,6 +14,11 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # Email notification url
 WAGTAILADMIN_BASE_URL = "https://learningapp.online.test:8081"
 
+# Set explicit frontend URL for email verification links
+FRONTEND_BASE_URL = (
+    "http://localhost:3000"  # Update this to match your actual frontend URL
+)
+
 # Allow weak local passwords
 AUTH_PASSWORD_VALIDATORS = []
 
