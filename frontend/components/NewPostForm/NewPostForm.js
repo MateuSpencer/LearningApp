@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { httpPost } from '../../utils/Http';
-import { useCSRFToken } from '../../context/CSRFTokenContext';
 import { useRouter } from 'next/router';
 import s from './NewPostForm.module.css';
 
@@ -38,8 +37,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
     }
   }, [router, pageSlug]);
   
-  // Use the CSRF token from context instead of fetching it in the component
-  const { token: csrfToken, loading: tokenLoading, error: tokenError, refreshToken } = useCSRFToken();
+
 
   // Simple URL validation on the client side
   const validateUrl = (url) => {

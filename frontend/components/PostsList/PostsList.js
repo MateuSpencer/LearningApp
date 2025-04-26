@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import Post from '../Post';
 import EditPostForm from '../EditPostForm';
 import { PostsFilter, PostsSort, PostsPagination } from '../PostsControls';
-import { useCSRFToken } from '../../context/CSRFTokenContext';
 import ConfirmationModal from '../ConfirmationModal';
 import usePosts from '../../hooks/usePosts';
 import s from './PostsList.module.css';
@@ -46,8 +45,6 @@ const PostsList = ({
   const [searchValue, setSearchValue] = useState('');
   const searchTimeoutRef = useRef(null);
   
-  // Get CSRF token
-  const { token: csrfToken, loading: tokenLoading, error: tokenError } = useCSRFToken();
   
   // Set up fixed filters based on props
   const computedFixedFilters = useMemo(() => {

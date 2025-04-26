@@ -2,15 +2,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ThemeProvider } from '../context/ThemeContext';
-import { CSRFTokenProvider } from '../context/CSRFTokenContext';
-
 // Custom render function that wraps component with all necessary providers
 export function renderWithProviders(ui, options = {}) {
   const Wrapper = ({ children }) => (
     <ThemeProvider>
-      <CSRFTokenProvider>
         {children}
-      </CSRFTokenProvider>
     </ThemeProvider>
   );
   
