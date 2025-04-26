@@ -10,6 +10,24 @@ let nextConfig = {
     basePath,
     i18n,
     output: "standalone",
+    // Add environment variables for django-allauth headless authentication
+    env: {
+        FRONTEND_BASE_URL: process.env.FRONTEND_BASE_URL || 'http://localhost:3000',
+        API_BASE_URL: process.env.API_BASE_URL || '/api',
+    },
+    // Add API proxy configuration for development
+    async rewrites() {
+        return [
+            {
+                source: '/api/:path*',
+                destination: process.env.API_URL || 'http://localhost:8000/api/:path*',
+            },
+            {
+                source: '/api/_allauth/:path*',
+                destination: process.env.API_URL ? `${process.env.API_URL}/_allauth/:path*` : 'http://localhost:8000/_allauth/:path*',
+            },
+        ];
+    },
 };
 
 // nextConfig = withSentryConfig(nextConfig, SentryWebpackPluginOptions);

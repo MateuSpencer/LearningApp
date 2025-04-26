@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ThemeProvider } from '../context/ThemeContext';
+import { AuthContextProvider, AuthChangeRedirector } from '../auth';
+import init from '../lib/init';
 import '../index.css';
 
 function MyApp({ Component, pageProps }) {
+    // Initialize the authentication system
+    useEffect(() => {
+        init();
+    }, []);
+
     return (
         <ThemeProvider>
-            <Component {...pageProps} />
+            <AuthContextProvider>
+                <AuthChangeRedirector />
+                <Component {...pageProps} />
+            </AuthContextProvider>
         </ThemeProvider>
     );
 }
