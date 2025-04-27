@@ -23,7 +23,7 @@ let nextConfig = {
                 destination: process.env.API_URL || 'http://localhost:8000/api/:path*',
             },
             {
-                source: '/api/_allauth/:path*',
+                source: '/_allauth/:path*',
                 destination: process.env.API_URL ? `${process.env.API_URL}/_allauth/:path*` : 'http://localhost:8000/_allauth/:path*',
             },
         ];

@@ -1,80 +1,59 @@
-import { useEffect, createContext, useState } from 'react';
-import { getAuth, getConfig } from '../lib/allauth';
-import { setupCSRFProtection } from '../lib/django';
+import { useEffect, createContext, useState } from 'react'
+import { getAuth, getConfig } from '../lib/allauth'
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext(null)
 
 function Loading() {
-  return <div>Starting...</div>;
+  return <div>Loading authentication...</div>
 }
 
 function LoadingError() {
-  return <div>Loading error!</div>;
+  return <div>Failed to load authentication state</div>
 }
 
-export function AuthContextProvider({ children }) {
-  const [auth, setAuth] = useState(undefined);
-  const [config, setConfig] = useState(undefined);
-  const [event, setEvent] = useState(null);
+export function AuthContextProvider(props) {
+  const [auth, setAuth] = useState(undefined)
+  const [config, setConfig] = useState(undefined)
 
   useEffect(() => {
-    // Skip during SSR
-    if (typeof window === 'undefined') return;
-
-    // Setup CSRF protection
-    setupCSRFProtection();
-
     function onAuthChanged(e) {
       setAuth(auth => {
         if (typeof auth === 'undefined') {
-          console.log('Authentication status loaded');
+          console.log('Authentication status loaded')
         } else {
-          console.log('Authentication status updated');
+          console.log('Authentication status updated')
         }
-        return e.detail;
-      });
-      // Set the event type to trigger redirects
-      setEvent(e.detail?.meta?.is_authenticated ? 'LOGGED_IN' : 'LOGGED_OUT');
+        return e.detail
+      })
     }
 
-    document.addEventListener('allauth.auth.change', onAuthChanged);
-    
-    // Initial auth and config fetch
-    getAuth()
-      .then(data => setAuth(data))
-      .catch((e) => {
-        console.error(e);
-        setAuth(false);
-      });
+    if (typeof document !== 'undefined') { // Check for browser environment
+      document.addEventListener('allauth.auth.change', onAuthChanged)
       
-    getConfig()
-      .then(data => setConfig(data))
-      .catch((e) => {
-        console.error(e);
-      });
+      getAuth().then(data => setAuth(data)).catch((e) => {
+        console.error(e)
+        setAuth(false)
+      })
       
-    return () => {
-      document.removeEventListener('allauth.auth.change', onAuthChanged);
-    };
-  }, []);
-
-  // Reset event after it's been processed
-  useEffect(() => {
-    if (event) {
-      const timer = setTimeout(() => setEvent(null), 100);
-      return () => clearTimeout(timer);
+      getConfig().then(data => setConfig(data)).catch((e) => {
+        console.error(e)
+      })
+      
+      return () => {
+        document.removeEventListener('allauth.auth.change', onAuthChanged)
+      }
     }
-  }, [event]);
-
-  const loading = (typeof auth === 'undefined') || config?.status !== 200;
+  }, [])
+  
+  const loading = (typeof auth === 'undefined') || config?.status !== 200
   
   return (
-    <AuthContext.Provider value={{ auth, config, event }}>
+    <AuthContext.Provider value={{ auth, config }}>
       {loading
         ? <Loading />
         : (auth === false
             ? <LoadingError />
-            : children)}
+            : props.children)}
     </AuthContext.Provider>
-  );
+  )
 }

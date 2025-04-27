@@ -1,4 +1,5 @@
-import { getCookie } from './Cookie';
+import { getCSRFToken } from '../lib/django';
+import { getAuth } from '../lib/allauth';
 
 const parseJSON = (response) => response.json();
 
@@ -7,9 +8,10 @@ const defaultHeaders = {
     'Content-Type': 'application/json',
 };
 
-// Build headers with optional CSRF token
-const buildHeaders = (csrfToken = null) => {
+// Build headers with CSRF token from django.js
+const buildHeaders = () => {
     const headers = { ...defaultHeaders };
+    const csrfToken = getCSRFToken();
     if (csrfToken) {
         headers['X-CSRFToken'] = csrfToken;
     }
@@ -27,49 +29,33 @@ const checkStatus = (response) => {
     throw error;
 };
 
-// Define httpGet without exporting it directly
-const httpGet = (url) =>
+// Get current user using allauth
+export const getCurrentUser = async () => {
+    try {
+        const authResponse = await getAuth();
+        if (authResponse.status === 200 && authResponse.data?.user) {
+            return authResponse.data.user;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error getting current user:', error);
+        return null;
+    }
+};
+
+// Basic HTTP methods that use proper CSRF handling
+export const httpGet = (url) =>
     fetch(url, {
         headers: buildHeaders(),
         credentials: 'same-origin',
     })
-        .then(checkStatus)
-        .then(parseJSON);
+    .then(checkStatus)
+    .then(parseJSON);
 
-// Enhance fetchCsrfToken for context provider use
-const fetchCsrfToken = async () => {
-    try {
-        const response = await fetch('/api/auth/csrf-token/', {
-            method: 'GET',
-            credentials: 'same-origin',
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch CSRF token');
-        }
-        
-        const data = await response.json();
-        return data.csrfToken;
-    } catch (error) {
-        console.error('Error fetching CSRF token:', error);
-        throw error;
-    }
-};
-
-// Update httpPost to accept csrfToken directly
-const httpPost = async (url, data, csrfToken = null) => {
-    // If no token is provided and URL is an API endpoint, try to fetch one
-    if (!csrfToken && url.startsWith('/api/')) {
-        try {
-            csrfToken = await fetchCsrfToken();
-        } catch (e) {
-            console.warn('Could not fetch CSRF token, proceeding without it');
-        }
-    }
-    
+export const httpPost = async (url, data) => {
     return fetch(url, {
         method: 'POST',
-        headers: buildHeaders(csrfToken),
+        headers: buildHeaders(),
         body: JSON.stringify(data),
         credentials: 'same-origin',
     })
@@ -77,20 +63,10 @@ const httpPost = async (url, data, csrfToken = null) => {
     .then(parseJSON);
 };
 
-// Add httpPut with csrfToken support
-const httpPut = async (url, data, csrfToken = null) => {
-    // If no token is provided and URL is an API endpoint, try to fetch one
-    if (!csrfToken && url.startsWith('/api/')) {
-        try {
-            csrfToken = await fetchCsrfToken();
-        } catch (e) {
-            console.warn('Could not fetch CSRF token, proceeding without it');
-        }
-    }
-    
+export const httpPut = async (url, data) => {
     return fetch(url, {
         method: 'PUT',
-        headers: buildHeaders(csrfToken),
+        headers: buildHeaders(),
         body: JSON.stringify(data),
         credentials: 'same-origin',
     })
@@ -98,20 +74,10 @@ const httpPut = async (url, data, csrfToken = null) => {
     .then(parseJSON);
 };
 
-// Add httpDelete with csrfToken support
-const httpDelete = async (url, csrfToken = null) => {
-    // If no token is provided and URL is an API endpoint, try to fetch one
-    if (!csrfToken && url.startsWith('/api/')) {
-        try {
-            csrfToken = await fetchCsrfToken();
-        } catch (e) {
-            console.warn('Could not fetch CSRF token, proceeding without it');
-        }
-    }
-    
+export const httpDelete = async (url) => {
     return fetch(url, {
         method: 'DELETE',
-        headers: buildHeaders(csrfToken),
+        headers: buildHeaders(),
         credentials: 'same-origin',
     })
     .then(checkStatus)
@@ -120,17 +86,3 @@ const httpDelete = async (url, csrfToken = null) => {
         return response.status === 204 ? {} : parseJSON(response);
     });
 };
-
-// Keep for backward compatibility - will be removed once all components are migrated
-const httpPostWithCsrfToken = (url, data) =>
-    fetch(url, {
-        method: 'POST',
-        headers: buildHeaders(getCookie('csrftoken')),
-        body: JSON.stringify(data),
-        credentials: 'same-origin',
-    })
-        .then(checkStatus)
-        .then(parseJSON);
-
-// Export all functions in a single export statement
-export { httpGet, httpPost, httpPut, httpDelete, fetchCsrfToken, httpPostWithCsrfToken };

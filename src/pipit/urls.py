@@ -71,11 +71,7 @@ urlpatterns += [
 
 # API URLs
 urlpatterns += [
-    path(
-        "api/_allauth/", include("allauth.headless.urls")
-    ),  # Add headless allauth URLs under /api/
-    # Add CSRF token API endpoint
-    path("api/auth/", include("pipit.api.urls")),
+    path("_allauth/", include("allauth.headless.urls")),
 ]
 
 urlpatterns += [re_path(r"", include(wagtail_urls))]

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import FormErrors from '../components/FormErrors'
 import { changePassword } from '../lib/allauth'
-import { Navigate } from 'react-router-dom'
 import { useUser } from '../auth'
 import Button from '../components/Button'
+import { useRouter } from 'next/router'
 
 export default function ChangePassword () {
+  const router = useRouter()
   const hasCurrentPassword = useUser().has_usable_password
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -31,7 +32,8 @@ export default function ChangePassword () {
     })
   }
   if (response.content?.status === 200) {
-    return <Navigate to='/calculator' />
+    router.push('/')
+    return null
   }
   return (
     <div>
