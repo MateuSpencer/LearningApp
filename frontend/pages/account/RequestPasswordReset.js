@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import FormErrors from '../components/FormErrors'
-import { requestPasswordReset, Flows } from '../lib/allauth'
+import FormErrors from '../../components/FormErrors'
+import { requestPasswordReset, Flows } from '../../lib/allauth'
 import { Navigate, Link } from 'react-router-dom'
-import Button from '../components/Button'
+import Button from '../../components/Button'
 
 export default function RequestPasswordReset () {
   const [email, setEmail] = useState('')

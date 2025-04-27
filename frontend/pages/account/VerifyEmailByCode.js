@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import FormErrors from '../components/FormErrors'
+import FormErrors from '../../components/FormErrors'
 import {
   Navigate
 } from 'react-router-dom'
-import { verifyEmail } from '../lib/allauth'
-import Button from '../components/Button'
+import { verifyEmail } from '../../lib/allauth'
+import Button from '../../components/Button'
 
 export default function VerifyEmail () {
   const [code, setCode] = useState('')

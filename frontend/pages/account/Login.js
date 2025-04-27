@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import FormErrors from '../components/FormErrors'
-import { login } from '../lib/allauth'
+import FormErrors from '../../components/FormErrors'
+import { login } from '../../lib/allauth'
 import { Link } from 'react-router-dom'
-import { useConfig } from '../auth'
-import ProviderList from '../socialaccount/ProviderList'
-import Button from '../components/Button'
-import WebAuthnLoginButton from '../mfa/WebAuthnLoginButton'
+import { useConfig } from '../../auth'
+import ProviderList from '../../socialaccount/ProviderList'
+import Button from '../../components/Button'
+import WebAuthnLoginButton from '../../mfa/WebAuthnLoginButton'
 
 export default function Login () {
   const [email, setEmail] = useState('')
