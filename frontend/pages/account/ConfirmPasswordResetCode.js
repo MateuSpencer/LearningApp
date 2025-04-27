@@ -1,14 +1,27 @@
-import { useState } from 'react'
-import FormErrors from '../components/FormErrors'
-import { getPasswordReset, Flows } from '../lib/allauth'
-import { Navigate } from 'react-router-dom'
-import Button from '../components/Button'
-import { useAuthStatus } from '../auth'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
+import FormErrors from '../../components/FormErrors'
+import { getPasswordReset, Flows } from '../../lib/allauth'
+import Button from '../../components/Button'
+import { useAuthStatus } from '../../auth'
 
 export default function ConfirmPasswordResetCode () {
   const [, authInfo] = useAuthStatus()
   const [code, setCode] = useState('')
   const [response, setResponse] = useState({ fetching: false, content: null })
+  const router = useRouter()
+  
+  // Handle redirects with useEffect instead of Navigate
+  useEffect(() => {
+    if (response.content?.status === 409 || authInfo.pendingFlow?.id !== Flows.PASSWORD_RESET_BY_CODE) {
+      router.push('/account/password/reset')
+    } else if (response.content?.status === 200) {
+      router.push({
+        pathname: '/account/password/reset/complete',
+        query: { resetKey: code }
+      })
+    }
+  }, [response.content?.status, authInfo.pendingFlow?.id, code, router])
 
   function submit () {
     setResponse({ ...response, fetching: true })
@@ -22,11 +35,6 @@ export default function ConfirmPasswordResetCode () {
     })
   }
 
-  if (response.content?.status === 409 || authInfo.pendingFlow?.id !== Flows.PASSWORD_RESET_BY_CODE) {
-    return <Navigate to='/account/password/reset' />
-  } else if (response.content?.status === 200) {
-    return <Navigate state={{ resetKey: code, resetKeyResponse: response.content }} to='/account/password/reset/complete' />
-  }
   return (
     <div>
       <h1>Enter Password Reset Code </h1>

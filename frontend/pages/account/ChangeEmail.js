@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Navigate } from 'react-router-dom'
-import * as allauth from '../lib/allauth'
-import FormErrors from '../components/FormErrors'
-import Button from '../components/Button'
-import { useConfig } from '../auth/hooks'
+import { useRouter } from 'next/router'
+import * as allauth from '../../lib/allauth'
+import FormErrors from '../../components/FormErrors'
+import Button from '../../components/Button'
+import { useConfig } from '../../auth/hooks'
 
 export default function ChangeEmail () {
   const config = useConfig()
@@ -11,6 +11,14 @@ export default function ChangeEmail () {
   const [redirectToVerification, setRedirectToVerification] = useState(false)
   const [emailAddresses, setEmailAddresses] = useState([])
   const [response, setResponse] = useState({ fetching: false, content: { status: 200, data: [] } })
+  const router = useRouter()
+
+  // Handle redirects with useEffect
+  useEffect(() => {
+    if (redirectToVerification) {
+      router.push('/account/verify-email')
+    }
+  }, [redirectToVerification, router])
 
   useEffect(() => {
     setResponse((r) => { return { ...r, fetching: true } })
@@ -24,7 +32,7 @@ export default function ChangeEmail () {
   }, [])
 
   function requestRedirectToVerification () {
-    if (config.data.account.email_verification_by_code_enabled) {
+    if (config?.data?.account?.email_verification_by_code_enabled) {
       setRedirectToVerification(true)
     }
   }
@@ -88,10 +96,6 @@ export default function ChangeEmail () {
     }).then(() => {
       setResponse((r) => { return { ...r, fetching: false } })
     })
-  }
-
-  if (redirectToVerification) {
-    return <Navigate to='/account/verify-email' />
   }
 
   return (

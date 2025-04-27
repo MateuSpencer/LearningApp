@@ -11,19 +11,28 @@ export function useConfig () {
 
 export function useUser () {
   const auth = useContext(AuthContext)?.auth
-  return authInfo(auth).user
+  return auth ? authInfo(auth).user : null
 }
 
 export function useAuthInfo () {
   const auth = useContext(AuthContext)?.auth
-  return authInfo(auth)
+  return auth ? authInfo(auth) : { isAuthenticated: false, requiresReauthentication: false, user: null, pendingFlow: null }
 }
 
 function authInfo (auth) {
-  const isAuthenticated = auth.status === 200 || (auth.status === 401 && auth.meta.is_authenticated)
+  if (!auth || typeof auth !== 'object') {
+    return { isAuthenticated: false, requiresReauthentication: false, user: null, pendingFlow: null }
+  }
+  
+  const isAuthenticated = auth.status === 200 || (auth.status === 401 && auth.meta?.is_authenticated)
   const requiresReauthentication = isAuthenticated && auth.status === 401
   const pendingFlow = auth.data?.flows?.find(flow => flow.is_pending)
-  return { isAuthenticated, requiresReauthentication, user: isAuthenticated ? auth.data.user : null, pendingFlow }
+  return { 
+    isAuthenticated, 
+    requiresReauthentication, 
+    user: isAuthenticated ? auth.data?.user || null : null, 
+    pendingFlow 
+  }
 }
 
 export const AuthChangeEvent = Object.freeze({

@@ -1,23 +1,63 @@
-import { useState } from 'react'
-import FormErrors from '../components/FormErrors'
-import { getPasswordReset, resetPassword } from '../lib/allauth'
-import { Navigate, Link, useLocation, useLoaderData } from 'react-router-dom'
-import Button from '../components/Button'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
+import FormErrors from '../../components/FormErrors'
+import { getPasswordReset, resetPassword } from '../../lib/allauth'
+import Button from '../../components/Button'
 
-export async function resetPasswordByLinkLoader ({ params }) {
-  const key = params.key
-  const resp = await getPasswordReset(key)
-  return { resetKey: key, resetKeyResponse: resp }
+// In Next.js, we'll use getServerSideProps instead of the React Router loader
+export async function getServerSideProps(context) {
+  const { key } = context.query;
+  if (key) {
+    try {
+      const resp = await getPasswordReset(key);
+      return {
+        props: {
+          resetKey: key,
+          resetKeyResponse: resp
+        }
+      };
+    } catch (error) {
+      console.error("Error fetching password reset data:", error);
+      return { props: {} };
+    }
+  }
+  
+  // Check if we have query params for resetKey (for code flow)
+  const { resetKey, resetKeyResponse } = context.query;
+  if (resetKey && resetKeyResponse) {
+    return {
+      props: {
+        resetKey,
+        resetKeyResponse: JSON.parse(resetKeyResponse)
+      }
+    };
+  }
+  
+  return { props: {} };
 }
 
-function ResetPassword ({ resetKey, resetKeyResponse }) {
+export default function ResetPassword({ resetKey, resetKeyResponse }) {
   const [password1, setPassword1] = useState('')
   const [password2, setPassword2] = useState('')
   const [password2Errors, setPassword2Errors] = useState([])
-
   const [response, setResponse] = useState({ fetching: false, content: null })
+  const router = useRouter()
+  
+  // Handle redirects with useEffect
+  useEffect(() => {
+    // Redirect if we don't have required props and came from code flow
+    if (!resetKey && !resetKeyResponse && router.pathname.includes('complete')) {
+      router.push('/account/password/reset')
+    }
+    
+    // Redirect after successful password reset
+    if ([200, 401].includes(response.content?.status)) {
+      router.push('/account/login')
+    }
+  }, [resetKey, resetKeyResponse, response.content?.status, router])
 
-  function submit () {
+  function submit() {
     if (password2 !== password1) {
       setPassword2Errors([{ param: 'password2', message: 'Password does not match.' }])
       return
@@ -33,12 +73,10 @@ function ResetPassword ({ resetKey, resetKeyResponse }) {
       setResponse((r) => { return { ...r, fetching: false } })
     })
   }
-  if ([200, 401].includes(response.content?.status)) {
-    return <Navigate to='/account/login' />
-  }
+
   let body
-  if (resetKeyResponse.status !== 200) {
-    body = <FormErrors param='key' errors={resetKeyResponse.errors} />
+  if (resetKeyResponse?.status !== 200) {
+    body = <FormErrors param='key' errors={resetKeyResponse?.errors} />
   } else if (response.content?.errors?.filter(e => e.param === 'key')) {
     body = <FormErrors param='key' errors={response.content?.errors} />
   } else {
@@ -60,22 +98,9 @@ function ResetPassword ({ resetKey, resetKeyResponse }) {
     <div>
       <h1>Reset Password</h1>
       <p>
-        Remember your password? <Link to='/account/login'>Back to login.</Link>
+        Remember your password? <Link href='/account/login'>Back to login.</Link>
       </p>
       {body}
     </div>
   )
-}
-
-export function ResetPasswordByLink () {
-  const { resetKey, resetKeyResponse } = useLoaderData()
-  return <ResetPassword resetKey={resetKey} resetKeyResponse={resetKeyResponse} />
-}
-
-export function ResetPasswordByCode () {
-  const { state } = useLocation()
-  if (!state || !state.resetKey || !state.resetKeyResponse) {
-    return <Navigate to='/account/password/reset' />
-  }
-  return <ResetPassword resetKey={state.resetKey} resetKeyResponse={state.resetKeyResponse} />
 }

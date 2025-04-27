@@ -1,14 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import FormErrors from '../../components/FormErrors'
-import {
-  Navigate
-} from 'react-router-dom'
 import { verifyEmail } from '../../lib/allauth'
 import Button from '../../components/Button'
 
 export default function VerifyEmail () {
   const [code, setCode] = useState('')
   const [response, setResponse] = useState({ fetching: false, content: null })
+  const router = useRouter()
+
+  // Replace Navigate with useRouter to handle redirects
+  useEffect(() => {
+    if ([200, 401].includes(response.content?.status)) {
+      router.push('/account/email')
+    }
+  }, [response.content?.status, router])
 
   function submit () {
     setResponse({ ...response, fetching: true })
@@ -20,10 +26,6 @@ export default function VerifyEmail () {
     }).then(() => {
       setResponse((r) => { return { ...r, fetching: false } })
     })
-  }
-
-  if ([200, 401].includes(response.content?.status)) {
-    return <Navigate to='/account/email' />
   }
 
   return (

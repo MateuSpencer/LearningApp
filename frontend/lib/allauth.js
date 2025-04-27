@@ -112,10 +112,16 @@ const tokenStorage = typeof window !== 'undefined' ? window.sessionStorage : {
 }
 
 export function getSessionToken () {
-  return tokenStorage ? tokenStorage.getItem('sessionToken') : null
+  if (!tokenStorage) return null
+  try {
+    return tokenStorage.getItem('sessionToken')
+  } catch (e) {
+    console.error('Error accessing session storage:', e)
+    return null
+  }
 }
 
-async function request (method, path, data, headers) {
+async function request (method, path, data, headers = {}) {
   const options = {
     method,
     headers: {
@@ -123,13 +129,18 @@ async function request (method, path, data, headers) {
       ...headers
     }
   }
+  
   if (settings.withCredentials) {
     options.credentials = 'include'
   }
+  
   // Don't pass along authentication related headers to the config endpoint.
   if (path !== URLs.CONFIG) {
     if (settings.client === Client.BROWSER) {
-      options.headers['X-CSRFToken'] = getCSRFToken()
+      const csrfToken = getCSRFToken()
+      if (csrfToken) {
+        options.headers['X-CSRFToken'] = csrfToken
+      }
     } else if (settings.client === Client.APP) {
       // IMPORTANT!: Do NOT use `Client.APP` in a browser context, as you will
       // be vulnerable to CSRF attacks. This logic is only here for
@@ -146,21 +157,31 @@ async function request (method, path, data, headers) {
     options.body = JSON.stringify(data)
     options.headers['Content-Type'] = 'application/json'
   }
-  const resp = await fetch(settings.baseUrl + path, options)
-  const msg = await resp.json()
-  if (msg.status === 410) {
-    tokenStorage.removeItem('sessionToken')
-  }
-  if (msg.meta?.session_token) {
-    tokenStorage.setItem('sessionToken', msg.meta.session_token)
-  }
-  if ([401, 410].includes(msg.status) || (msg.status === 200 && msg.meta?.is_authenticated)) {
-    if (typeof document !== 'undefined') {
-      const event = new CustomEvent('allauth.auth.change', { detail: msg })
-      document.dispatchEvent(event)
+  
+  try {
+    const resp = await fetch(settings.baseUrl + path, options)
+    const msg = await resp.json()
+    
+    if (msg.status === 410 && tokenStorage) {
+      tokenStorage.removeItem('sessionToken')
     }
+    
+    if (msg.meta?.session_token && tokenStorage) {
+      tokenStorage.setItem('sessionToken', msg.meta.session_token)
+    }
+    
+    if ([401, 410].includes(msg.status) || (msg.status === 200 && msg.meta?.is_authenticated)) {
+      if (typeof document !== 'undefined') {
+        const event = new CustomEvent('allauth.auth.change', { detail: msg })
+        document.dispatchEvent(event)
+      }
+    }
+    
+    return msg
+  } catch (error) {
+    console.error('API request failed:', error)
+    return { status: 500, errors: { detail: 'API request failed' } }
   }
-  return msg
 }
 
 export async function login (data) {

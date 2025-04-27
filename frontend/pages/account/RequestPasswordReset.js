@@ -1,12 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
 import FormErrors from '../../components/FormErrors'
 import { requestPasswordReset, Flows } from '../../lib/allauth'
-import { Navigate, Link } from 'react-router-dom'
 import Button from '../../components/Button'
 
 export default function RequestPasswordReset () {
   const [email, setEmail] = useState('')
   const [response, setResponse] = useState({ fetching: false, content: null })
+  const router = useRouter()
+  
+  // Handle redirects with useEffect instead of Navigate
+  useEffect(() => {
+    if (response.content?.status === 401) {
+      router.push('/account/password/reset/confirm')
+    }
+  }, [response.content?.status, router])
 
   function submit () {
     setResponse({ ...response, fetching: true })
@@ -20,9 +29,6 @@ export default function RequestPasswordReset () {
     })
   }
 
-  if (response.content?.status === 401) {
-    return <Navigate to='/account/password/reset/confirm' />
-  }
   if (response.content?.status === 200) {
     return (
       <div>
@@ -31,11 +37,12 @@ export default function RequestPasswordReset () {
       </div>
     )
   }
+  
   return (
     <div>
       <h1>Reset Password</h1>
       <p>
-        Remember your password? <Link to='/account/login'>Back to login.</Link>
+        Remember your password? <Link href='/account/login'>Back to login.</Link>
       </p>
 
       <FormErrors errors={response.content?.errors} />

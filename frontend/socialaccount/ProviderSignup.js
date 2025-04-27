@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import FormErrors from '../components/FormErrors'
 import { providerSignup } from '../lib/allauth'
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import Button from '../components/Button'
 
 export default function ProviderSignup () {
@@ -24,7 +24,7 @@ export default function ProviderSignup () {
     <div>
       <h1>Sign Up</h1>
       <p>
-        Already have an account? <Link to='/account/login'>Login here.</Link>
+        Already have an account? <Link href='/account/login'>Login here.</Link>
       </p>
 
       <FormErrors errors={response.content?.errors} />

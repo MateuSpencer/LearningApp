@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import FormErrors from '../components/FormErrors'
-import { signUp } from '../lib/allauth'
-import { Link } from 'react-router-dom'
-import { useConfig } from '../auth'
-import ProviderList from '../socialaccount/ProviderList'
-import Button from '../components/Button'
+import FormErrors from '../../components/FormErrors'
+import { signUp } from '../../lib/allauth'
+import Link from 'next/link'
+import { useConfig } from '../../auth'
+import ProviderList from '../../socialaccount/ProviderList'
+import Button from '../../components/Button'
+import { withAnonymousProtection } from '../../utils/withAuth'
+
+export const getServerSideProps = withAnonymousProtection();
 
 export default function Signup () {
   const [email, setEmail] = useState('')
@@ -13,7 +16,7 @@ export default function Signup () {
   const [password2Errors, setPassword2Errors] = useState([])
   const [response, setResponse] = useState({ fetching: false, content: null })
   const config = useConfig()
-  const hasProviders = config.data.socialaccount?.providers?.length > 0
+  const hasProviders = config?.data?.socialaccount?.providers?.length > 0
 
   function submit () {
     if (password2 !== password1) {
@@ -36,7 +39,7 @@ export default function Signup () {
     <div>
       <h1>Sign Up</h1>
       <p>
-        Already have an account? <Link to='/account/login'>Login here.</Link>
+        Already have an account? <Link href='/account/login'>Login here.</Link>
       </p>
 
       <FormErrors errors={response.content?.errors} />
@@ -51,7 +54,7 @@ export default function Signup () {
         <FormErrors param='password2' errors={password2Errors} />
       </div>
       <Button disabled={response.fetching} onClick={() => submit()}>Sign Up</Button>
-      <a href='/account/signup/passkey'>Sign up using a passkey</a>
+      <Link href='/account/signup/passkey'>Sign up using a passkey</Link>
 
       {hasProviders
         ? <>

@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import FormErrors from '../../components/FormErrors'
 import { confirmLoginCode, Flows } from '../../lib/allauth'
-import { Navigate } from 'react-router-dom'
 import Button from '../../components/Button'
 import { useAuthStatus } from '../../auth'
 
@@ -9,6 +9,14 @@ export default function ConfirmLoginCode () {
   const [, authInfo] = useAuthStatus()
   const [code, setCode] = useState('')
   const [response, setResponse] = useState({ fetching: false, content: null })
+  const router = useRouter()
+  
+  // Handle redirects with useEffect instead of Navigate
+  useEffect(() => {
+    if (response.content?.status === 409 || authInfo.pendingFlow?.id !== Flows.LOGIN_BY_CODE) {
+      router.push('/account/login/code')
+    }
+  }, [response.content?.status, authInfo.pendingFlow?.id, router])
 
   function submit () {
     setResponse({ ...response, fetching: true })
@@ -22,9 +30,6 @@ export default function ConfirmLoginCode () {
     })
   }
 
-  if (response.content?.status === 409 || authInfo.pendingFlow?.id !== Flows.LOGIN_BY_CODE) {
-    return <Navigate to='/account/login/code' />
-  }
   return (
     <div>
       <h1>Enter Sign-In Code </h1>

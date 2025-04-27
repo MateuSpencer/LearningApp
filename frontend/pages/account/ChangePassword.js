@@ -1,19 +1,29 @@
-import { useState } from 'react'
-import FormErrors from '../components/FormErrors'
-import { changePassword } from '../lib/allauth'
-import { useUser } from '../auth'
-import Button from '../components/Button'
+import { useState, useEffect } from 'react'
+import FormErrors from '../../components/FormErrors'
+import { changePassword } from '../../lib/allauth'
+import { useUser } from '../../auth'
+import Button from '../../components/Button'
 import { useRouter } from 'next/router'
+import { withAuthProtection } from '../../utils/withAuth'
+
+export const getServerSideProps = withAuthProtection();
 
 export default function ChangePassword () {
   const router = useRouter()
-  const hasCurrentPassword = useUser().has_usable_password
+  const user = useUser()
+  const hasCurrentPassword = user?.has_usable_password
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newPassword2, setNewPassword2] = useState('')
   const [newPassword2Errors, setNewPassword2Errors] = useState([])
-
   const [response, setResponse] = useState({ fetching: false, content: null })
+  
+  // Handle redirect after successful password change
+  useEffect(() => {
+    if (response.content?.status === 200) {
+      router.push('/')
+    }
+  }, [response.content?.status, router])
 
   function submit () {
     if (newPassword !== newPassword2) {
@@ -31,10 +41,7 @@ export default function ChangePassword () {
       setResponse((r) => { return { ...r, fetching: false } })
     })
   }
-  if (response.content?.status === 200) {
-    router.push('/')
-    return null
-  }
+  
   return (
     <div>
       <h1>{hasCurrentPassword ? 'Change Password' : 'Set Password'}</h1>

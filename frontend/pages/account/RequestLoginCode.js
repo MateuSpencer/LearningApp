@@ -1,12 +1,20 @@
-import { useState } from 'react'
-import FormErrors from '../components/FormErrors'
-import { requestLoginCode } from '../lib/allauth'
-import { Navigate } from 'react-router-dom'
-import Button from '../components/Button'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
+import FormErrors from '../../components/FormErrors'
+import { requestLoginCode } from '../../lib/allauth'
+import Button from '../../components/Button'
 
 export default function RequestLoginCode () {
   const [email, setEmail] = useState('')
   const [response, setResponse] = useState({ fetching: false, content: null })
+  const router = useRouter()
+  
+  // Handle redirects with useEffect
+  useEffect(() => {
+    if (response.content?.status === 401) {
+      router.push('/account/login/code/confirm')
+    }
+  }, [response.content?.status, router])
 
   function submit () {
     setResponse({ ...response, fetching: true })
@@ -20,9 +28,6 @@ export default function RequestLoginCode () {
     })
   }
 
-  if (response.content?.status === 401) {
-    return <Navigate to='/account/login/code/confirm' />
-  }
   return (
     <div>
       <h1>Send me a sign-in code</h1>

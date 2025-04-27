@@ -3,12 +3,16 @@ import { useRouter } from 'next/router'
 import { useAuthChange, AuthChangeEvent, useAuthStatus } from './hooks'
 import { Flows, AuthenticatorType } from '../lib/allauth'
 
+// Central configuration for authentication URLs
 export const URLs = Object.freeze({
   LOGIN_URL: '/account/login',
   LOGIN_REDIRECT_URL: '/my-posts', // Redirect to My Posts after login
-  LOGOUT_REDIRECT_URL: '/'
+  LOGOUT_REDIRECT_URL: '/',
+  DEFAULT_PROTECTED_FAILURE_URL: '/account/login', // Default URL for authentication failures
+  DEFAULT_ANONYMOUS_FAILURE_URL: '/my-posts' // Default URL for when authenticated users try to access anonymous-only pages
 })
 
+// Define paths for each flow type
 const flow2path = {}
 flow2path[Flows.LOGIN] = '/account/login'
 flow2path[Flows.LOGIN_BY_CODE] = '/account/login/code/confirm'
@@ -97,7 +101,9 @@ export function AuthChangeRedirector({ children }) {
         router.push(URLs.LOGOUT_REDIRECT_URL)
         break
       case AuthChangeEvent.LOGGED_IN:
-        router.push(URLs.LOGIN_REDIRECT_URL)
+        // Prioritize the 'next' parameter if available
+        const nextUrl = router.query.next || URLs.LOGIN_REDIRECT_URL
+        router.push(nextUrl)
         break
       case AuthChangeEvent.REAUTHENTICATED: {
         const next = router.query.next || '/'
