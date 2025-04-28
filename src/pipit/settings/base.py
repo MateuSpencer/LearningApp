@@ -160,7 +160,7 @@ DEFAULT_FROM_EMAIL = get_env("DEFAULT_FROM_EMAIL", default="noreply@example.com"
 
 # Authentication and Django AllAuth Configuration
 AUTH_USER_MODEL = "customuser.User"
-LOGIN_REDIRECT_URL = "/account"  # Redirect to account page after login
+LOGIN_REDIRECT_URL = "/"  # Redirect to account page after login
 
 # Session settings
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
@@ -249,26 +249,6 @@ ACCOUNT_LOGIN_BY_CODE_ENABLED = True  # Add this setting from example
 ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True  # Add this setting from example
 ACCOUNT_LOGOUT_ON_GET = False  # POST request required for logout for CSRF protection
 ACCOUNT_PRESERVE_USERNAME_CASING = False  # Treat usernames as case insensitive
-
-# Headless AllAuth Settings
-HEADLESS_ONLY = True
-# Define frontend URLs - ADJUST THESE FOR YOUR ACTUAL SPA
-# Use localhost:3000 as a placeholder for typical local SPA development
-FRONTEND_BASE_URL = get_env("FRONTEND_BASE_URL", default="http://localhost:3000")
-HEADLESS_FRONTEND_URLS = {
-    "account_confirm_email": f"{FRONTEND_BASE_URL}/verify-email/{{key}}",
-    "account_reset_password": f"{FRONTEND_BASE_URL}/password/reset",
-    "account_reset_password_from_key": f"{FRONTEND_BASE_URL}/password/reset/key/{{key}}",
-    "account_signup": f"{FRONTEND_BASE_URL}/signup",
-    "socialaccount_login_error": f"{FRONTEND_BASE_URL}/provider/callback",  # Example, adjust if using social auth
-    # Add other URLs your frontend needs if different from defaults
-}
-HEADLESS_SERVE_SPECIFICATION = True
-
-# MFA Settings (from example)
-MFA_SUPPORTED_TYPES = ["totp", "recovery_codes", "webauthn"]
-MFA_PASSKEY_LOGIN_ENABLED = True
-MFA_PASSKEY_SIGNUP_ENABLED = True
 
 # Uploaded media
 MEDIA_URL = "/wt/media/"
