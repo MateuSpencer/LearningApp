@@ -89,4 +89,15 @@ server {
     # For proper cookie handling with secure sessions
     proxy_cookie_path / "/; HTTPOnly; Secure";
 }
+
+    location /accounts/ {
+        proxy_set_header Host $host:8081;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass ${PYTHON_HOST}:8000/accounts/;
+        
+        # For proper cookie handling with authentication
+        proxy_cookie_path / "/; HTTPOnly; Secure";
+    }
 }

@@ -21,6 +21,12 @@ export default function CatchAllPage({ componentName, componentProps }) {
 export async function getServerSideProps({ req, params, res }) {
     let path = params?.path || [];
     path = path.join('/');
+    
+    // Skip processing for authentication paths
+    if (path.startsWith('accounts/')) {
+        console.log('[getServerSideProps] Skipping auth route:', path);
+        return { notFound: true };  // This will make Next.js pass the request to the server
+    }
 
     const { host } = req.headers;
     let queryParams = new URL(req.url, `https://${host}`).search;

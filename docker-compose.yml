@@ -26,6 +26,8 @@ services:
       args:
         - ENVIRONMENT=local
     command: "runserver"
+    ports:
+      - "8000:8000"
     volumes:
       - "./src:/home/app/web"
       - "./src/media:/home/app/media"

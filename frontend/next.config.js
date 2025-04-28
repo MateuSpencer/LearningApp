@@ -10,6 +10,16 @@ let nextConfig = {
     basePath,
     i18n,
     output: "standalone",
+    
+    // Add explicit rewrites for authentication routes
+    async rewrites() {
+        return [
+            {
+                source: '/accounts/:path*',
+                destination: '/accounts/:path*', // This will pass through to the backend
+            },
+        ];
+    },
 };
 
 // nextConfig = withSentryConfig(nextConfig, SentryWebpackPluginOptions);

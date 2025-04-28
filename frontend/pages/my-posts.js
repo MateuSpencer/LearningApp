@@ -1,6 +1,5 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { withAuthProtection } from '../utils/withAuth';
 
 // Import UserPostsPage component dynamically to match pattern used in other pages
 const UserPostsPage = dynamic(() => import('../containers/UserPostsPage'), {
@@ -23,8 +22,6 @@ const defaultProps = {
     }
   }
 };
-
-export const getServerSideProps = withAuthProtection();
 
 export default function MyPosts() {
   return <UserPostsPage {...defaultProps.componentProps} />;
