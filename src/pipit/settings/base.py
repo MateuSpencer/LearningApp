@@ -56,9 +56,8 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    "allauth.mfa",  # Add MFA
-    "allauth.headless",  # Add Headless
-    "allauth.usersessions",  # Add User Sessions
+    # "allauth.socialaccount.providers.google",
+    # "allauth.socialaccount.providers.facebook",
     # Project specific apps
     "pipit",
     "sitesettings",
@@ -78,7 +77,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware",  # Required for django-allauth
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "pipit.urls"
@@ -159,18 +158,57 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, "locale")]
 # Email
 DEFAULT_FROM_EMAIL = get_env("DEFAULT_FROM_EMAIL", default="noreply@example.com")
 
-# Auth
+# Authentication and Django AllAuth Configuration
 AUTH_USER_MODEL = "customuser.User"
-
-# Authentication settings
 LOGIN_REDIRECT_URL = "/account"  # Redirect to account page after login
 
 # Session settings
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 SESSION_COOKIE_HTTPONLY = True
 
+# Django AllAuth settings
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+# Provider specific settings
+# SOCIALACCOUNT_PROVIDERS = {
+#     'google': {
+#         # For each OAuth based provider, either add a ``SocialApp``
+#         # (``socialaccount`` app) containing the required client
+#         # credentials, or list them here:
+#         'APP': {
+#             'client_id': '123',
+#             'secret': '456',
+#             'key': ''
+#         }
+#     }
+# }
+
+
+# Django AllAuth configuration
+ACCOUNT_LOGIN_METHODS = {
+    "email",
+    "username",
+}  # Allow login with either username or email
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*",
+    "username*",
+    "password1*",
+    "password2*",
+]  # Required fields during signup
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = False
+ACCOUNT_LOGIN_BY_CODE_ENABLED = True
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
+ACCOUNT_LOGOUT_ON_GET = False  # POST request required for logout for CSRF protection
+ACCOUNT_PRESERVE_USERNAME_CASING = False  # Treat usernames as case insensitive
+
 # Wagtail
-WAGTAIL_SITE_NAME = "Company-Project"
+WAGTAIL_SITE_NAME = "LearningApp"
 WAGTAILIMAGES_IMAGE_MODEL = "customimage.CustomImage"
 WAGTAILDOCS_DOCUMENT_MODEL = "customdocument.CustomDocument"
 WAGTAIL_ALLOW_UNICODE_SLUGS = False

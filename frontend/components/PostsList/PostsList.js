@@ -5,7 +5,6 @@ import EditPostForm from '../EditPostForm';
 import { PostsFilter, PostsSort, PostsPagination } from '../PostsControls';
 import ConfirmationModal from '../ConfirmationModal';
 import usePosts from '../../hooks/usePosts';
-import { useUser } from '../../auth/hooks'; // Add this import
 import s from './PostsList.module.css';
 
 /**
@@ -104,17 +103,22 @@ const PostsList = ({
     return fetchPostsRef.current(options);
   }, []);
   
-  // Get the current user from allauth
-  const user = useUser();
-  
-  // Update currentUser when allauth user changes
+  // Fetch the current user
   useEffect(() => {
-    if (user) {
-      setCurrentUser(user.username || user.email);
-    } else {
-      setCurrentUser(null);
-    }
-  }, [user]);
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch('/api/auth/user/');
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentUser(data.username);
+        }
+      } catch (err) {
+        console.error('Error fetching current user:', err);
+      }
+    };
+    
+    fetchCurrentUser();
+  }, []);
   
   // Store previous dependencies for comparison
   useEffect(() => {
@@ -353,7 +357,8 @@ const PostsList = ({
   };
 
   // Are controls disabled?
-  const controlsDisabled = loading || !!error;
+  const controlsDisabled = loading || !!error || tokenLoading || !!tokenError;
+
   // SVG Icons for buttons
   const FilterIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -484,6 +489,14 @@ const PostsList = ({
         )}
       </div>
       
+      {/* Show token-related errors */}
+      {tokenLoading && <p className={s.loading}>Loading security token...</p>}
+      {tokenError && (
+        <div className={s.errorContainer}>
+          <p className={s.error}>Failed to load security token: {tokenError.message}</p>
+        </div>
+      )}
+      
       {/* Show post loading and errors */}
       {loading && <p className={s.loading}>Loading posts...</p>}
       {error && <p className={s.error}>{error}</p>}
@@ -530,8 +543,8 @@ const PostsList = ({
               onDelete={handleDeleteClick}
               onUpvote={handleUpvote}
               onDownvote={handleDownvote}
-              canModify={!!currentUser && post.author_username === currentUser}
-              canVote={!!currentUser}
+              canModify={!!csrfToken && !tokenLoading && !tokenError}
+              canVote={!!csrfToken && !tokenLoading && !tokenError && !!currentUser}
             />
           );
         })}

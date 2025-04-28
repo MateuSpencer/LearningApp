@@ -67,11 +67,7 @@ urlpatterns += [
     path("wt/sitemap.xml", sitemap, name="sitemap"),
     path("wt/health-check/", health_check, name="health_check"),
     path("api/posts/", include("posts.urls")),
-]
-
-# API URLs
-urlpatterns += [
-    path("_allauth/", include("allauth.headless.urls")),
+    path("accounts/", include("allauth.urls")),
 ]
 
 urlpatterns += [re_path(r"", include(wagtail_urls))]
