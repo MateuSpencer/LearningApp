@@ -1,68 +1,106 @@
 {% extends "allauth/layouts/base.html" %}
 {% load allauth %}
+{% load i18n %}
 {% block body %}
-    <div class="flex-grow-1 row">
-        <aside class="col-sm-4 col-md-3 col-lg-2 text-bg-dark">
-            <ul class="p-3 nav nav-pills flex-column">
-                {% url 'account_email' as email_url_ %}
-                {% if email_url_ %}
-                    <li class="nav-item">
-                        <a class="{% block nav_class_email %}nav-link text-white{% endblock %}"
-                           href="{{ email_url_ }}">Change Email</a>
-                    </li>
-                {% endif %}
-                {% url 'account_change_password' as change_password_url_ %}
-                {% if change_password_url_ %}
-                    <li class="nav-item">
-                        <a class="{% block nav_class_password %}nav-link text-white{% endblock %}"
-                           href="{{ change_password_url_ }}">Change Password</a>
-                    </li>
-                {% endif %}
-                {% url 'account_change_phone' as phone_url_ %}
-                {% if phone_url_ %}
-                    <li class="nav-item">
-                        <a class="{% block nav_class_phone %}nav-link text-white{% endblock %}"
-                           href="{{ phone_url_ }}">Change Phone</a>
-                    </li>
-                {% endif %}
-                {% url 'socialaccount_connections' as connections_url_ %}
-                {% if connections_url_ %}
-                    <li class="nav-item">
-                        <a class="{% block nav_class_socialaccount %}nav-link text-white{% endblock %}"
-                           href="{{ connections_url_ }}">Third-Party Accounts</a>
-                    </li>
-                {% endif %}
-                {% url 'mfa_index' as mfa_index_url_ %}
-                {% if mfa_index_url_ %}
-                    <li class="nav-item">
-                        <a class="{% block nav_class_mfa %}nav-link text-white{% endblock %}"
-                           href="{{ mfa_index_url_ }}">Two-Factor Authentication</a>
-                    </li>
-                {% endif %}
-                {% url 'usersessions_list' as usersessions_list_url_ %}
-                {% if usersessions_list_url_ %}
-                    <li class="nav-item">
-                        <a class="{% block nav_class_usersessions %}nav-link text-white{% endblock %}"
-                           href="{{ usersessions_list_url_ }}">Sessions</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </aside>
-        <main class="col-sm-8 col-md-9 col-lg-10">
-            <div id="content" class="container">
-                {% if messages %}
-                    <div class="pt-4">
-                        {% for message in messages %}
-                            {% element alert level=message.tags %}
-                                {% slot message %}
-                                    {{ message }}
-                                {% endslot %}
-                            {% endelement %}
-                        {% endfor %}
-                    </div>
-                {% endif %}
+    <style>
+        /* Styles specific to pages with sidebar */
+        @media (min-width: 992px) {
+            .content-area {
+                margin-left: 250px; /* Space for sidebar on larger screens */
+            }
+        }
+    </style>
+    
+    <aside style="position: fixed; top: 0; left: 0; height: 100vh; width: 250px; overflow-y: auto; background-color: var(--bg-secondary); border-right: 1px solid var(--border-color); box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); z-index: 100; display: flex; flex-direction: column; border-radius: 0 15px 15px 0;">
+        <!-- Site name in sidebar header - now clickable and links to homepage -->
+        <div class="sidebarHeader">
+            <a href="/" style="text-decoration: none;">
+                <span class="siteName">LearningApp</span>
+            </a>
+        </div>
+        
+        <ul class="p-3 nav nav-pills flex-column flex-grow-1">
+            {% url 'account_email' as email_url_ %}
+            {% if email_url_ %}
+                <li class="nav-item">
+                    <a class="{% block nav_class_email %}nav-link text-white{% endblock %} mb-2"
+                       href="{{ email_url_ }}">
+                       <i class="auth-icon">📧</i> Change Email
+                    </a>
+                </li>
+            {% endif %}
+            {% url 'account_change_password' as change_password_url_ %}
+            {% if change_password_url_ %}
+                <li class="nav-item">
+                    <a class="{% block nav_class_password %}nav-link text-white{% endblock %} mb-2"
+                       href="{{ change_password_url_ }}">
+                       <i class="auth-icon">🔑</i> Change Password
+                    </a>
+                </li>
+            {% endif %}
+            {% url 'account_change_phone' as phone_url_ %}
+            {% if phone_url_ %}
+                <li class="nav-item">
+                    <a class="{% block nav_class_phone %}nav-link text-white{% endblock %} mb-2"
+                       href="{{ phone_url_ }}">
+                       <i class="auth-icon">📱</i> Change Phone
+                    </a>
+                </li>
+            {% endif %}
+            {% url 'socialaccount_connections' as connections_url_ %}
+            {% if connections_url_ %}
+                <li class="nav-item">
+                    <a class="{% block nav_class_socialaccount %}nav-link text-white{% endblock %} mb-2"
+                       href="{{ connections_url_ }}">
+                       <i class="auth-icon">🔗</i> Third-Party Accounts
+                    </a>
+                </li>
+            {% endif %}
+            {% url 'mfa_index' as mfa_index_url_ %}
+            {% if mfa_index_url_ %}
+                <li class="nav-item">
+                    <a class="{% block nav_class_mfa %}nav-link text-white{% endblock %} mb-2"
+                       href="{{ mfa_index_url_ }}">
+                       <i class="auth-icon">🔐</i> Two-Factor Authentication
+                    </a>
+                </li>
+            {% endif %}
+            {% url 'usersessions_list' as usersessions_list_url_ %}
+            {% if usersessions_list_url_ %}
+                <li class="nav-item">
+                    <a class="{% block nav_class_usersessions %}nav-link text-white{% endblock %} mb-2"
+                       href="{{ usersessions_list_url_ }}">
+                       <i class="auth-icon">💻</i> Sessions
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+        
+        <!-- Logout button now links to homepage after signing out -->
+        <div style="padding: 15px; margin-top: auto; border-top: 1px solid var(--border-color);">
+            <a href="{% url 'account_logout' %}?next=/" class="logoutButton">
+                <i class="auth-icon">🚪</i>{% translate "Sign Out" %}
+            </a>
+        </div>
+    </aside>
+    
+    <main style="padding: 20px; margin-left: 0;">
+        <div class="content-container">
+            {% if messages %}
+                <div class="pt-4">
+                    {% for message in messages %}
+                        {% element alert level=message.tags %}
+                            {% slot message %}
+                                {{ message }}
+                            {% endslot %}
+                        {% endelement %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <h2 class="section-title">Account Management</h2>
+            <div class="text-center">
                 {% block content %}{% endblock %}
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 {% endblock %}
