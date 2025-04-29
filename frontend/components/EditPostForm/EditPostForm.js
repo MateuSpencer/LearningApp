@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { httpPut } from '../../utils/Http';
-import { useCSRFToken } from '../../context/CSRFTokenContext';
 import s from './EditPostForm.module.css';
 
 const EditPostForm = ({ post, onSave, onCancel }) => {
@@ -12,8 +11,6 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
   const [urlError, setUrlError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
-  // Use the CSRF token from context instead of fetching it in the component
-  const { token: csrfToken, loading: tokenLoading, error: tokenError, refreshToken } = useCSRFToken();
 
   // Simple URL validation on the client side
   const validateUrl = (url) => {

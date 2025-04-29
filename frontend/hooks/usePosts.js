@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useCSRFToken } from '../context/CSRFTokenContext';
 import { httpGet, httpPost, httpPut, httpDelete } from '../utils/Http';
 
 const API_BASE_URL = '/api/posts';
@@ -36,8 +35,6 @@ export function usePosts({
   const [sortBy, setSortBy] = useState(initialSortBy);
   const [sortDirection, setSortDirection] = useState(initialSortDirection);
   
-  // Use the CSRF token from context for authenticated requests
-  const { token: csrfToken, loading: tokenLoading, error: tokenError } = useCSRFToken();
   
   // Cache previous results to avoid unnecessary refetches
   const cacheRef = useRef({});
