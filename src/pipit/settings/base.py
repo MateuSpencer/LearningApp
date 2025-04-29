@@ -86,7 +86,14 @@ APPEND_SLASH = True
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["templates"],
+        "DIRS": [
+            os.path.join(
+                os.path.dirname(BASE_DIR), "templates"
+            ),  # Project-level templates
+            os.path.join(
+                os.path.dirname(BASE_DIR), "main", "templates"
+            ),  # main app templates
+        ],
         "OPTIONS": {
             "debug": DEBUG,
             "loaders": [
