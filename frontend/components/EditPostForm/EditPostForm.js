@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useRouter } from 'next/router';
+import { useAuth } from '../../context/AuthContext';
 import { httpPut } from '../../utils/Http';
 import s from './EditPostForm.module.css';
 
 const EditPostForm = ({ post, onSave, onCancel }) => {
+  const router = useRouter();
+  const { isAuthenticated, refreshAuth } = useAuth();
   const [content, setContent] = useState(post?.content || '');
   const [resourceUrl, setResourceUrl] = useState(post?.resource_url || '');
   const [status, setStatus] = useState(post?.status || 'published');
@@ -11,6 +15,12 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
   const [urlError, setUrlError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
+  // Check authentication
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/accounts/login/');
+    }
+  }, [isAuthenticated, router]);
 
   // Simple URL validation on the client side
   const validateUrl = (url) => {
@@ -45,8 +55,8 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
       return;
     }
     
-    if (!csrfToken) {
-      setError('Security token not available. Please try again later.');
+    if (!isAuthenticated) {
+      router.push('/accounts/login/');
       return;
     }
     
@@ -63,58 +73,33 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
           resource_url: resourceUrl,
           status,
           page_slug: post.page_slug // Explicitly include the page_slug
-        },
-        csrfToken
+        }
       );
       
       onSave(updatedPost);
       
     } catch (err) {
       console.error('Error updating post:', err);
-      // Check if it's a CSRF token issue (usually 403 Forbidden)
-      if (err.status === 403) {
-        setError('Your session may have expired. Refreshing...');
-        try {
-          // Try to refresh the token
-          await refreshToken();
-          setError('Please try submitting again.');
-        } catch (refreshError) {
-          setError('Failed to refresh security token. Please reload the page.');
-        }
+      // Check if it's an authentication issue (401 Unauthorized)
+      if (err.response && err.response.status === 401) {
+        setError('Your session has expired. Redirecting to login...');
+        refreshAuth();
+        setTimeout(() => {
+          router.push('/accounts/login/');
+        }, 1500);
+      } else if (err.response && err.response.status === 403) {
+        setError('You don\'t have permission to edit this post.');
       } else if (err.data && err.data.resource_url) {
         // Handle specific resource URL validation errors from the server
         setUrlError(err.data.resource_url);
         setError(null);
       } else {
-        setError(`Failed to update post: ${err.message}`);
+        setError(`Failed to update post: ${err.message || 'Unknown error'}`);
       }
     } finally {
       setSubmitting(false);
     }
   };
-
-  // Show loading state while waiting for the token
-  if (tokenLoading) {
-    return <div className={s.loading}>Loading security token...</div>;
-  }
-
-  // Show error if token fetch failed
-  if (tokenError) {
-    return (
-      <div className={s.errorContainer}>
-        <div className={s.errorMessage}>
-          Failed to load security token: {tokenError.message}
-        </div>
-        <button 
-          onClick={refreshToken} 
-          className={s.retryButton}
-          disabled={submitting}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className={s.formContainer}>
@@ -131,7 +116,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className={s.textarea}
-            disabled={submitting || !csrfToken}
+            disabled={submitting || !isAuthenticated}
             rows={5}
             required
           />
@@ -145,7 +130,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
             value={resourceUrl}
             onChange={handleUrlChange}
             className={s.input}
-            disabled={submitting || !csrfToken}
+            disabled={submitting || !isAuthenticated}
           />
         </div>
         
@@ -156,7 +141,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             className={s.select}
-            disabled={submitting || !csrfToken}
+            disabled={submitting || !isAuthenticated}
           >
             <option value="published">Published</option>
             <option value="draft">Draft</option>
@@ -176,7 +161,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
           <button 
             type="submit" 
             className={s.submitButton}
-            disabled={submitting || !csrfToken}
+            disabled={submitting || !isAuthenticated}
           >
             {submitting ? 'Saving...' : 'Save Changes'}
           </button>

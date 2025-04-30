@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { httpGet, httpPost, httpPut, httpDelete } from '../utils/Http';
+import { useAuth } from '../context/AuthContext';
 
 const API_BASE_URL = '/api/posts';
+const LOGIN_URL = '/accounts/login/';
 
 /**
  * Custom hook for managing posts with advanced filtering, sorting, and pagination
@@ -23,6 +25,9 @@ export function usePosts({
   pageSize = 10,
   autoRefetch = true
 } = {}) {
+  // Get authentication state from AuthContext
+  const { isAuthenticated } = useAuth();
+  
   // State for posts, pagination, and request status
   const [posts, setPosts] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -35,10 +40,20 @@ export function usePosts({
   const [sortBy, setSortBy] = useState(initialSortBy);
   const [sortDirection, setSortDirection] = useState(initialSortDirection);
   
-  
   // Cache previous results to avoid unnecessary refetches
   const cacheRef = useRef({});
-  
+
+  // Helper function to handle authentication errors
+  const handleAuthError = (err) => {
+    // Check if this is a 401 error (Unauthorized)
+    if (err.response && err.response.status === 401) {
+      // Redirect to login page
+      window.location.href = LOGIN_URL;
+      return new Error('Authentication required. Redirecting to login page...');
+    }
+    return err;
+  };
+
   // Build the query params string for the API request
   const buildQueryString = useCallback(() => {
     const queryParams = new URLSearchParams();
@@ -110,13 +125,14 @@ export function usePosts({
   
   // Create a new post
   const createPost = useCallback(async (postData) => {
-    if (!csrfToken) {
-      throw new Error('CSRF token not available. Please try again later.');
+    if (!isAuthenticated) {
+      window.location.href = LOGIN_URL;
+      throw new Error('You must be logged in to create a post.');
     }
     
     try {
       setLoading(true);
-      const newPost = await httpPost(API_BASE_URL + '/', postData, csrfToken);
+      const newPost = await httpPost(API_BASE_URL + '/', postData);
       
       // Invalidate cache for current query
       const queryString = buildQueryString();
@@ -128,23 +144,25 @@ export function usePosts({
       
       return newPost;
     } catch (err) {
-      setError(err.message || 'Failed to create post');
+      const enhancedError = handleAuthError(err);
+      setError(enhancedError.message || 'Failed to create post');
       console.error('Error creating post:', err);
-      throw err;
+      throw enhancedError;
     } finally {
       setLoading(false);
     }
-  }, [csrfToken, buildQueryString]);
+  }, [isAuthenticated, buildQueryString]);
   
   // Update an existing post
   const updatePost = useCallback(async (id, postData) => {
-    if (!csrfToken) {
-      throw new Error('CSRF token not available. Please try again later.');
+    if (!isAuthenticated) {
+      window.location.href = LOGIN_URL;
+      throw new Error('You must be logged in to update a post.');
     }
     
     try {
       setLoading(true);
-      const updatedPost = await httpPut(`${API_BASE_URL}/${id}/`, postData, csrfToken);
+      const updatedPost = await httpPut(`${API_BASE_URL}/${id}/`, postData);
       
       // Invalidate cache for current query
       const queryString = buildQueryString();
@@ -157,23 +175,25 @@ export function usePosts({
       
       return updatedPost;
     } catch (err) {
-      setError(err.message || `Failed to update post: ${id}`);
+      const enhancedError = handleAuthError(err);
+      setError(enhancedError.message || `Failed to update post: ${id}`);
       console.error(`Error updating post: ${id}`, err);
-      throw err;
+      throw enhancedError;
     } finally {
       setLoading(false);
     }
-  }, [csrfToken, buildQueryString]);
+  }, [isAuthenticated, buildQueryString]);
   
   // Delete a post
   const deletePost = useCallback(async (id) => {
-    if (!csrfToken) {
-      throw new Error('CSRF token not available. Please try again later.');
+    if (!isAuthenticated) {
+      window.location.href = LOGIN_URL;
+      throw new Error('You must be logged in to delete a post.');
     }
     
     try {
       setLoading(true);
-      await httpDelete(`${API_BASE_URL}/${id}/`, csrfToken);
+      await httpDelete(`${API_BASE_URL}/${id}/`);
       
       // Invalidate cache for current query
       const queryString = buildQueryString();
@@ -185,23 +205,25 @@ export function usePosts({
       
       return true;
     } catch (err) {
-      setError(err.message || `Failed to delete post: ${id}`);
+      const enhancedError = handleAuthError(err);
+      setError(enhancedError.message || `Failed to delete post: ${id}`);
       console.error(`Error deleting post: ${id}`, err);
-      throw err;
+      throw enhancedError;
     } finally {
       setLoading(false);
     }
-  }, [csrfToken, buildQueryString]);
+  }, [isAuthenticated, buildQueryString]);
   
   // Upvote a post
   const upvotePost = useCallback(async (id) => {
-    if (!csrfToken) {
-      throw new Error('CSRF token not available. Please try again later.');
+    if (!isAuthenticated) {
+      window.location.href = LOGIN_URL;
+      throw new Error('You must be logged in to vote on a post.');
     }
     
     try {
       setLoading(true);
-      const updatedPost = await httpPost(`${API_BASE_URL}/${id}/upvote/`, {}, csrfToken);
+      const updatedPost = await httpPost(`${API_BASE_URL}/${id}/upvote/`, {});
       
       // Invalidate cache for current query
       const queryString = buildQueryString();
@@ -214,23 +236,25 @@ export function usePosts({
       
       return updatedPost;
     } catch (err) {
-      setError(err.message || `Failed to upvote post: ${id}`);
+      const enhancedError = handleAuthError(err);
+      setError(enhancedError.message || `Failed to upvote post: ${id}`);
       console.error(`Error upvoting post: ${id}`, err);
-      throw err;
+      throw enhancedError;
     } finally {
       setLoading(false);
     }
-  }, [csrfToken, buildQueryString]);
+  }, [isAuthenticated, buildQueryString]);
   
   // Downvote a post
   const downvotePost = useCallback(async (id) => {
-    if (!csrfToken) {
-      throw new Error('CSRF token not available. Please try again later.');
+    if (!isAuthenticated) {
+      window.location.href = LOGIN_URL;
+      throw new Error('You must be logged in to vote on a post.');
     }
     
     try {
       setLoading(true);
-      const updatedPost = await httpPost(`${API_BASE_URL}/${id}/downvote/`, {}, csrfToken);
+      const updatedPost = await httpPost(`${API_BASE_URL}/${id}/downvote/`, {});
       
       // Invalidate cache for current query
       const queryString = buildQueryString();
@@ -243,13 +267,14 @@ export function usePosts({
       
       return updatedPost;
     } catch (err) {
-      setError(err.message || `Failed to downvote post: ${id}`);
+      const enhancedError = handleAuthError(err);
+      setError(enhancedError.message || `Failed to downvote post: ${id}`);
       console.error(`Error downvoting post: ${id}`, err);
-      throw err;
+      throw enhancedError;
     } finally {
       setLoading(false);
     }
-  }, [csrfToken, buildQueryString]);
+  }, [isAuthenticated, buildQueryString]);
 
   // Update a specific filter
   const updateFilter = useCallback((key, value) => {
@@ -323,9 +348,12 @@ export function usePosts({
     sortBy,
     sortDirection,
     
+    // Auth state
+    isAuthenticated,
+    
     // Status
-    loading: loading || tokenLoading,
-    error: error || tokenError,
+    loading,
+    error,
     
     // Methods
     fetchPosts,
@@ -337,8 +365,8 @@ export function usePosts({
     clearFilters,
     updateSort,
     goToPage,
-    upvotePost,    // Add upvote method
-    downvotePost,  // Add downvote method
+    upvotePost,
+    downvotePost,
   };
 }
 

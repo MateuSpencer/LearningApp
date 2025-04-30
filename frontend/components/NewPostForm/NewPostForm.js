@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { httpPost } from '../../utils/Http';
 import { useRouter } from 'next/router';
+import { useAuth } from '../../context/AuthContext';
 import s from './NewPostForm.module.css';
 
 const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
@@ -15,6 +16,16 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
   
   // Get router to extract current path
   const router = useRouter();
+  
+  // Use the centralized auth context
+  const { isAuthenticated, refreshAuth } = useAuth();
+  
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/accounts/login/');
+    }
+  }, [isAuthenticated, router]);
   
   // Extract the pageSlug from the URL path if it's not provided
   useEffect(() => {
@@ -37,8 +48,6 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
     }
   }, [router, pageSlug]);
   
-
-
   // Simple URL validation on the client side
   const validateUrl = (url) => {
     if (!url) return true; // Empty URLs are allowed
@@ -72,16 +81,17 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       return;
     }
     
-    if (!csrfToken) {
-      setError('Security token not available. Please try again later.');
+    if (!isAuthenticated) {
+      router.push('/accounts/login/');
       return;
     }
     
     try {
       setSubmitting(true);
       setError(null);
+      setUrlError(null);
       
-      // Use httpPost with the token from context and the extracted page slug
+      // Use httpPost with the extracted page slug - the token is now handled automatically
       const newPost = await httpPost(
         '/api/posts/',
         {
@@ -89,8 +99,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
           resource_url: resourceUrl,
           status,
           page_slug: actualPageSlug
-        },
-        csrfToken
+        }
       );
       
       setContent('');
@@ -100,50 +109,36 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       
     } catch (err) {
       console.error('Error creating post:', err);
-      // Check if it's a CSRF token issue (usually 403 Forbidden)
-      if (err.status === 403) {
-        setError('Your session may have expired. Refreshing...');
-        try {
-          // Try to refresh the token
-          await refreshToken();
-          setError('Please try submitting again.');
-        } catch (refreshError) {
-          setError('Failed to refresh security token. Please reload the page.');
+      
+      // Check if it's an authentication issue (401 Unauthorized)
+      if (err.status === 401) {
+        setError('Your session has expired. Redirecting to login...');
+        refreshAuth();
+        setTimeout(() => {
+          router.push('/accounts/login/');
+        }, 1500);
+      } else if (err.status === 403) {
+        setError('You don\'t have permission to create a post. Please make sure you are logged in.');
+        refreshAuth();
+      } else if (err.data) {
+        // Handle field-specific errors from the server
+        if (err.data.resource_url) {
+          setUrlError(err.data.resource_url);
         }
-      } else if (err.data && err.data.resource_url) {
-        // Handle specific resource URL validation errors from the server
-        setUrlError(err.data.resource_url);
-        setError(null);
+        if (err.data.content) {
+          setError(err.data.content);
+        } else if (err.data.detail || err.data.message) {
+          setError(err.data.detail || err.data.message);
+        } else {
+          setError(`Failed to create post: ${err.message || 'Unknown error'}`);
+        }
       } else {
-        setError(`Failed to create post: ${err.message}`);
+        setError(`Failed to create post: ${err.message || 'Unknown error'}`);
       }
     } finally {
       setSubmitting(false);
     }
   };
-
-  // Show loading state while waiting for the token
-  if (tokenLoading) {
-    return <div className={s.loading}>Loading security token...</div>;
-  }
-
-  // Show error if token fetch failed
-  if (tokenError) {
-    return (
-      <div className={s.errorContainer}>
-        <div className={s.errorMessage}>
-          Failed to load security token: {tokenError.message}
-        </div>
-        <button 
-          onClick={refreshToken} 
-          className={s.retryButton}
-          disabled={submitting}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className={s.formContainer}>
@@ -160,7 +155,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className={s.textarea}
-            disabled={submitting || !csrfToken}
+            disabled={submitting || !isAuthenticated}
             rows={5}
             required
             placeholder="Share your knowledge, ideas, or questions..."
@@ -175,7 +170,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             value={resourceUrl}
             onChange={handleUrlChange}
             className={s.input}
-            disabled={submitting || !csrfToken}
+            disabled={submitting || !isAuthenticated}
             placeholder="https://example.com"
           />
         </div>
@@ -187,7 +182,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             className={s.select}
-            disabled={submitting || !csrfToken}
+            disabled={submitting || !isAuthenticated}
           >
             <option value="published">Published</option>
             <option value="draft">Draft</option>
@@ -207,7 +202,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
           <button 
             type="submit" 
             className={s.submitButton}
-            disabled={submitting || !csrfToken || !content.trim()}
+            disabled={submitting || !isAuthenticated || !content.trim()}
           >
             {submitting ? 'Posting...' : 'Post'}
           </button>

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { useRouter } from 'next/router';
 import Post from '../Post';
 import EditPostForm from '../EditPostForm';
 import { PostsFilter, PostsSort, PostsPagination } from '../PostsControls';
 import ConfirmationModal from '../ConfirmationModal';
 import usePosts from '../../hooks/usePosts';
+import { useAuth } from '../../context/AuthContext';
 import s from './PostsList.module.css';
 
 /**
@@ -26,12 +28,17 @@ const PostsList = ({
   allowedSortFields = ['votes_score', 'created_at', 'updated_at', 'status'],
   fixedFilters = {}
 }) => {
+  const router = useRouter();
+  const LOGIN_URL = '/accounts/login/';
+  
   // Track changes to dependencies 
-  const prevDepsRef = useRef({ currentUser: null, showOnlyMyPosts: false });
+  const prevDepsRef = useRef({ username: null, showOnlyMyPosts: false });
   
   // Track which post is being edited
   const [editingPostId, setEditingPostId] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
+  
+  // Use the centralized auth context
+  const { isAuthenticated, user, isLoading: authLoading, error: authError, refreshAuth } = useAuth();
   
   // State for delete confirmation modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -45,7 +52,15 @@ const PostsList = ({
   const [searchValue, setSearchValue] = useState('');
   const searchTimeoutRef = useRef(null);
   
-  
+  // Handler for authentication-required actions
+  const requireAuth = useCallback((action) => {
+    if (!isAuthenticated) {
+      router.push(LOGIN_URL);
+      return false;
+    }
+    return true;
+  }, [isAuthenticated, router]);
+
   // Set up fixed filters based on props
   const computedFixedFilters = useMemo(() => {
     const filters = { ...fixedFilters };
@@ -56,12 +71,12 @@ const PostsList = ({
     }
     
     // If showOnlyMyPosts is true, add author filter
-    if (showOnlyMyPosts && currentUser) {
-      filters.author = currentUser;
+    if (showOnlyMyPosts && user?.username) {
+      filters.author = user.username;
     }
     
     return filters;
-  }, [fixedFilters, pageSlug, showOnlyMyPosts, currentUser]);
+  }, [fixedFilters, pageSlug, showOnlyMyPosts, user?.username]);
   
   // Use our custom hook for posts data and operations
   const {
@@ -83,11 +98,11 @@ const PostsList = ({
     clearFilters,
     updateSort,
     goToPage,
-    upvotePost,      // Include upvote functionality
-    downvotePost     // Include downvote functionality
+    upvotePost,
+    downvotePost
   } = usePosts({
     fixedFilters: computedFixedFilters,
-    initialSortBy: 'votes_score',  // Default to sorting by vote score
+    initialSortBy: 'votes_score',
     initialSortDirection: 'desc',
     pageSize: 10
   });
@@ -103,41 +118,24 @@ const PostsList = ({
     return fetchPostsRef.current(options);
   }, []);
   
-  // Fetch the current user
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await fetch('/api/auth/user/');
-        if (response.ok) {
-          const data = await response.json();
-          setCurrentUser(data.username);
-        }
-      } catch (err) {
-        console.error('Error fetching current user:', err);
-      }
-    };
-    
-    fetchCurrentUser();
-  }, []);
-  
   // Store previous dependencies for comparison
   useEffect(() => {
     prevDepsRef.current = { 
-      currentUser, 
+      username: user?.username, 
       showOnlyMyPosts, 
       fetchPosts: fetchPostsRef.current 
     };
-  }, [currentUser, showOnlyMyPosts, fetchPosts]);
+  }, [user?.username, showOnlyMyPosts, fetchPosts]);
   
-  // Refetch posts when currentUser changes and we're using showOnlyMyPosts
+  // Refetch posts when username changes and we're using showOnlyMyPosts
   useEffect(() => {
     // Only fetch if we have a user and either the user or showOnlyMyPosts flag changed
-    if (showOnlyMyPosts && currentUser && 
-        (prevDepsRef.current.currentUser !== currentUser || 
+    if (showOnlyMyPosts && user?.username && 
+        (prevDepsRef.current.username !== user.username || 
          prevDepsRef.current.showOnlyMyPosts !== showOnlyMyPosts)) {
       stableFetchPosts({ force: true });
     }
-  }, [showOnlyMyPosts, currentUser, stableFetchPosts]);
+  }, [showOnlyMyPosts, user?.username, stableFetchPosts]);
   
   // Handle filter changes
   const handleFilterChange = (filterName, value, clearAll = false) => {
@@ -280,13 +278,17 @@ const PostsList = ({
     goToPage(page);
   };
   
-  // Handle post editing
+  // Handle post editing - requires auth
   const handleEdit = (postId) => {
-    setEditingPostId(postId);
+    if (requireAuth()) {
+      setEditingPostId(postId);
+    }
   };
   
   // Handle saving edits
   const handleSaveEdit = async (updatedPostData) => {
+    if (!requireAuth()) return;
+    
     try {
       await updatePost(updatedPostData.id, updatedPostData);
       setEditingPostId(null);
@@ -303,12 +305,16 @@ const PostsList = ({
   
   // Open confirmation modal for post deletion
   const handleDeleteClick = (postId) => {
-    setPostToDelete(postId);
-    setDeleteModalOpen(true);
+    if (requireAuth()) {
+      setPostToDelete(postId);
+      setDeleteModalOpen(true);
+    }
   };
   
   // Handle actual post deletion after confirmation
   const handleConfirmDelete = async () => {
+    if (!requireAuth()) return;
+    
     try {
       await deletePost(postToDelete);
       setDeleteModalOpen(false);
@@ -328,36 +334,40 @@ const PostsList = ({
 
   // Handle upvoting a post
   const handleUpvote = async (postId) => {
-    if (!currentUser) {
-      // If user is not logged in, redirect to login or show a message
-      alert('Please log in to vote on posts');
-      return;
-    }
+    if (!requireAuth()) return;
     
     try {
       await upvotePost(postId);
     } catch (err) {
       console.error('Failed to upvote post:', err);
+      
+      // Handle 401 unauthorized errors (session expired)
+      if (err.response && err.response.status === 401) {
+        refreshAuth(); // Try to refresh authentication state
+        router.push(LOGIN_URL);
+      }
     }
   };
   
   // Handle downvoting a post
   const handleDownvote = async (postId) => {
-    if (!currentUser) {
-      // If user is not logged in, redirect to login or show a message
-      alert('Please log in to vote on posts');
-      return;
-    }
+    if (!requireAuth()) return;
     
     try {
       await downvotePost(postId);
     } catch (err) {
       console.error('Failed to downvote post:', err);
+      
+      // Handle 401 unauthorized errors (session expired)
+      if (err.response && err.response.status === 401) {
+        refreshAuth(); // Try to refresh authentication state
+        router.push(LOGIN_URL);
+      }
     }
   };
 
   // Are controls disabled?
-  const controlsDisabled = loading || !!error || tokenLoading || !!tokenError;
+  const controlsDisabled = loading || !!error || authLoading || !!authError;
 
   // SVG Icons for buttons
   const FilterIcon = () => (
@@ -454,8 +464,8 @@ const PostsList = ({
             {onNewPost && !showOnlyMyPosts && (
               <button 
                 className={s.newPostButton}
-                onClick={onNewPost}
-                disabled={tokenLoading || !!tokenError}
+                onClick={() => requireAuth() && onNewPost()}
+                disabled={controlsDisabled}
               >
                 Add New Post
               </button>
@@ -489,11 +499,11 @@ const PostsList = ({
         )}
       </div>
       
-      {/* Show token-related errors */}
-      {tokenLoading && <p className={s.loading}>Loading security token...</p>}
-      {tokenError && (
+      {/* Show authentication-related errors */}
+      {authLoading && <p className={s.loading}>Checking authentication...</p>}
+      {authError && (
         <div className={s.errorContainer}>
-          <p className={s.error}>Failed to load security token: {tokenError.message}</p>
+          <p className={s.error}>Authentication error: {authError}</p>
         </div>
       )}
       
@@ -530,7 +540,7 @@ const PostsList = ({
               resource_url={post.resource_url}
               author={post.author_username}
               createdAt={post.created_at}
-              currentUser={currentUser}
+              currentUser={user?.username}
               slug={pageSlug}
               primary_slug={post.primary_slug}
               page_slug={post.page_slug}
@@ -543,8 +553,8 @@ const PostsList = ({
               onDelete={handleDeleteClick}
               onUpvote={handleUpvote}
               onDownvote={handleDownvote}
-              canModify={!!csrfToken && !tokenLoading && !tokenError}
-              canVote={!!csrfToken && !tokenLoading && !tokenError && !!currentUser}
+              canModify={isAuthenticated && !authLoading && post.author_username === user?.username}
+              canVote={isAuthenticated && !authLoading}
             />
           );
         })}
