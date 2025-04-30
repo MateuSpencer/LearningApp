@@ -9,21 +9,113 @@
                 margin-left: 250px; /* Space for sidebar on larger screens */
             }
         }
+        
+        .sidebarButtonsContainer {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 15px;
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
+        }
+        
+        .themeButtonWrapper {
+            flex: 0 0 auto;
+        }
+        
+        .logoutButtonWrapper {
+            flex: 1;
+        }
+        
+        /* Nav links styling that adapts to theme */
+        .sidebarNav {
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 8px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.2s ease,
+                       color var(--theme-transition-speed) var(--theme-transition-timing);
+        }
+        
+        .sidebarNav:hover {
+            background-color: var(--bg-hover);
+            text-decoration: none;
+            color: var(--color-primary-dark);
+        }
+        
+        .sidebarNav.active {
+            background-color: var(--color-primary);
+            color: var(--bg-secondary);
+        }
+        
+        /* Centered site name header with border */
+        .sidebarHeader {
+            padding: 20px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
+        }
+        
+        /* Fix for account content boxes not adapting to theme */
+        .content-container {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+                        color var(--theme-transition-speed) var(--theme-transition-timing),
+                        border-color var(--theme-transition-speed) var(--theme-transition-timing),
+                        box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
+        }
+        
+        /* Make form elements adapt to theme */
+        .form-control, input[type="text"], input[type="email"], 
+        input[type="password"], input[type="search"], input[type="tel"], 
+        input[type="url"], input[type="number"], select, textarea {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+            transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+                        color var(--theme-transition-speed) var(--theme-transition-timing),
+                        border-color var(--theme-transition-speed) var(--theme-transition-timing);
+        }
+        
+        .form-control:focus, input:focus, select:focus, textarea:focus {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 0.25rem rgba(42, 198, 208, 0.25);
+        }
+        
+        /* Fix for select dropdown options */
+        option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
     </style>
     
-    <aside style="position: fixed; top: 0; left: 0; height: 100vh; width: 250px; overflow-y: auto; background-color: var(--bg-secondary); border-right: 1px solid var(--border-color); box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); z-index: 100; display: flex; flex-direction: column; border-radius: 0 15px 15px 0;">
-        <!-- Site name in sidebar header - now clickable and links to homepage -->
+    <aside style="position: fixed; top: 0; left: 0; height: 100vh; width: max-content; min-width: 250px; max-width: 300px; overflow-y: auto; background-color: var(--bg-secondary); border-right: 1px solid var(--border-color); box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); z-index: 100; display: flex; flex-direction: column; border-radius: 0 15px 15px 0; transition: background-color var(--theme-transition-speed) var(--theme-transition-timing), border-color var(--theme-transition-speed) var(--theme-transition-timing), box-shadow var(--theme-transition-speed) var(--theme-transition-timing);">
+        <!-- Site name in sidebar header - centered and separated by a line like in the frontend -->
         <div class="sidebarHeader">
-            <a href="/" style="text-decoration: none;">
+            <a href="/" style="text-decoration: none; display: block; width: 100%; text-align: center;">
                 <span class="siteName">LearningApp</span>
             </a>
         </div>
         
+        <!-- Navigation links -->
         <ul class="p-3 nav nav-pills flex-column flex-grow-1">
             {% url 'account_email' as email_url_ %}
             {% if email_url_ %}
                 <li class="nav-item">
-                    <a class="{% block nav_class_email %}nav-link text-white{% endblock %} mb-2"
+                    <a class="sidebarNav {% if request.path == email_url_ %}active{% endif %} mb-2"
                        href="{{ email_url_ }}">
                        <i class="auth-icon">📧</i> Change Email
                     </a>
@@ -32,7 +124,7 @@
             {% url 'account_change_password' as change_password_url_ %}
             {% if change_password_url_ %}
                 <li class="nav-item">
-                    <a class="{% block nav_class_password %}nav-link text-white{% endblock %} mb-2"
+                    <a class="sidebarNav {% if request.path == change_password_url_ %}active{% endif %} mb-2"
                        href="{{ change_password_url_ }}">
                        <i class="auth-icon">🔑</i> Change Password
                     </a>
@@ -41,7 +133,7 @@
             {% url 'account_change_phone' as phone_url_ %}
             {% if phone_url_ %}
                 <li class="nav-item">
-                    <a class="{% block nav_class_phone %}nav-link text-white{% endblock %} mb-2"
+                    <a class="sidebarNav {% if request.path == phone_url_ %}active{% endif %} mb-2"
                        href="{{ phone_url_ }}">
                        <i class="auth-icon">📱</i> Change Phone
                     </a>
@@ -50,7 +142,7 @@
             {% url 'socialaccount_connections' as connections_url_ %}
             {% if connections_url_ %}
                 <li class="nav-item">
-                    <a class="{% block nav_class_socialaccount %}nav-link text-white{% endblock %} mb-2"
+                    <a class="sidebarNav {% if request.path == connections_url_ %}active{% endif %} mb-2"
                        href="{{ connections_url_ }}">
                        <i class="auth-icon">🔗</i> Third-Party Accounts
                     </a>
@@ -59,7 +151,7 @@
             {% url 'mfa_index' as mfa_index_url_ %}
             {% if mfa_index_url_ %}
                 <li class="nav-item">
-                    <a class="{% block nav_class_mfa %}nav-link text-white{% endblock %} mb-2"
+                    <a class="sidebarNav {% if request.path == mfa_index_url_ %}active{% endif %} mb-2"
                        href="{{ mfa_index_url_ }}">
                        <i class="auth-icon">🔐</i> Two-Factor Authentication
                     </a>
@@ -68,7 +160,7 @@
             {% url 'usersessions_list' as usersessions_list_url_ %}
             {% if usersessions_list_url_ %}
                 <li class="nav-item">
-                    <a class="{% block nav_class_usersessions %}nav-link text-white{% endblock %} mb-2"
+                    <a class="sidebarNav {% if request.path == usersessions_list_url_ %}active{% endif %} mb-2"
                        href="{{ usersessions_list_url_ }}">
                        <i class="auth-icon">💻</i> Sessions
                     </a>
@@ -76,11 +168,25 @@
             {% endif %}
         </ul>
         
-        <!-- Logout button now links to homepage after signing out -->
-        <div style="padding: 15px; margin-top: auto; border-top: 1px solid var(--border-color);">
-            <a href="{% url 'account_logout' %}?next=/" class="logoutButton">
-                <i class="auth-icon">🚪</i>{% translate "Sign Out" %}
-            </a>
+        <!-- Theme toggle and logout buttons container -->
+        <div class="sidebarButtonsContainer">
+            <!-- Theme toggle button -->
+            <div class="themeButtonWrapper">
+                <button 
+                    class="themeToggleButton" 
+                    onclick="toggleTheme()" 
+                    aria-label="Toggle theme"
+                >
+                    🌙
+                </button>
+            </div>
+            
+            <!-- Logout button -->
+            <div class="logoutButtonWrapper">
+                <a href="{% url 'account_logout' %}?next=/" class="logoutButton">
+                    <i class="auth-icon">🚪</i>{% translate "Sign Out" %}
+                </a>
+            </div>
         </div>
     </aside>
     
