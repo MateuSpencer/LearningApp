@@ -183,7 +183,29 @@ const checkStatus = (response) => {
         try {
             const data = JSON.parse(text);
             error.data = data;
-            error.message = data.detail || data.message || error.message;
+            
+            // Handle various error response formats
+            if (data.detail) {
+                error.message = data.detail;
+            } else if (data.message) {
+                error.message = data.message;
+            } else if (data.error) {
+                error.message = data.error;
+            } else if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
+                error.message = data.non_field_errors.join('. ');
+            } else if (typeof data === 'object' && Object.keys(data).length > 0) {
+                // For validation errors with field-specific messages (common in 400 responses)
+                const firstField = Object.keys(data)[0];
+                const firstError = Array.isArray(data[firstField]) ? data[firstField][0] : data[firstField];
+                
+                // Set a more specific error message
+                if (firstField === 'url' && firstError.includes('already exists')) {
+                    error.message = `This URL already exists in the system`;
+                    error.type = 'duplicate_url';
+                } else {
+                    error.message = `${firstField}: ${firstError}`;
+                }
+            }
         } catch (e) {
             // If the response is not JSON, use the text as the error message
             if (text && text.length < 100) {

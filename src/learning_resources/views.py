@@ -187,11 +187,18 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
             )
 
         # Check if URL already exists
-        if ResourceURL.objects.filter(url=url).exists():
+        existing_url = ResourceURL.objects.filter(url=url).first()
+        if existing_url:
+            # Instead of returning a 400 error, return a 200 response with the existing resource info
+            existing_resource = existing_url.learning_resource
             return Response(
-                {"url": "This URL is already associated with a learning resource"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+                {
+                    "status": "duplicate_url",
+                    "message": "This URL is already associated with a learning resource",
+                    "resource": self.get_serializer(existing_resource).data,
+                },
+                status=status.HTTP_200_OK,
+            )  # Return 200 OK instead of 400 Bad Request
 
         # Create resource and URL in a transaction
         serializer = self.get_serializer(

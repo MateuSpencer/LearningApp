@@ -59,8 +59,51 @@ export const learningResources = {
                 resource_type: resourceType
             };
             
-            return await httpPost(`${API_BASE_URL}/`, payload);
+            const response = await httpPost(`${API_BASE_URL}/`, payload);
+            
+            // Check if the response indicates a duplicate URL
+            if (response.status === 'duplicate_url') {
+                // Return a special result object instead of throwing an error
+                return {
+                    success: false,
+                    status: 'duplicate_url',
+                    message: response.message || 'This URL already exists in the system',
+                    existingResource: response.resource
+                };
+            }
+            
+            // If successful, return the normal response
+            return {
+                success: true,
+                resource: response
+            };
         } catch (error) {
+            // Handle specific error cases from HTTP errors
+            if (error.data && error.data.url) {
+                // If the error is specifically about the URL
+                if (typeof error.data.url === 'string' && error.data.url.includes('already exists')) {
+                    // Return a special result object instead of throwing an error
+                    return {
+                        success: false,
+                        status: 'duplicate_url',
+                        message: 'This URL already exists in the system',
+                        error: error
+                    };
+                } else if (Array.isArray(error.data.url) && error.data.url.length > 0) {
+                    const urlError = error.data.url[0];
+                    if (urlError.includes('already exists')) {
+                        // Return a special result object instead of throwing an error
+                        return {
+                            success: false,
+                            status: 'duplicate_url',
+                            message: 'This URL already exists in the system',
+                            error: error
+                        };
+                    }
+                }
+            }
+            
+            // For other errors, log and re-throw
             console.error('Error creating resource from URL:', error);
             throw error;
         }

@@ -75,18 +75,34 @@ const NewLearningResourceForm = ({ pageSlug, onSuccess, onCancel }) => {
       const urlCheckResult = await learningResources.checkUrlExists(url);
       
       if (urlCheckResult.exists) {
+        // Don't make the API call if URL exists, just show the error message
         setUrlError('This URL is already associated with a resource');
         setSubmitting(false);
         return;
       }
       
       // Create resource with URL and associate it with page
-      const newResource = await learningResources.createFromUrl({
+      const result = await learningResources.createFromUrl({
         url,
         title,
         pageSlug,
         resourceType
       });
+      
+      // Check if the operation was successful
+      if (!result.success) {
+        // Handle duplicate URL case without throwing an error
+        if (result.status === 'duplicate_url') {
+          const resourceInfo = result.existingResource ? 
+            ` (Resource ID: ${result.existingResource.id.substring(0, 8)}...)` : '';
+          setUrlError(`${result.message}${resourceInfo}. Please try another URL.`);
+          setSubmitting(false);
+          return;
+        }
+      }
+      
+      // If successful, clear the form and call the success callback
+      const newResource = result.resource;
       
       // Clear form
       setUrl('');
@@ -114,10 +130,10 @@ const NewLearningResourceForm = ({ pageSlug, onSuccess, onCancel }) => {
       } else if (err.data) {
         // Handle field-specific errors from the server
         if (err.data.url) {
-          setUrlError(err.data.url);
+          setUrlError(Array.isArray(err.data.url) ? err.data.url[0] : err.data.url);
         }
         if (err.data.title) {
-          setError(err.data.title);
+          setError(Array.isArray(err.data.title) ? err.data.title[0] : err.data.title);
         } else if (err.data.detail || err.data.message) {
           setError(err.data.detail || err.data.message);
         } else {
