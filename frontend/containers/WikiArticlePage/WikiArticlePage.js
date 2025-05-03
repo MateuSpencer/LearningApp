@@ -5,6 +5,7 @@ import WikipediaPreview from '../../components/WikipediaPreview';
 import RightSidebar from '../../components/RightSidebar';
 import PostsList from '../../components/PostsList';
 import NewPostForm from '../../components/NewPostForm';
+import LearningResourcesList from '../../components/LearningResourcesList';
 import s from './WikiArticlePage.module.css';
 
 const WikiArticlePage = ({ title, articleSlug }) => {
@@ -26,6 +27,14 @@ const WikiArticlePage = ({ title, articleSlug }) => {
     <div className={s.pageLayout}>
       <div className={`${s.mainContent} ${isSidebarExpanded ? s.withExpandedSidebar : ''}`}>
         <WikipediaPreview slug={articleSlug} />
+        
+        {/* Learning Resources section */}
+        <div className={s.resourcesSection}>
+          <LearningResourcesList 
+            pageSlug={articleSlug} 
+            key={`resources-list-${articleSlug}`} // Add key to ensure proper re-rendering
+          />
+        </div>
         
         <div className={s.postsSection}>
           <h2 className={s.postsTitle}>Posts</h2>

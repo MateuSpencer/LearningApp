@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import s from './Post.module.css';
+import { formatPageSlug } from '../../utils/stringUtils'; // Import from new utility file
 
 const Post = ({ 
   id, 
@@ -29,19 +30,9 @@ const Post = ({
     const currentUserStr = currentUser ? String(currentUser).trim() : '';
     const isAuthor = currentUser && authorStr === currentUserStr;
     
-    // Format slugs for display (replace underscores with spaces and capitalize)
-    const formatForDisplay = (slugText) => {
-        if (!slugText) return '';
-        return slugText
-            .replace(/_/g, ' ')
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-    };
-    
-    // Get formatted versions of slugs
-    const formattedSlug = formatForDisplay(slug);
-    const formattedPageSlug = formatForDisplay(page_slug);
+    // Get formatted versions of slugs using the imported function
+    const formattedSlug = formatPageSlug(slug);
+    const formattedPageSlug = formatPageSlug(page_slug);
     
     // Get status label and CSS class
     const getStatusInfo = () => {

@@ -68,6 +68,7 @@ urlpatterns += [
     path("wt/sitemap.xml", sitemap, name="sitemap"),
     path("wt/health-check/", health_check, name="health_check"),
     path("api/posts/", include("posts.urls")),
+    path("api/learning-resources/", include("learning_resources.urls")),
     path("api/auth/status/", auth_status, name="auth_status"),
     path("accounts/", include("allauth.urls")),
 ]

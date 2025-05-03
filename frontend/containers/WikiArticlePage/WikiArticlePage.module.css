@@ -27,6 +27,11 @@
   min-width: 250px;
 }
 
+.resourcesSection {
+  margin-top: 30px;
+  padding-top: 10px;
+}
+
 .postsSection {
   margin-top: 40px;
   padding-top: 30px;

@@ -1,0 +1,267 @@
+.resourceItem {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background-color: var(--bg-secondary, #ffffff);
+  border: 1px solid var(--border-color, #e0e0e0);
+  transition: all 0.2s ease, 
+              background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.resourceItem:hover {
+  border-color: var(--color-primary, #01FFFF);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.voteContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+}
+
+.voteButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-secondary, #666666);
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.voteButton:hover:not(:disabled) {
+  color: var(--color-primary, #01FFFF);
+}
+
+.voteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upvoted {
+  color: var(--color-primary, #01FFFF);
+}
+
+.downvoted {
+  color: var(--color-secondary, #EA6400);
+}
+
+.voteScore {
+  font-weight: bold;
+  font-size: 14px;
+  margin: 3px 0;
+  color: var(--text-primary, #333333);
+}
+
+.resourceContent {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+
+.resourceType {
+  font-size: 24px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.resourceInfo {
+  flex: 1;
+}
+
+.resourceTitle {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.resourceLink {
+  color: var(--text-primary, #333333);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.resourceLink:hover {
+  color: var(--color-primary, #01FFFF);
+}
+
+.resourceUrl {
+  font-size: 14px;
+  color: var(--text-secondary, #666666);
+  text-decoration: none;
+  display: block;
+  margin-top: 4px;
+  transition: color 0.2s ease;
+  word-break: break-all;
+}
+
+.resourceUrl:hover {
+  color: var(--color-primary, #01FFFF);
+}
+
+@media (max-width: 480px) {
+  .resourceItem {
+    flex-direction: column;
+  }
+  
+  .voteContainer {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  
+  .voteScore {
+    margin: 0 10px;
+  }
+}
+
+.resourceTitle a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+.resourceTitle a:hover {
+  text-decoration: underline;
+}
+
+.resourceMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+}
+
+.star, .halfStar, .emptyStar {
+  font-size: 1.2rem;
+}
+
+.star {
+  color: gold;
+}
+
+.halfStar {
+  position: relative;
+  color: #e6e6e6;
+}
+
+.halfStar::before {
+  content: '★';
+  position: absolute;
+  color: gold;
+  width: 50%;
+  overflow: hidden;
+}
+
+.emptyStar {
+  color: #e6e6e6;
+}
+
+.ratingText {
+  margin-left: 4px;
+  color: var(--text-secondary);
+}
+
+.accessibilityLevel {
+  font-style: italic;
+}
+
+.votingControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.score {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.voteButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.voteButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+}
+
+.voteButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.voteButton.active {
+  color: var(--primary-color);
+}
+
+.voteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Add specific styles for active upvote/downvote */
+.voteButton.upvoted {
+  color: #28a745 !important; /* Green */
+}
+
+.voteButton.downvoted {
+  color: #dc3545 !important; /* Red */
+}
+
+.voteIcon {
+  font-size: 1.2rem;
+}
+
+.associatedPages {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.associatedPagesLabel {
+  font-weight: 500;
+  margin-right: 0.25rem;
+}
+
+.pageLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.pageLink:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.pageSeparator {
+  color: var(--text-secondary);
+  margin: 0 0.25rem;
+}

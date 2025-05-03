@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "main",
     "nextjs",
     "posts",
+    "learning_resources",
 ]
 
 MIDDLEWARE = [
