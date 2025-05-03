@@ -140,6 +140,18 @@
   align-items: center;
   color: var(--text-secondary);
   font-size: 0.9rem;
+  margin: 8px 0;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metaLabel {
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .stars {
@@ -148,7 +160,8 @@
 }
 
 .star, .halfStar, .emptyStar {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
 .star {
@@ -175,10 +188,28 @@
 .ratingText {
   margin-left: 4px;
   color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
 .accessibilityLevel {
-  font-style: italic;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #ffffff;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.accessibilityBeginner {
+  background-color: #28a745;
+}
+
+.accessibilityModerate {
+  background-color: #ffc107;
+  color: #212529; /* Dark text for better contrast on yellow */
+}
+
+.accessibilityAdvanced {
+  background-color: #dc3545;
 }
 
 .votingControls {

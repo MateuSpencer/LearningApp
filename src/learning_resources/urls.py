@@ -9,7 +9,7 @@ from .views import (
 # Create a router for our viewsets
 router = DefaultRouter()
 router.register(
-    r"learning-resources", LearningResourceViewSet, basename="learning-resource"
+    r"learning-resources", LearningResourceViewSet, basename="learning-resources"
 )
 router.register(r"resource-urls", ResourceURLViewSet, basename="resource-url")
 router.register(

@@ -15,7 +15,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
               border-color var(--theme-transition-speed) var(--theme-transition-timing),
-              box-shadow var(--theme-transition-speed) var (--theme-transition-timing);
+              box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .header {
@@ -170,7 +170,7 @@
   color: var(--text-secondary, #666666);
   font-size: 1.1rem;
   background-color: var(--bg-info-light);
-  color: var (--text-info);
+  color: var(--text-info);
 }
 
 .error {

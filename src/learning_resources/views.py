@@ -93,6 +93,8 @@ class ResourcePageAssociationFilter(FilterSet):
 @method_decorator(csrf_protect, name="update")
 @method_decorator(csrf_protect, name="partial_update")
 @method_decorator(csrf_protect, name="destroy")
+@method_decorator(csrf_protect, name="quality_vote")
+@method_decorator(csrf_protect, name="accessibility_vote")
 class LearningResourceViewSet(viewsets.ModelViewSet):
     """
     API endpoint for learning resources with filtering, searching, and sorting

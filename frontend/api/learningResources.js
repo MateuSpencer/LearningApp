@@ -1,8 +1,10 @@
 import { httpGet, httpPost, httpPut, httpDelete } from '../utils/Http';
 
-const API_BASE_URL = '/api/learning-resources/learning-resources';
-const ASSOCIATIONS_URL = '/api/learning-resources/resource-associations';
-const RESOURCE_URLS_URL = '/api/learning-resources/resource-urls';
+// Define correct API endpoint paths - this is the key fix
+const API_BASE = '/api/learning-resources';
+const RESOURCES_ENDPOINT = `${API_BASE}/learning-resources`;
+const ASSOCIATIONS_ENDPOINT = `${API_BASE}/resource-associations`;
+const RESOURCE_URLS_ENDPOINT = `${API_BASE}/resource-urls`;
 
 export const learningResources = {
     // Resource operations
@@ -17,7 +19,7 @@ export const learningResources = {
             });
             
             const queryString = queryParams.toString();
-            const url = queryString ? `${API_BASE_URL}/?${queryString}` : `${API_BASE_URL}/`;
+            const url = queryString ? `${RESOURCES_ENDPOINT}/?${queryString}` : `${RESOURCES_ENDPOINT}/`;
             
             return await httpGet(url);
         } catch (error) {
@@ -33,7 +35,7 @@ export const learningResources = {
     
     getById: async (id) => {
         try {
-            return await httpGet(`${API_BASE_URL}/${id}/`);
+            return await httpGet(`${RESOURCES_ENDPOINT}/${id}/`);
         } catch (error) {
             console.error(`Error fetching learning resource with id ${id}:`, error);
             throw error;
@@ -42,7 +44,7 @@ export const learningResources = {
     
     create: async (resourceData) => {
         try {
-            return await httpPost(`${API_BASE_URL}/`, resourceData);
+            return await httpPost(`${RESOURCES_ENDPOINT}/`, resourceData);
         } catch (error) {
             console.error('Error creating learning resource:', error);
             throw error;
@@ -59,7 +61,7 @@ export const learningResources = {
                 resource_type: resourceType
             };
             
-            const response = await httpPost(`${API_BASE_URL}/`, payload);
+            const response = await httpPost(`${RESOURCES_ENDPOINT}/`, payload);
             
             // Check if the response indicates a duplicate URL
             if (response.status === 'duplicate_url') {
@@ -117,7 +119,7 @@ export const learningResources = {
                 url: url
             });
             
-            const response = await httpGet(`${RESOURCE_URLS_URL}/?${queryParams}`);
+            const response = await httpGet(`${RESOURCE_URLS_ENDPOINT}/?${queryParams}`);
             
             // If any results are found, the URL exists
             return {
@@ -133,7 +135,7 @@ export const learningResources = {
     
     update: async (id, resourceData) => {
         try {
-            return await httpPut(`${API_BASE_URL}/${id}/`, resourceData);
+            return await httpPut(`${RESOURCES_ENDPOINT}/${id}/`, resourceData);
         } catch (error) {
             console.error(`Error updating learning resource with id ${id}:`, error);
             throw error;
@@ -142,7 +144,7 @@ export const learningResources = {
     
     delete: async (id) => {
         try {
-            return await httpDelete(`${API_BASE_URL}/${id}/`);
+            return await httpDelete(`${RESOURCES_ENDPOINT}/${id}/`);
         } catch (error) {
             console.error(`Error deleting learning resource with id ${id}:`, error);
             throw error;
@@ -152,7 +154,7 @@ export const learningResources = {
     // Quality voting operations
     submitQualityVote: async (resourceId, rating) => {
         try {
-            return await httpPost(`${API_BASE_URL}/${resourceId}/quality-vote/`, {
+            return await httpPost(`${RESOURCES_ENDPOINT}/${resourceId}/quality_vote/`, {
                 rating
             });
         } catch (error) {
@@ -164,7 +166,7 @@ export const learningResources = {
     // Accessibility voting operations
     submitAccessibilityVote: async (resourceId, level) => {
         try {
-            return await httpPost(`${API_BASE_URL}/${resourceId}/accessibility-vote/`, {
+            return await httpPost(`${RESOURCES_ENDPOINT}/${resourceId}/accessibility_vote/`, {
                 level
             });
         } catch (error) {
@@ -181,7 +183,7 @@ export const learningResources = {
                 url,
                 is_primary: isPrimary
             };
-            return await httpPost(RESOURCE_URLS_URL + '/', payload);
+            return await httpPost(`${RESOURCE_URLS_ENDPOINT}/`, payload);
         } catch (error) {
             console.error(`Error adding URL to resource ${resourceId}:`, error);
             throw error;
@@ -191,7 +193,7 @@ export const learningResources = {
     // Page associations
     getAssociationsForPage: async (pageSlug) => {
         try {
-            const url = `${ASSOCIATIONS_URL}/?page_slug=${pageSlug}`;
+            const url = `${ASSOCIATIONS_ENDPOINT}/?page_slug=${pageSlug}`;
             const response = await httpGet(url);
             return response;
         } catch (error) {
@@ -203,7 +205,7 @@ export const learningResources = {
     createAssociation: async (resourceId, pageSlug) => {
         try {
             // First check if this association already exists
-            const existingAssociations = await httpGet(`${ASSOCIATIONS_URL}/?resource_id=${resourceId}&page_slug=${pageSlug}`);
+            const existingAssociations = await httpGet(`${ASSOCIATIONS_ENDPOINT}/?resource_id=${resourceId}&page_slug=${pageSlug}`);
             
             // If the association already exists, return it instead of creating a new one
             if (existingAssociations.results && existingAssociations.results.length > 0) {
@@ -217,7 +219,7 @@ export const learningResources = {
             };
             
             // Create the association
-            const result = await httpPost(ASSOCIATIONS_URL + '/', payload);
+            const result = await httpPost(`${ASSOCIATIONS_ENDPOINT}/`, payload);
             
             return result;
         } catch (error) {
@@ -229,7 +231,7 @@ export const learningResources = {
     // Appropriateness voting
     upvoteAssociation: async (associationId) => {
         try {
-            return await httpPost(`${ASSOCIATIONS_URL}/${associationId}/upvote/`, {});
+            return await httpPost(`${ASSOCIATIONS_ENDPOINT}/${associationId}/upvote/`, {});
         } catch (error) {
             console.error(`Error upvoting association ${associationId}:`, error);
             throw error;
@@ -238,7 +240,7 @@ export const learningResources = {
     
     downvoteAssociation: async (associationId) => {
         try {
-            return await httpPost(`${ASSOCIATIONS_URL}/${associationId}/downvote/`, {});
+            return await httpPost(`${ASSOCIATIONS_ENDPOINT}/${associationId}/downvote/`, {});
         } catch (error) {
             console.error(`Error downvoting association ${associationId}:`, error);
             throw error;
@@ -249,7 +251,7 @@ export const learningResources = {
     getAssociationsForResource: async (resourceId) => {
         try {
             // Updated to use resource_id parameter for consistency
-            return await httpGet(`${ASSOCIATIONS_URL}/?resource_id=${resourceId}`);
+            return await httpGet(`${ASSOCIATIONS_ENDPOINT}/?resource_id=${resourceId}`);
         } catch (error) {
             console.error(`Error fetching associations for resource ${resourceId}:`, error);
             throw error;

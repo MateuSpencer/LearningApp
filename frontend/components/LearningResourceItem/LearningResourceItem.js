@@ -21,7 +21,18 @@ const LearningResourceItem = ({
   const [loading, setLoading] = useState(false);
   
   // Extract data from resource and association
-  const { id: resourceId, title, resource_type, primary_url, urls = [] } = resource || {};
+  const { 
+    id: resourceId, 
+    title, 
+    resource_type, 
+    primary_url, 
+    urls = [],
+    quality_vote_sum = 0,
+    quality_vote_count = 0,
+    dominant_accessibility_level,
+    average_quality_rating
+  } = resource || {};
+  
   const { id: associationId, appropriateness_upvotes, appropriateness_downvotes, user_vote, page_slug } = association || {};
   
   // Get the URL to display (primary URL if exists, otherwise first URL)
@@ -29,6 +40,9 @@ const LearningResourceItem = ({
   
   // Calculate vote score
   const voteScore = (appropriateness_upvotes || 0) - (appropriateness_downvotes || 0);
+  
+  // Calculate quality rating
+  const qualityRating = average_quality_rating || (quality_vote_count > 0 ? quality_vote_sum / quality_vote_count : 0);
   
   // Fetch associated pages for this resource if showPageLinks is true
   useEffect(() => {
@@ -124,6 +138,44 @@ const LearningResourceItem = ({
     return baseClass;
   };
   
+  // Render stars for the quality rating
+  const renderStars = (rating) => {
+    if (!rating) return <span className={s.ratingText}>No ratings</span>;
+    
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating - fullStars >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return (
+      <>
+        {[...Array(fullStars)].map((_, i) => (
+          <span key={`full-${i}`} className={s.star}>★</span>
+        ))}
+        {hasHalfStar && <span className={s.halfStar}>★</span>}
+        {[...Array(emptyStars)].map((_, i) => (
+          <span key={`empty-${i}`} className={s.emptyStar}>★</span>
+        ))}
+        <span className={s.ratingText}>({rating.toFixed(1)})</span>
+      </>
+    );
+  };
+  
+  // Format accessibility level for display
+  const formatAccessibilityLevel = (level) => {
+    if (!level) return 'Not rated';
+    return level.charAt(0).toUpperCase() + level.slice(1);
+  };
+  
+  // Get CSS class for accessibility level
+  const getAccessibilityClass = (level) => {
+    switch (level) {
+      case 'beginner': return s.accessibilityBeginner;
+      case 'moderate': return s.accessibilityModerate;
+      case 'advanced': return s.accessibilityAdvanced;
+      default: return '';
+    }
+  };
+  
   if (!resource || !displayUrl) {
     return null; // Don't render if resource or URL is missing
   }
@@ -162,14 +214,12 @@ const LearningResourceItem = ({
         
         <div className={s.resourceInfo}>
           <h4 className={s.resourceTitle}>
-            <a 
-              href={displayUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link 
+              href={`/learning-resources/${resourceId}`}
               className={s.resourceLink}
             >
               {title}
-            </a>
+            </Link>
           </h4>
           
           <a 
@@ -180,6 +230,23 @@ const LearningResourceItem = ({
           >
             {formatUrl(displayUrl)}
           </a>
+          
+          {/* Display quality rating and accessibility level */}
+          <div className={s.resourceMeta}>
+            <div className={s.metaItem}>
+              <span className={s.metaLabel}>Quality:</span>
+              <div className={s.stars}>
+                {renderStars(qualityRating)}
+              </div>
+            </div>
+            
+            <div className={s.metaItem}>
+              <span className={s.metaLabel}>Accessibility:</span>
+              <span className={`${s.accessibilityLevel} ${getAccessibilityClass(dominant_accessibility_level)}`}>
+                {formatAccessibilityLevel(dominant_accessibility_level)}
+              </span>
+            </div>
+          </div>
           
           {/* Display associated pages if showing all resources */}
           {showPageLinks && associatedPages.length > 0 && (

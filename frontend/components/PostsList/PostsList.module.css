@@ -52,7 +52,7 @@
     color: var(--text-primary);
     transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
                 border-color var(--theme-transition-speed) var(--theme-transition-timing),
-                color var(--theme-transition-speed) var (--theme-transition-timing),
+                color var(--theme-transition-speed) var(--theme-transition-timing),
                 transform 0.2s ease;
 }
 

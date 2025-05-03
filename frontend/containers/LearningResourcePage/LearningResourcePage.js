@@ -7,6 +7,45 @@ import { useAuth } from '../../context/AuthContext';
 import learningResources from '../../api/learningResources';
 import s from './LearningResourcePage.module.css';
 
+// Helper function to check if URL is from YouTube
+const isYouTubeUrl = (url) => {
+  if (!url) return false;
+  
+  try {
+    // Match YouTube URL patterns
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)/;
+    return youtubeRegex.test(url);
+  } catch (err) {
+    console.error('Error checking YouTube URL:', err);
+    return false;
+  }
+};
+
+// Helper function to convert regular YouTube URLs to embed format
+const getEmbedUrl = (url) => {
+  if (!url) return '';
+  
+  try {
+    // Only convert YouTube URLs
+    if (!isYouTubeUrl(url)) return url;
+    
+    // Match YouTube URL patterns
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(youtubeRegex);
+    
+    if (match && match[1]) {
+      // Return the embed URL format
+      return `https://www.youtube.com/embed/${match[1]}`;
+    }
+    
+    // If not a YouTube URL or pattern doesn't match, return the original URL
+    return url;
+  } catch (err) {
+    console.error('Error parsing URL:', err);
+    return url;
+  }
+};
+
 const LearningResourcePage = ({ resourceId, initialResourceData }) => {
   const router = useRouter();
   const { isAuthenticated, refreshAuth } = useAuth();
@@ -21,6 +60,10 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
     quality: 0,
     accessibility: ''
   });
+  
+  // Add state for page associations
+  const [pageAssociations, setPageAssociations] = useState([]);
+  const [loadingAssociations, setLoadingAssociations] = useState(false);
   
   // Fetch resource data when component mounts or resourceId changes
   useEffect(() => {
@@ -58,6 +101,30 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
     
     fetchResourceData();
   }, [resourceId]);
+  
+  // Fetch page associations for the resource
+  useEffect(() => {
+    if (resource?.id) {
+      const fetchPageAssociations = async () => {
+        setLoadingAssociations(true);
+        try {
+          const response = await learningResources.getAssociationsForResource(resource.id);
+          const associationsWithSlugs = response.results 
+            ? response.results.filter(assoc => !!assoc.page_slug)
+            : [];
+          
+          setPageAssociations(associationsWithSlugs);
+        } catch (err) {
+          console.error(`Error fetching associations for resource ${resource.id}:`, err);
+          setPageAssociations([]);
+        } finally {
+          setLoadingAssociations(false);
+        }
+      };
+      
+      fetchPageAssociations();
+    }
+  }, [resource?.id]);
   
   // Ensure user is authenticated before actions that require auth
   const requireAuth = () => {
@@ -126,6 +193,16 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
     }
   };
   
+  // Get CSS class for accessibility level badge
+  const getLevelBadgeClass = (level) => {
+    switch (level) {
+      case 'beginner': return s.beginnerBadge;
+      case 'moderate': return s.moderateBadge;
+      case 'advanced': return s.advancedBadge;
+      default: return '';
+    }
+  };
+  
   // Format page slug for display
   const formatPageSlug = (slug) => {
     return slug
@@ -182,135 +259,145 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
     <div className={s.container}>
       <h1 className={s.title}>{resource.title}</h1>
       
-      <div className={s.typeLabel}>{resource.resource_type}</div>
+      <div className={s.headerSection}>
+        <div className={s.typeLabel}>{resource.resource_type}</div>
+      </div>
       
-      <div className={s.contentContainer}>
-        <div className={s.primaryContent}>
-          {primaryUrl && (
-            <>
-              {/* Try to embed content, with fallback to link */}
-              <div className={s.embedContainer}>
-                <iframe
-                  src={primaryUrl}
-                  className={s.embedFrame}
-                  title={resource.title}
-                  sandbox="allow-scripts allow-same-origin allow-popups"
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
-                  onError={() => console.log('Failed to load embed')}
-                />
-              </div>
-              
-              <div className={s.embedFallback}>
-                <p>If the content doesn't load correctly, you can access it directly:</p>
-                <a 
-                  href={primaryUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={s.primaryLink}
+      {/* Associated Pages section above the video - styled like resource index page */}
+      {pageAssociations.length > 0 && (
+        <div className={s.associatedPagesSection}>
+          <div className={s.associatedPages}>
+            <span className={s.associatedPagesLabel}>Associated Pages:</span>
+            {pageAssociations.map((association, index) => (
+              <React.Fragment key={association.id}>
+                <Link 
+                  href={`/wiki/${association.page_slug}`}
+                  className={s.pageLink}
                 >
-                  {primaryUrl}
-                </a>
-              </div>
-            </>
-          )}
+                  {formatPageSlug(association.page_slug)}
+                </Link>
+                {index < pageAssociations.length - 1 && <span className={s.pageSeparator}>,</span>}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {loadingAssociations && (
+        <div className={s.associatedPagesSection}>
+          <div className={s.associatedPages}>
+            <span>Loading associated pages...</span>
+          </div>
+        </div>
+      )}
+      
+      {primaryUrl && (
+        <>
+          {/* URL fallback message - moved above the iframe */}
+          <div className={s.embedFallback}>
+            <p>If the content doesn't load correctly, you can access it directly:</p>
+            <a 
+              href={primaryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={s.primaryLink}
+            >
+              {primaryUrl}
+            </a>
+          </div>
           
-          {!primaryUrl && (
-            <div className={s.noContent}>
-              <p>This resource doesn't have any URLs attached.</p>
+          {/* Try to embed content */}
+          <div className={s.embedContainer}>
+            <iframe
+              src={getEmbedUrl(primaryUrl)}
+              className={s.embedFrame}
+              title={resource.title}
+              sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
+              referrerPolicy="no-referrer"
+              loading="lazy"
+              onError={() => console.log('Failed to load embed')}
+            />
+          </div>
+        </>
+      )}
+      
+      {!primaryUrl && (
+        <div className={s.noContent}>
+          <p>This resource doesn't have any URLs attached.</p>
+        </div>
+      )}
+      
+      <div className={s.votingSection}>
+        <div className={s.ratingCard}>
+          <h3 className={s.sectionTitle}>Quality Rating</h3>
+          <div className={s.ratingDisplay}>
+            <div className={s.averageRating}>
+              <span className={s.ratingValue}>{resource.average_quality_rating?.toFixed(1) || 'No votes'}</span>
+              <span className={s.ratingLabel}>/ 5</span>
             </div>
-          )}
+          </div>
+          <div className={s.voteSection}>
+            <h4 className={s.voteTitle}>Your Rating</h4>
+            {renderStarInput()}
+          </div>
         </div>
         
-        <div className={s.sidebar}>
-          <div className={s.sidebarSection}>
-            <h3 className={s.sectionTitle}>Quality Rating</h3>
-            <div className={s.ratingDisplay}>
-              <div className={s.averageRating}>
-                <span className={s.ratingValue}>{resource.average_quality_rating?.toFixed(1) || 'No votes'}</span>
-                <span className={s.ratingLabel}>/ 5</span>
-              </div>
-            </div>
-            <div className={s.voteSection}>
-              <h4 className={s.voteTitle}>Your Rating</h4>
-              {renderStarInput()}
+        <div className={s.ratingCard}>
+          <h3 className={s.sectionTitle}>Accessibility Level</h3>
+          <div className={s.accessibilityDisplay}>
+            <div className={s.dominantLevel}>
+              Most users rated this resource as:
+              <span className={`${s.levelBadge} ${getLevelBadgeClass(resource.dominant_accessibility_level)}`}>
+                {resource.dominant_accessibility_level ? resource.dominant_accessibility_level.charAt(0).toUpperCase() + resource.dominant_accessibility_level.slice(1) : 'Not Yet Rated'}
+              </span>
             </div>
           </div>
-          
-          <div className={s.sidebarSection}>
-            <h3 className={s.sectionTitle}>Accessibility Level</h3>
-            <div className={s.accessibilityDisplay}>
-              <div className={s.dominantLevel}>
-                Most users rated this resource as:
-                <span className={s.levelBadge}>
-                  {resource.dominant_accessibility_level || 'Not Yet Rated'}
-                </span>
-              </div>
-            </div>
-            <div className={s.voteSection}>
-              <h4 className={s.voteTitle}>Your Assessment</h4>
-              <div className={s.accessibilityButtons}>
-                <button
-                  className={`${s.levelButton} ${accessibilityLevel === 'beginner' ? s.active : ''}`}
-                  onClick={() => handleAccessibilityVote('beginner')}
-                  disabled={!isAuthenticated}
-                >
-                  Beginner
-                </button>
-                <button
-                  className={`${s.levelButton} ${accessibilityLevel === 'moderate' ? s.active : ''}`}
-                  onClick={() => handleAccessibilityVote('moderate')}
-                  disabled={!isAuthenticated}
-                >
-                  Moderate
-                </button>
-                <button
-                  className={`${s.levelButton} ${accessibilityLevel === 'advanced' ? s.active : ''}`}
-                  onClick={() => handleAccessibilityVote('advanced')}
-                  disabled={!isAuthenticated}
-                >
-                  Advanced
-                </button>
-              </div>
+          <div className={s.voteSection}>
+            <h4 className={s.voteTitle}>Your Assessment</h4>
+            <div className={s.accessibilityButtons}>
+              <button
+                className={`${s.levelButton} ${s.beginnerButton} ${accessibilityLevel === 'beginner' ? s.active : ''}`}
+                onClick={() => handleAccessibilityVote('beginner')}
+                disabled={!isAuthenticated}
+              >
+                Beginner
+              </button>
+              <button
+                className={`${s.levelButton} ${s.moderateButton} ${accessibilityLevel === 'moderate' ? s.active : ''}`}
+                onClick={() => handleAccessibilityVote('moderate')}
+                disabled={!isAuthenticated}
+              >
+                Moderate
+              </button>
+              <button
+                className={`${s.levelButton} ${s.advancedButton} ${accessibilityLevel === 'advanced' ? s.active : ''}`}
+                onClick={() => handleAccessibilityVote('advanced')}
+                disabled={!isAuthenticated}
+              >
+                Advanced
+              </button>
             </div>
           </div>
-          
-          {additionalUrls.length > 0 && (
-            <div className={s.sidebarSection}>
-              <h3 className={s.sectionTitle}>Additional URLs</h3>
-              <ul className={s.urlList}>
-                {additionalUrls.map((urlItem, index) => (
-                  <li key={index} className={s.urlItem}>
-                    <a 
-                      href={urlItem.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={s.urlLink}
-                    >
-                      {urlItem.url}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </div>
       
-      {resource.page_associations && resource.page_associations.length > 0 && (
-        <div className={s.associatedPages}>
-          <h3 className={s.associatedTitle}>Associated Topics</h3>
-          <div className={s.pagesList}>
-            {resource.page_associations.map((association, index) => (
-              <Link 
-                key={index}
-                href={`/wiki/${association.page_slug}`}
-                className={s.pageLink}
-              >
-                {formatPageSlug(association.page_slug)}
-              </Link>
+      {additionalUrls.length > 0 && (
+        <div className={s.additionalUrls}>
+          <h3 className={s.sectionTitle}>Additional URLs</h3>
+          <ul className={s.urlList}>
+            {additionalUrls.map((urlItem, index) => (
+              <li key={index} className={s.urlItem}>
+                <a 
+                  href={urlItem.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={s.urlLink}
+                >
+                  {urlItem.url}
+                </a>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
       
