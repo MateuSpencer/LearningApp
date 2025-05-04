@@ -18,7 +18,7 @@ from .models import (
     ResourceURL,
     ResourcePageAssociation,
     QualityVote,
-    AccessibilityVote,
+    DifficultyVote,
     AppropriatenessVote,
 )
 from .serializers import (
@@ -26,7 +26,7 @@ from .serializers import (
     ResourceURLSerializer,
     ResourcePageAssociationSerializer,
     QualityVoteSerializer,
-    AccessibilityVoteSerializer,
+    DifficultyVoteSerializer,
     AppropriatenessVoteSerializer,
 )
 
@@ -94,7 +94,7 @@ class ResourcePageAssociationFilter(FilterSet):
 @method_decorator(csrf_protect, name="partial_update")
 @method_decorator(csrf_protect, name="destroy")
 @method_decorator(csrf_protect, name="quality_vote")
-@method_decorator(csrf_protect, name="accessibility_vote")
+@method_decorator(csrf_protect, name="difficulty_vote")
 class LearningResourceViewSet(viewsets.ModelViewSet):
     """
     API endpoint for learning resources with filtering, searching, and sorting
@@ -117,7 +117,7 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
 
     Voting:
     - POST /api/learning-resources/{id}/quality-vote/ to vote on quality (1-5 stars)
-    - POST /api/learning-resources/{id}/accessibility-vote/ to vote on accessibility level
+    - POST /api/learning-resources/{id}/difficulty-vote/ to vote on difficulty level
     """
 
     serializer_class = LearningResourceSerializer
@@ -265,9 +265,9 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
     @action(
         detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
     )
-    def accessibility_vote(self, request, pk=None):
+    def difficulty_vote(self, request, pk=None):
         """
-        Vote on the accessibility level of a resource
+        Vote on the difficulty level of a resource
         Creates a new vote if the user hasn't voted yet
         Changes the vote if the user changes their level
         Removes the vote if the user votes the same level again (toggle off)
@@ -283,7 +283,7 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = AccessibilityVoteSerializer(
+        serializer = DifficultyVoteSerializer(
             data={"learning_resource": resource.id, "level": level},
             context={"request": request},
         )

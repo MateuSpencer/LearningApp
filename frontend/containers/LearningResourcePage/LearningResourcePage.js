@@ -55,10 +55,10 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
   const [error, setError] = useState(null);
   
   const [qualityRating, setQualityRating] = useState(0);
-  const [accessibilityLevel, setAccessibilityLevel] = useState('');
+  const [difficultyLevel, setDifficultyLevel] = useState('');
   const [userVotes, setUserVotes] = useState({
     quality: 0,
-    accessibility: ''
+    difficulty: ''
   });
   
   // Add state for page associations
@@ -87,9 +87,9 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
           setUserVotes(prev => ({ ...prev, quality: data.user_quality_vote }));
         }
         
-        if (data.user_accessibility_vote) {
-          setAccessibilityLevel(data.user_accessibility_vote);
-          setUserVotes(prev => ({ ...prev, accessibility: data.user_accessibility_vote }));
+        if (data.user_difficulty_vote) {
+          setDifficultyLevel(data.user_difficulty_vote);
+          setUserVotes(prev => ({ ...prev, difficulty: data.user_difficulty_vote }));
         }
       } catch (err) {
         console.error('Failed to fetch learning resource:', err);
@@ -164,25 +164,25 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
     }
   };
   
-  // Handle accessibility vote submission
-  const handleAccessibilityVote = async (level) => {
+  // Handle difficulty vote submission
+  const handleDifficultyVote = async (level) => {
     if (!requireAuth()) return;
     
     try {
       setLoading(true);
       
       // Submit the vote
-      await learningResources.submitAccessibilityVote(resourceId, level);
+      await learningResources.submitDifficultyVote(resourceId, level);
       
       // Update local state optimistically
-      setAccessibilityLevel(level);
-      setUserVotes(prev => ({ ...prev, accessibility: level }));
+      setDifficultyLevel(level);
+      setUserVotes(prev => ({ ...prev, difficulty: level }));
       
       // Refetch to get updated aggregate values
       const updatedResource = await learningResources.getById(resourceId);
       setResource(updatedResource);
     } catch (err) {
-      console.error('Failed to submit accessibility vote:', err);
+      console.error('Failed to submit difficulty vote:', err);
       
       // Handle session expiration
       if (err.response && err.response.status === 401) {
@@ -193,7 +193,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
     }
   };
   
-  // Get CSS class for accessibility level badge
+  // Get CSS class for difficulty level badge
   const getLevelBadgeClass = (level) => {
     switch (level) {
       case 'beginner': return s.beginnerBadge;
@@ -343,35 +343,35 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
         </div>
         
         <div className={s.ratingCard}>
-          <h3 className={s.sectionTitle}>Accessibility Level</h3>
-          <div className={s.accessibilityDisplay}>
+          <h3 className={s.sectionTitle}>Difficulty Level</h3>
+          <div className={s.difficultyDisplay}>
             <div className={s.dominantLevel}>
               Most users rated this resource as:
-              <span className={`${s.levelBadge} ${getLevelBadgeClass(resource.dominant_accessibility_level)}`}>
-                {resource.dominant_accessibility_level ? resource.dominant_accessibility_level.charAt(0).toUpperCase() + resource.dominant_accessibility_level.slice(1) : 'Not Yet Rated'}
+              <span className={`${s.levelBadge} ${getLevelBadgeClass(resource.dominant_difficulty_level)}`}>
+                {resource.dominant_difficulty_level ? resource.dominant_difficulty_level.charAt(0).toUpperCase() + resource.dominant_difficulty_level.slice(1) : 'Not Yet Rated'}
               </span>
             </div>
           </div>
           <div className={s.voteSection}>
             <h4 className={s.voteTitle}>Your Assessment</h4>
-            <div className={s.accessibilityButtons}>
+            <div className={s.difficultyButtons}>
               <button
-                className={`${s.levelButton} ${s.beginnerButton} ${accessibilityLevel === 'beginner' ? s.active : ''}`}
-                onClick={() => handleAccessibilityVote('beginner')}
+                className={`${s.levelButton} ${s.beginnerButton} ${difficultyLevel === 'beginner' ? s.active : ''}`}
+                onClick={() => handleDifficultyVote('beginner')}
                 disabled={!isAuthenticated}
               >
                 Beginner
               </button>
               <button
-                className={`${s.levelButton} ${s.moderateButton} ${accessibilityLevel === 'moderate' ? s.active : ''}`}
-                onClick={() => handleAccessibilityVote('moderate')}
+                className={`${s.levelButton} ${s.moderateButton} ${difficultyLevel === 'moderate' ? s.active : ''}`}
+                onClick={() => handleDifficultyVote('moderate')}
                 disabled={!isAuthenticated}
               >
                 Moderate
               </button>
               <button
-                className={`${s.levelButton} ${s.advancedButton} ${accessibilityLevel === 'advanced' ? s.active : ''}`}
-                onClick={() => handleAccessibilityVote('advanced')}
+                className={`${s.levelButton} ${s.advancedButton} ${difficultyLevel === 'advanced' ? s.active : ''}`}
+                onClick={() => handleDifficultyVote('advanced')}
                 disabled={!isAuthenticated}
               >
                 Advanced

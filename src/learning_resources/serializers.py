@@ -4,7 +4,7 @@ from .models import (
     ResourceURL,
     ResourcePageAssociation,
     QualityVote,
-    AccessibilityVote,
+    DifficultyVote,
     AppropriatenessVote,
 )
 
@@ -20,9 +20,9 @@ class LearningResourceSerializer(serializers.ModelSerializer):
     urls = ResourceURLSerializer(many=True, read_only=True)
     primary_url = serializers.SerializerMethodField()
     average_quality_rating = serializers.SerializerMethodField()
-    dominant_accessibility_level = serializers.SerializerMethodField()
+    dominant_difficulty_level = serializers.SerializerMethodField()
     user_quality_vote = serializers.SerializerMethodField()
-    user_accessibility_vote = serializers.SerializerMethodField()
+    user_difficulty_vote = serializers.SerializerMethodField()
     # Optional field for creating a resource with URLs
     url_list = serializers.ListField(
         child=serializers.URLField(), write_only=True, required=False
@@ -38,15 +38,15 @@ class LearningResourceSerializer(serializers.ModelSerializer):
             "updated_at",
             "quality_vote_count",
             "quality_vote_sum",
-            "accessibility_beginner_count",
-            "accessibility_moderate_count",
-            "accessibility_advanced_count",
+            "difficulty_beginner_count",
+            "difficulty_moderate_count",
+            "difficulty_advanced_count",
             "average_quality_rating",
-            "dominant_accessibility_level",
+            "dominant_difficulty_level",
             "urls",
             "primary_url",
             "user_quality_vote",
-            "user_accessibility_vote",
+            "user_difficulty_vote",
             "url_list",
         ]
         read_only_fields = [
@@ -55,16 +55,16 @@ class LearningResourceSerializer(serializers.ModelSerializer):
             "updated_at",
             "quality_vote_count",
             "quality_vote_sum",
-            "accessibility_beginner_count",
-            "accessibility_moderate_count",
-            "accessibility_advanced_count",
+            "difficulty_beginner_count",
+            "difficulty_moderate_count",
+            "difficulty_advanced_count",
         ]
 
     def get_average_quality_rating(self, obj):
         return obj.average_quality_rating()
 
-    def get_dominant_accessibility_level(self, obj):
-        return obj.dominant_accessibility_level()
+    def get_dominant_difficulty_level(self, obj):
+        return obj.dominant_difficulty_level()
 
     def get_primary_url(self, obj):
         try:
@@ -85,16 +85,16 @@ class LearningResourceSerializer(serializers.ModelSerializer):
         except QualityVote.DoesNotExist:
             return None
 
-    def get_user_accessibility_vote(self, obj):
-        """Return the current user's accessibility vote on this resource, if any"""
+    def get_user_difficulty_vote(self, obj):
+        """Return the current user's difficulty vote on this resource, if any"""
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return None
 
         try:
-            vote = obj.accessibility_votes.get(user=request.user)
+            vote = obj.difficulty_votes.get(user=request.user)
             return vote.level
-        except AccessibilityVote.DoesNotExist:
+        except DifficultyVote.DoesNotExist:
             return None
 
     def create(self, validated_data):
@@ -216,9 +216,9 @@ class QualityVoteSerializer(serializers.ModelSerializer):
             )
 
 
-class AccessibilityVoteSerializer(serializers.ModelSerializer):
+class DifficultyVoteSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AccessibilityVote
+        model = DifficultyVote
         fields = ["id", "learning_resource", "level", "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
 
@@ -230,7 +230,7 @@ class AccessibilityVoteSerializer(serializers.ModelSerializer):
         # Check if the user already has a vote for this resource
         try:
             # If vote exists, update it
-            existing_vote = AccessibilityVote.objects.get(
+            existing_vote = DifficultyVote.objects.get(
                 learning_resource=learning_resource, user=user
             )
 
@@ -244,9 +244,9 @@ class AccessibilityVoteSerializer(serializers.ModelSerializer):
             existing_vote.save()
             return existing_vote
 
-        except AccessibilityVote.DoesNotExist:
+        except DifficultyVote.DoesNotExist:
             # Create a new vote
-            return AccessibilityVote.objects.create(
+            return DifficultyVote.objects.create(
                 learning_resource=learning_resource, user=user, level=level
             )
 

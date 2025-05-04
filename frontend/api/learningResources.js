@@ -163,14 +163,14 @@ export const learningResources = {
         }
     },
     
-    // Accessibility voting operations
-    submitAccessibilityVote: async (resourceId, level) => {
+    // Difficulty voting operations
+    submitDifficultyVote: async (resourceId, level) => {
         try {
-            return await httpPost(`${RESOURCES_ENDPOINT}/${resourceId}/accessibility_vote/`, {
+            return await httpPost(`${RESOURCES_ENDPOINT}/${resourceId}/difficulty_vote/`, {
                 level
             });
         } catch (error) {
-            console.error(`Error submitting accessibility vote for resource ${resourceId}:`, error);
+            console.error(`Error submitting difficulty vote for resource ${resourceId}:`, error);
             throw error;
         }
     },

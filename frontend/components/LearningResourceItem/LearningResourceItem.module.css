@@ -191,7 +191,7 @@
   font-size: 0.9rem;
 }
 
-.accessibilityLevel {
+.difficultyLevel {
   font-size: 0.9rem;
   font-weight: 500;
   color: #ffffff;
@@ -199,16 +199,16 @@
   border-radius: 12px;
 }
 
-.accessibilityBeginner {
+.difficultyBeginner {
   background-color: #28a745;
 }
 
-.accessibilityModerate {
+.difficultyModerate {
   background-color: #ffc107;
   color: #212529; /* Dark text for better contrast on yellow */
 }
 
-.accessibilityAdvanced {
+.difficultyAdvanced {
   background-color: #dc3545;
 }
 

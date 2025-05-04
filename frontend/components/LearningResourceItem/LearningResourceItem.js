@@ -29,7 +29,7 @@ const LearningResourceItem = ({
     urls = [],
     quality_vote_sum = 0,
     quality_vote_count = 0,
-    dominant_accessibility_level,
+    dominant_difficulty_level,
     average_quality_rating
   } = resource || {};
   
@@ -160,18 +160,18 @@ const LearningResourceItem = ({
     );
   };
   
-  // Format accessibility level for display
-  const formatAccessibilityLevel = (level) => {
+  // Format difficulty level for display
+  const formatDifficultyLevel = (level) => {
     if (!level) return 'Not rated';
     return level.charAt(0).toUpperCase() + level.slice(1);
   };
   
-  // Get CSS class for accessibility level
-  const getAccessibilityClass = (level) => {
+  // Get CSS class for difficulty level
+  const getDifficultyClass = (level) => {
     switch (level) {
-      case 'beginner': return s.accessibilityBeginner;
-      case 'moderate': return s.accessibilityModerate;
-      case 'advanced': return s.accessibilityAdvanced;
+      case 'beginner': return s.difficultyBeginner;
+      case 'moderate': return s.difficultyModerate;
+      case 'advanced': return s.difficultyAdvanced;
       default: return '';
     }
   };
@@ -231,7 +231,7 @@ const LearningResourceItem = ({
             {formatUrl(displayUrl)}
           </a>
           
-          {/* Display quality rating and accessibility level */}
+          {/* Display quality rating and difficulty level */}
           <div className={s.resourceMeta}>
             <div className={s.metaItem}>
               <span className={s.metaLabel}>Quality:</span>
@@ -241,9 +241,9 @@ const LearningResourceItem = ({
             </div>
             
             <div className={s.metaItem}>
-              <span className={s.metaLabel}>Accessibility:</span>
-              <span className={`${s.accessibilityLevel} ${getAccessibilityClass(dominant_accessibility_level)}`}>
-                {formatAccessibilityLevel(dominant_accessibility_level)}
+              <span className={s.metaLabel}>Difficulty:</span>
+              <span className={`${s.difficultyLevel} ${getDifficultyClass(dominant_difficulty_level)}`}>
+                {formatDifficultyLevel(dominant_difficulty_level)}
               </span>
             </div>
           </div>

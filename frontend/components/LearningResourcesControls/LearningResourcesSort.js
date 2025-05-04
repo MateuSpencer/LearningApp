@@ -10,7 +10,7 @@ const LearningResourcesSort = ({
   sortBy, 
   sortDirection, 
   onSortChange,
-  allowedSortFields = ['quality_score', 'created_at', 'accessibility_score'],
+  allowedSortFields = ['quality_score', 'created_at', 'difficulty_score'],
   disabled = false 
 }) => {
   const handleSortChange = (e) => {
@@ -40,10 +40,10 @@ const LearningResourcesSort = ({
           </>
         )}
         
-        {allowedSortFields.includes('accessibility_score') && (
+        {allowedSortFields.includes('difficulty_score') && (
           <>
-            <option value="accessibility_score:desc">Most Accessible First</option>
-            <option value="accessibility_score:asc">Least Accessible First</option>
+            <option value="difficulty_score:desc">Most Accessible First</option>
+            <option value="difficulty_score:asc">Least Accessible First</option>
           </>
         )}
         

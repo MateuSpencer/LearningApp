@@ -26,7 +26,7 @@ const LearningResourcesList = ({
   onAddResource,
   showAddButton = true,
   allowedFilters = ['type', 'search'],
-  allowedSortFields = ['quality_score', 'created_at', 'accessibility_score'],
+  allowedSortFields = ['quality_score', 'created_at', 'difficulty_score'],
   fixedFilters = {}
 }) => {
   const router = useRouter();
@@ -515,7 +515,7 @@ LearningResourcesList.defaultProps = {
   onAddResource: null,
   showAddButton: true,
   allowedFilters: ['type', 'search'],
-  allowedSortFields: ['quality_score', 'created_at', 'accessibility_score'],
+  allowedSortFields: ['quality_score', 'created_at', 'difficulty_score'],
   fixedFilters: {}
 };
 

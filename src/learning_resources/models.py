@@ -25,9 +25,9 @@ class LearningResource(TimestampMixin, models.Model):
     # Fields for aggregating votes
     quality_vote_count = models.IntegerField(default=0)
     quality_vote_sum = models.IntegerField(default=0)
-    accessibility_beginner_count = models.IntegerField(default=0)
-    accessibility_moderate_count = models.IntegerField(default=0)
-    accessibility_advanced_count = models.IntegerField(default=0)
+    difficulty_beginner_count = models.IntegerField(default=0)
+    difficulty_moderate_count = models.IntegerField(default=0)
+    difficulty_advanced_count = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Learning Resource"
@@ -48,12 +48,12 @@ class LearningResource(TimestampMixin, models.Model):
             return 0
         return self.quality_vote_sum / self.quality_vote_count
 
-    def dominant_accessibility_level(self):
-        """Determine which accessibility level has the most votes."""
+    def dominant_difficulty_level(self):
+        """Determine which difficulty level has the most votes."""
         counts = {
-            "beginner": self.accessibility_beginner_count,
-            "moderate": self.accessibility_moderate_count,
-            "advanced": self.accessibility_advanced_count,
+            "beginner": self.difficulty_beginner_count,
+            "moderate": self.difficulty_moderate_count,
+            "advanced": self.difficulty_advanced_count,
         }
         if sum(counts.values()) == 0:
             return None
@@ -69,20 +69,20 @@ class LearningResource(TimestampMixin, models.Model):
         self.quality_vote_sum = result.get("sum", 0)
         self.save(update_fields=["quality_vote_count", "quality_vote_sum"])
 
-    def update_accessibility_vote_counts(self):
-        """Update the cached accessibility vote count fields"""
-        beginner_count = self.accessibility_votes.filter(level="beginner").count()
-        moderate_count = self.accessibility_votes.filter(level="moderate").count()
-        advanced_count = self.accessibility_votes.filter(level="advanced").count()
+    def update_difficulty_vote_counts(self):
+        """Update the cached difficulty vote count fields"""
+        beginner_count = self.difficulty_votes.filter(level="beginner").count()
+        moderate_count = self.difficulty_votes.filter(level="moderate").count()
+        advanced_count = self.difficulty_votes.filter(level="advanced").count()
 
-        self.accessibility_beginner_count = beginner_count
-        self.accessibility_moderate_count = moderate_count
-        self.accessibility_advanced_count = advanced_count
+        self.difficulty_beginner_count = beginner_count
+        self.difficulty_moderate_count = moderate_count
+        self.difficulty_advanced_count = advanced_count
         self.save(
             update_fields=[
-                "accessibility_beginner_count",
-                "accessibility_moderate_count",
-                "accessibility_advanced_count",
+                "difficulty_beginner_count",
+                "difficulty_moderate_count",
+                "difficulty_advanced_count",
             ]
         )
 
@@ -208,9 +208,9 @@ class QualityVote(TimestampMixin, models.Model):
         resource.update_quality_vote_counts()
 
 
-class AccessibilityVote(TimestampMixin, models.Model):
+class DifficultyVote(TimestampMixin, models.Model):
     """
-    Model for tracking user votes on resource accessibility level
+    Model for tracking user votes on resource difficulty level
     """
 
     LEVEL_CHOICES = (
@@ -223,16 +223,16 @@ class AccessibilityVote(TimestampMixin, models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="accessibility_votes",
+        related_name="difficulty_votes",
     )
     learning_resource = models.ForeignKey(
-        LearningResource, on_delete=models.CASCADE, related_name="accessibility_votes"
+        LearningResource, on_delete=models.CASCADE, related_name="difficulty_votes"
     )
     level = models.CharField(max_length=10, choices=LEVEL_CHOICES)
 
     class Meta:
-        verbose_name = "Accessibility Vote"
-        verbose_name_plural = "Accessibility Votes"
+        verbose_name = "Difficulty Vote"
+        verbose_name_plural = "Difficulty Votes"
         unique_together = ("user", "learning_resource")
 
     def __str__(self):
@@ -241,13 +241,13 @@ class AccessibilityVote(TimestampMixin, models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         # Update the resource's vote counts
-        self.learning_resource.update_accessibility_vote_counts()
+        self.learning_resource.update_difficulty_vote_counts()
 
     def delete(self, *args, **kwargs):
         resource = self.learning_resource  # Keep reference before deletion
         super().delete(*args, **kwargs)
         # After deleting, update the resource's vote counts
-        resource.update_accessibility_vote_counts()
+        resource.update_difficulty_vote_counts()
 
 
 class AppropriatenessVote(models.Model):

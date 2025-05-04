@@ -32,8 +32,8 @@ const LearningResourcesIndexPage = () => {
       <LearningResourcesList 
         showAll={true} 
         associateWithPage={associateWithPage}
-        allowedFilters={['type', 'accessibility', 'search']}
-        allowedSortFields={['quality_score', 'created_at', 'accessibility_score']} 
+        allowedFilters={['type', 'difficulty', 'search']}
+        allowedSortFields={['quality_score', 'created_at', 'difficulty_score']} 
         showAddButton={false} // Disable the Add Resource button
       />
     </div>

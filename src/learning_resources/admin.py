@@ -4,7 +4,7 @@ from .models import (
     ResourceURL,
     ResourcePageAssociation,
     QualityVote,
-    AccessibilityVote,
+    DifficultyVote,
     AppropriatenessVote,
 )
 
@@ -23,9 +23,9 @@ class LearningResourceAdmin(admin.ModelAdmin):
     readonly_fields = (
         "quality_vote_count",
         "quality_vote_sum",
-        "accessibility_beginner_count",
-        "accessibility_moderate_count",
-        "accessibility_advanced_count",
+        "difficulty_beginner_count",
+        "difficulty_moderate_count",
+        "difficulty_advanced_count",
     )
 
     def average_quality_rating_display(self, obj):
@@ -73,8 +73,8 @@ class QualityVoteAdmin(admin.ModelAdmin):
     raw_id_fields = ("user", "learning_resource")
 
 
-@admin.register(AccessibilityVote)
-class AccessibilityVoteAdmin(admin.ModelAdmin):
+@admin.register(DifficultyVote)
+class DifficultyVoteAdmin(admin.ModelAdmin):
     list_display = ("user", "learning_resource", "level", "created_at")
     list_filter = ("level", "created_at")
     search_fields = ("user__username", "learning_resource__title")
