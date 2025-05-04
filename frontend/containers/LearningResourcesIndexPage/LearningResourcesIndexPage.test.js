@@ -1,10 +1,27 @@
 import { render, /* screen */ } from '@testing-library/react';
 import LearningResourcesIndexPage from './';
+import { ThemeProvider } from '../../context/ThemeContext';
+import { AuthProvider } from '../../context/AuthContext';
 // import data from './LearningResourcesIndexPage.data';
+
+// Wrapper component that provides all required providers
+const AllProviders = ({ children }) => {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </ThemeProvider>
+  );
+};
 
 describe('<LearningResourcesIndexPage />', () => {
     it('Renders an empty LearningResourcesIndexPage', () => {
-        render(<LearningResourcesIndexPage />);
+        render(
+          <AllProviders>
+            <LearningResourcesIndexPage />
+          </AllProviders>
+        );
     });
 
     // it('Renders LearningResourcesIndexPage with data', () => {

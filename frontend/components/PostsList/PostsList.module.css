@@ -12,6 +12,15 @@
                 box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
+/* Centered title style that matches LearningResourcesList */
+.centeredTitle {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
 /* Controls wrapper - contains all control elements before the horizontal divider */
 .controlsWrapper {
     margin-bottom: 1.5rem;
@@ -101,7 +110,7 @@
     color: var(--text-primary);
     transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
                 background-color var(--theme-transition-speed) var(--theme-transition-timing),
-                color var(--theme-transition-speed) var(--theme-transition-timing),
+                color var(--theme-transition-speed) var (--theme-transition-timing),
                 box-shadow 0.2s ease;
 }
 

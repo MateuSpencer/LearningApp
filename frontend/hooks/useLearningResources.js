@@ -24,7 +24,7 @@ export function useLearningResources({
   showAll = false,
   fixedFilters = {},
   initialFilters = {},
-  initialSortBy = 'quality_score',  // Default to sorting by quality score
+  initialSortBy = 'quality_vote_sum',  // Updated to match backend field
   initialSortDirection = 'desc',
   pageSize = 10,
   autoRefetch = true 
@@ -69,21 +69,33 @@ export function useLearningResources({
     
     // Add fixed filters (these don't change during component lifecycle)
     Object.entries(fixedFilters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      if (value !== undefined && value !== null && value !== '' && value !== 'all') {
         queryParams.append(key, value);
       }
     });
     
     // Add user-controlled filters
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      if (value !== undefined && value !== null && value !== '' && value !== 'all') {
+        // Special handling for certain filter types
+        if (key === 'type' && value === 'all') {
+          // Skip 'all' values as they mean no filtering
+          return;
+        }
+        
+        if (key === 'difficulty' && value === 'all') {
+          // Skip 'all' values as they mean no filtering
+          return;
+        }
+        
+        // For all other cases, add the filter
         queryParams.append(key, value);
       }
     });
     
     // Add pagination params
-    queryParams.append('page', currentPage);
-    queryParams.append('page_size', pageSize);
+    queryParams.append('page', currentPage.toString());
+    queryParams.append('page_size', pageSize.toString());
     
     // Add sorting params
     const orderingValue = (sortDirection === 'desc' ? '-' : '') + sortBy;

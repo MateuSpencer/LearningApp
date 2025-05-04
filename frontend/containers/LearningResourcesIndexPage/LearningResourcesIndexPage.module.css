@@ -14,6 +14,14 @@
   margin-bottom: 30px;
 }
 
+.centeredHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
 .title {
   font-size: 2.2rem;
   margin: 0;

@@ -25,8 +25,8 @@ const LearningResourcesList = ({
   showAll = false,
   onAddResource,
   showAddButton = true,
-  allowedFilters = ['type', 'search'],
-  allowedSortFields = ['quality_score', 'created_at', 'difficulty_score'],
+  allowedFilters = ['type', 'search', 'difficulty'],
+  allowedSortFields = ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   fixedFilters = {}
 }) => {
   const router = useRouter();
@@ -80,7 +80,7 @@ const LearningResourcesList = ({
     pageSlug,
     showAll,
     fixedFilters: computedFixedFilters,
-    initialSortBy: 'quality_score',
+    initialSortBy: 'quality_vote_sum',
     initialSortDirection: 'desc',
     pageSize: 10,
     autoRefetch: true
@@ -301,6 +301,9 @@ const LearningResourcesList = ({
 
   return (
     <div className={s.container}>
+      {/* Add centered title */}
+      <h2 className={s.centeredTitle}>Learning Resources</h2>
+      
       <div className={s.controlsWrapper}>
         <div className={s.controlsBar}>
           <div className={s.controlsLeft}>
@@ -458,7 +461,12 @@ const LearningResourcesList = ({
               title: item.title,
               resource_type: item.resource_type, 
               primary_url: item.primary_url,
-              urls: item.urls
+              urls: item.urls,
+              // Add missing quality and difficulty properties
+              quality_vote_sum: item.quality_vote_sum,
+              quality_vote_count: item.quality_vote_count,
+              average_quality_rating: item.average_quality_rating,
+              dominant_difficulty_level: item.dominant_difficulty_level
             };
             
             // All other properties belong to the association
@@ -514,8 +522,8 @@ LearningResourcesList.defaultProps = {
   showAll: false,
   onAddResource: null,
   showAddButton: true,
-  allowedFilters: ['type', 'search'],
-  allowedSortFields: ['quality_score', 'created_at', 'difficulty_score'],
+  allowedFilters: ['type', 'search', 'difficulty'],
+  allowedSortFields: ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   fixedFilters: {}
 };
 

@@ -30,7 +30,18 @@ export const learningResources = {
     
     // Alias for getAll to match the function name used in the components
     getAllResources: async (filters = {}) => {
-        return learningResources.getAll(filters);
+        try {
+            // Handle when filters is a query string already
+            if (typeof filters === 'string') {
+                const url = `${RESOURCES_ENDPOINT}/?${filters}`;
+                return await httpGet(url);
+            }
+            // Otherwise, treat as object and use getAll
+            return learningResources.getAll(filters);
+        } catch (error) {
+            console.error('Error fetching learning resources:', error);
+            throw error;
+        }
     },
     
     getById: async (id) => {

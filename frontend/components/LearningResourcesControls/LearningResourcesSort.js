@@ -10,7 +10,7 @@ const LearningResourcesSort = ({
   sortBy, 
   sortDirection, 
   onSortChange,
-  allowedSortFields = ['quality_score', 'created_at', 'difficulty_score'],
+  allowedSortFields = ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   disabled = false 
 }) => {
   const handleSortChange = (e) => {
@@ -33,17 +33,17 @@ const LearningResourcesSort = ({
         disabled={disabled}
       >
         {/* Add quality score sorting options */}
-        {allowedSortFields.includes('quality_score') && (
+        {allowedSortFields.includes('quality_vote_sum') && (
           <>
-            <option value="quality_score:desc">Highest Quality First</option>
-            <option value="quality_score:asc">Lowest Quality First</option>
+            <option value="quality_vote_sum:desc">Highest Quality First</option>
+            <option value="quality_vote_sum:asc">Lowest Quality First</option>
           </>
         )}
         
-        {allowedSortFields.includes('difficulty_score') && (
+        {allowedSortFields.includes('quality_vote_count') && (
           <>
-            <option value="difficulty_score:desc">Most Accessible First</option>
-            <option value="difficulty_score:asc">Least Accessible First</option>
+            <option value="quality_vote_count:desc">Most Rated First</option>
+            <option value="quality_vote_count:asc">Least Rated First</option>
           </>
         )}
         
@@ -65,13 +65,6 @@ const LearningResourcesSort = ({
           <>
             <option value="title:asc">Title (A-Z)</option>
             <option value="title:desc">Title (Z-A)</option>
-          </>
-        )}
-        
-        {allowedSortFields.includes('type') && (
-          <>
-            <option value="type:asc">Type (A-Z)</option>
-            <option value="type:desc">Type (Z-A)</option>
           </>
         )}
       </select>

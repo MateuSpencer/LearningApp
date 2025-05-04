@@ -38,11 +38,26 @@ const LeftSidebar = ({ items }) => {
                 <nav className={s.Navigation}>
                     <ul className={s.NavList}>
                         <li className={s.NavItem}>
+                            <Link href="/learning-resources" className={s.NavLink}>
+                                <span className={s.NavIcon}>📚</span>
+                                <div className={s.NavTextWrapper}>
+                                    <span className={s.NavText}>Learning Resources</span>
+                                </div>
+                            </Link>
+                        </li>
+                        <li className={s.NavItem}>
+                            <Link href="/wiki" className={s.NavLink}>
+                                <span className={s.NavIcon}>🌐</span>
+                                <div className={s.NavTextWrapper}>
+                                    <span className={s.NavText}>Wiki</span>
+                                </div>
+                            </Link>
+                        </li>
+                        <li className={s.NavItem}>
                             <Link href="/my-posts" className={s.NavLink}>
                                 <span className={s.NavIcon}>📝</span>
-                                {/* NEW wrapper */}
                                 <div className={s.NavTextWrapper}>
-                                <span className={s.NavText}>My Posts</span>
+                                    <span className={s.NavText}>My Posts</span>
                                 </div>
                             </Link>
                         </li>

@@ -37,7 +37,6 @@ const WikiArticlePage = ({ title, articleSlug }) => {
         </div>
         
         <div className={s.postsSection}>
-          <h2 className={s.postsTitle}>Posts</h2>
           {showNewPostForm ? (
             <NewPostForm 
               pageSlug={articleSlug}

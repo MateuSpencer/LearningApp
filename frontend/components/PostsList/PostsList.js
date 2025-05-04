@@ -401,6 +401,9 @@ const PostsList = ({
         cancelText="Cancel"
       />
       
+      {/* Add centered title inside the container */}
+      <h2 className={s.centeredTitle}>Posts</h2>
+      
       <div className={s.controlsWrapper}>
         <div className={s.controlsBar}>
           <div className={s.controlsLeft}>

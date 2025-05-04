@@ -1,10 +1,15 @@
 import { render, /* screen */ } from '@testing-library/react';
 import NewLearningResourceForm from './';
+import { AuthProvider } from '../../context/AuthContext';
 // import data from './NewLearningResourceForm.data';
 
 describe('<NewLearningResourceForm />', () => {
     it('Renders an empty NewLearningResourceForm', () => {
-        render(<NewLearningResourceForm />);
+        render(
+          <AuthProvider>
+            <NewLearningResourceForm />
+          </AuthProvider>
+        );
     });
 
     // it('Renders NewLearningResourceForm with data', () => {

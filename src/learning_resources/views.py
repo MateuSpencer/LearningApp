@@ -63,6 +63,9 @@ class ResourceFilter(FilterSet):
     Custom filter for learning resources
     """
 
+    # Add filter for difficulty level
+    difficulty = CharFilter(method="filter_by_difficulty")
+
     class Meta:
         model = LearningResource
         fields = {
@@ -70,6 +73,36 @@ class ResourceFilter(FilterSet):
             "created_at": ["gt", "lt"],
             "updated_at": ["gt", "lt"],
         }
+
+    def filter_by_difficulty(self, queryset, name, value):
+        """
+        Filter resources by their dominant difficulty level
+        """
+        if not value or value == "all":
+            return queryset
+
+        # Map difficulty levels to the corresponding count fields
+        difficulty_map = {
+            "beginner": "difficulty_beginner_count",
+            "moderate": "difficulty_moderate_count",
+            "advanced": "difficulty_advanced_count",
+        }
+
+        if value not in difficulty_map:
+            return queryset
+
+        # Get the field name for the requested difficulty level
+        field_name = difficulty_map[value]
+
+        # Create a filter to find resources where the requested difficulty has the highest count
+        filter_conditions = Q()
+        for other_level, other_field in difficulty_map.items():
+            if other_level != value:
+                # The selected difficulty count should be greater than other difficulty counts
+                filter_conditions &= Q(**{f"{field_name}__gt": models.F(other_field)})
+
+        # Apply the filter
+        return queryset.filter(filter_conditions)
 
 
 class ResourcePageAssociationFilter(FilterSet):
