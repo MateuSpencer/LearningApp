@@ -1,0 +1,232 @@
+.searchResults {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  animation: fadeIn 0.3s ease-in;
+  padding: 0 15px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.loadingContainer,
+.errorContainer,
+.noResults {
+  padding: 30px 20px;
+  border-radius: 8px;
+  background-color: var(--theme-bg-secondary, #111111);
+  text-align: center;
+  margin: 30px auto;
+  max-width: 500px;
+  border: 1px solid var(--border-color, #333);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.loadingText {
+  color: #01FFFF;
+  font-size: 16px;
+  position: relative;
+  display: inline-block;
+}
+
+.loadingText::after {
+  content: "...";
+  position: absolute;
+  right: -20px;
+  animation: ellipsis 1.5s infinite;
+}
+
+@keyframes ellipsis {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.errorText {
+  color: #ff4d4d;
+  font-size: 16px;
+}
+
+.noResultsText {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: var(--theme-text-primary, #fff);
+}
+
+.helpText {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.resultsHeading {
+  font-size: 1.75rem;
+  margin-bottom: 10px;
+  color: var(--theme-text-primary, #fff);
+  text-align: center;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.resultsHeading::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #01FFFF, transparent);
+  transform: translateX(-50%);
+}
+
+.resultCount {
+  font-size: 14px;
+  color: #aaa;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.resultsList {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Enhanced clickable search results */
+.resultItem {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.resultItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(1, 255, 255, 0.15);
+  background-color: var(--theme-bg-hover, rgba(25, 25, 25, 0.9));
+}
+
+.resultItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background-color: #01FFFF;
+  transition: width 0.3s ease;
+}
+
+.resultItem:hover::before {
+  width: 100%;
+}
+
+.resultItem:last-child {
+  border-bottom: none;
+}
+
+/* Enhanced clickable search results */
+.resultArticle {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resultArticle {
+  position: relative;
+  transition: background-color 0.2s ease;
+  padding: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.resultArticle:hover {
+  background-color: rgba(51, 102, 204, 0.1);
+}
+
+/* Enhanced clickable search results */
+.resultLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.resultLink {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: block;
+  position: relative;
+}
+
+.resultLink:hover {
+  text-decoration: none;
+  color: #4dffff;
+  transform: translateX(3px);
+}
+
+.resultTitle {
+  color: #3366cc;
+  transition: color 0.2s ease;
+}
+
+.resultTitle {
+  font-size: 20px;
+  margin: 0 0 12px 0;
+}
+
+.resultLink:hover .resultTitle {
+  color: #4dffff;
+  text-decoration: underline;
+}
+
+.resultTitle a {
+  color: #3366cc;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.2rem;
+}
+
+.resultTitle a:hover {
+  text-decoration: underline;
+}
+
+.resultSnippet {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--theme-text-primary, rgba(255, 255, 255, 0.9));
+  margin-top: 8px;
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Match highlighting for search terms */
+.resultSnippet :global(span.searchmatch) {
+  font-weight: bold;
+  color: #01FFFF;
+  background-color: rgba(1, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin: 0 1px;
+}
+
+.resultFooter {
+  margin-top: 30px;
+  text-align: center;
+  padding: 15px;
+  border-top: 1px solid #333;
+}
+
+.footerNote {
+  font-size: 14px;
+  color: #aaa;
+  font-style: italic;
+}
+
+/* Removed View article specific styling as entire result is now clickable */

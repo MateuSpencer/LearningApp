@@ -15,6 +15,17 @@
   max-width: calc(100% - 250px); /* Account for expanded sidebar */
 }
 
+/* Loading state styling */
+.loadingSection {
+  margin: 40px 0;
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+  background-color: var(--theme-bg-secondary);
+  font-style: italic;
+  color: var(--theme-text-secondary);
+}
+
 .rightSidebarContainer {
   width: 60px; /* Collapsed width */
   min-width: 60px; /* Prevent shrinking */
@@ -29,13 +40,24 @@
 
 .resourcesSection {
   margin-top: 30px;
-  padding-top: 10px;
+  padding-top: 30px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  border-top: 1px solid var(--border-color);
 }
 
 .postsSection {
   margin-top: 40px;
   padding-top: 30px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
   border-top: 1px solid var(--border-color);
+}
+
+.introSection {
+  margin-bottom: 30px;
 }
 
 .postsTitle {

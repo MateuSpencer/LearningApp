@@ -6,8 +6,8 @@ const EditPostFormData = {
     status: 'published',
     page_slug: 'example-article'
   },
-  onSave: (updatedPost) => console.log('Post updated:', updatedPost),
-  onCancel: () => console.log('Edit cancelled')
+  onSave: (updatedPost) => {},
+  onCancel: () => {}
 };
 
 export default EditPostFormData;

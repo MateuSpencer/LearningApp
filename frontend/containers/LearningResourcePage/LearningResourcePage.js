@@ -16,7 +16,6 @@ const isYouTubeUrl = (url) => {
     const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)/;
     return youtubeRegex.test(url);
   } catch (err) {
-    console.error('Error checking YouTube URL:', err);
     return false;
   }
 };
@@ -41,7 +40,6 @@ const getEmbedUrl = (url) => {
     // If not a YouTube URL or pattern doesn't match, return the original URL
     return url;
   } catch (err) {
-    console.error('Error parsing URL:', err);
     return url;
   }
 };
@@ -92,7 +90,6 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
           setUserVotes(prev => ({ ...prev, difficulty: data.user_difficulty_vote }));
         }
       } catch (err) {
-        console.error('Failed to fetch learning resource:', err);
         setError('Failed to load resource. It may have been removed or you may not have permission to view it.');
       } finally {
         setLoading(false);
@@ -115,7 +112,6 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
           
           setPageAssociations(associationsWithSlugs);
         } catch (err) {
-          console.error(`Error fetching associations for resource ${resource.id}:`, err);
           setPageAssociations([]);
         } finally {
           setLoadingAssociations(false);
@@ -153,8 +149,6 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
       const updatedResource = await learningResources.getById(resourceId);
       setResource(updatedResource);
     } catch (err) {
-      console.error('Failed to submit quality vote:', err);
-      
       // Handle session expiration
       if (err.response && err.response.status === 401) {
         refreshAuth();
@@ -182,8 +176,6 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
       const updatedResource = await learningResources.getById(resourceId);
       setResource(updatedResource);
     } catch (err) {
-      console.error('Failed to submit difficulty vote:', err);
-      
       // Handle session expiration
       if (err.response && err.response.status === 401) {
         refreshAuth();
@@ -315,7 +307,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
               sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
               referrerPolicy="no-referrer"
               loading="lazy"
-              onError={() => console.log('Failed to load embed')}
+              onError={() => {}}
             />
           </div>
         </>

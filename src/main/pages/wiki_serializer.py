@@ -26,16 +26,5 @@ class WikiArticleSerializer(WikiPageSerializer):
         return self.context.get("article_slug", "")
 
 
-class WikiSearchSerializer(WikiPageSerializer):
-    """Serializer for search results"""
-
-    query = serializers.SerializerMethodField()
-
-    class Meta:
-        model = WikiPage
-        fields = WikiPageSerializer.Meta.fields + [
-            "query",
-        ]
-
-    def get_query(self, page):
-        return self.context.get("query", "")
+# WikiSearchSerializer has been removed as the search functionality
+# is now directly handled through the main WikiIndexPage with query parameters

@@ -3,19 +3,35 @@
   flex-direction: column;
   align-items: center;
   padding: 40px 20px;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   margin-bottom: 30px;
   text-align: center;
+  color: var(--theme-text-primary, var(--text-primary));
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
 }
 
 .searchContainer {
   width: 100%;
-  margin-bottom: 30px;
+  max-width: 800px;
+  margin-bottom: 40px;
 }
 
 .searchContainer form {
@@ -50,31 +66,93 @@
   background-color: #254aa5;
 }
 
-.instructions {
+.resultsContainer {
   width: 100%;
-  padding: 20px;
-  background-color: #f8f9fa;
+  margin-top: 20px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.instructions {
+  text-align: center;
+  background-color: var(--theme-bg-secondary, rgba(17, 17, 17, 0.7));
+  border: 1px solid var(--border-color);
+  padding: 30px;
   border-radius: 8px;
   margin-top: 20px;
+  max-width: 700px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .instructions h2 {
-  margin-top: 0;
+  color: var(--color-primary);
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.instructions p {
+  color: var(--theme-text-primary, var(--text-primary));
+  margin-bottom: 15px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.instructions ul {
+  margin: 15px 0 0 0;
+  padding: 0;
+  list-style-position: inside;
+  text-align: center;
+}
+
+.instructions li {
+  color: var(--color-primary);
+  margin: 10px 0;
+  font-size: 16px;
+  display: inline-block;
+  margin-right: 20px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.instructions li:hover {
+  color: var(--color-primary-light);
+  transform: translateX(3px);
 }
 
 .instructions code {
   display: block;
   padding: 10px;
-  background-color: #eaecf0;
+  background-color: var(--theme-code-bg, #eaecf0);
+  color: var(--theme-code-text, #333);
   margin: 10px 0;
   border-radius: 4px;
 }
 
 .instructions a {
-  color: #3366cc;
+  color: var(--color-primary-dark);
   text-decoration: none;
 }
 
 .instructions a:hover {
   text-decoration: underline;
+}
+
+/* Disable the suggestion underline effect that appears on hover */
+.searchContainer :global(.SuggestionItem)::after {
+  display: none;
+}
+
+/* Light mode specific adjustments */
+:global(.light-mode) .instructions {
+  background-color: var(--theme-bg-secondary, #f5f5f5);
+  border-color: var(--border-color, #ddd);
+}
+
+:global(.light-mode) .title {
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }

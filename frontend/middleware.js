@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
 
+// List of common invalid paths that we can immediately redirect
+const COMMON_INVALID_PATHS = new Set([
+    'favicon.ico', 'robots.txt', 'sitemap.xml', 'undefined', 'null', 
+    'NaN', '[object Object]', 'undefined.js', 'undefined.css',
+    'runtime.js', 'undefined.jpg', 'undefined.png', 'undefined.gif'
+]);
+
 export function middleware(request) {
     const url = new URL(request.url);
     const origin = url.origin;
@@ -7,8 +14,63 @@ export function middleware(request) {
     
     // Skip middleware for authentication routes
     if (pathname.startsWith('/accounts/')) {
-        console.log('[Middleware] Bypassing authentication route:', pathname);
         return NextResponse.rewrite(new URL(pathname, origin));
+    }
+    
+    // Handle Wiki article paths directly - ensure proper handling
+    if (pathname.startsWith('/wiki/') && pathname !== '/wiki/') {
+        try {
+            // Extract the slug from the path - preserve the exact path without encoding
+            const wikiPrefix = '/wiki/';
+            const slug = pathname.slice(wikiPrefix.length);
+            
+            // Handle obvious invalid paths immediately
+            if (slug.length === 0 || COMMON_INVALID_PATHS.has(slug)) {
+                return NextResponse.redirect(new URL('/wiki', origin));
+            }
+            
+            // If we detect an encoded URL format that should be unencoded, redirect to the unencoded version
+            // This handles cases where %3A is used instead of : in the URL
+            if (pathname.includes('%')) {
+                try {
+                    const decodedPath = decodeURIComponent(pathname);
+                    // Only redirect if decoding actually changed something
+                    if (decodedPath !== pathname) {
+                        return NextResponse.redirect(new URL(decodedPath, origin), 301); // Permanent redirect
+                    }
+                } catch (error) {
+                    // Error decoding path - continue with original path
+                }
+            }
+            
+            // Skip middleware processing for direct wiki article URLs
+            // This prevents valid paths from being intercepted while ensuring proper handling of special characters
+            if (pathname.startsWith('/wiki/')) {
+                return NextResponse.next();
+            }
+            
+            // Handle Wiki invalid paths - redirect trailing slashes with query parameters
+            // Example URL: /slug/?anything should redirect to wiki search
+            if (url.search && pathname.endsWith('/')) {
+                // Redirect to wiki search with the slug as a query
+                return NextResponse.redirect(new URL(`/wiki?q=${slug}`, origin));
+            }
+            
+            // Handle paths with more segments than expected (e.g., /wiki/slug/extra/segments)
+            const pathSegments = pathname.split('/').filter(Boolean);
+            if (pathSegments.length > 2) {
+                return NextResponse.redirect(new URL(`/wiki?q=${slug}`, origin));
+            }
+            
+            // Special check for paths that incorrectly include path=wiki in query params
+            if (url.searchParams.has('path') && url.searchParams.get('path') === 'wiki') {
+                // Redirect to the proper wiki path with the slug
+                return NextResponse.redirect(new URL(`/wiki/${slug}`, origin));
+            }
+        } catch (error) {
+            // Return next() to let the request continue even if there was an error in our processing
+            return NextResponse.next();
+        }
     }
     
     const requestHeaders = new Headers(request.headers);

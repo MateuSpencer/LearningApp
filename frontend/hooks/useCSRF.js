@@ -34,7 +34,6 @@ export const useCSRF = () => {
           
           if (csrfCookie) {
             const token = csrfCookie.split('=')[1];
-            console.log(`Found CSRF token in cookie: ${csrfCookie.split('=')[0]}`);
             setCsrfToken(token);
             setIsLoading(false);
             return;
@@ -45,7 +44,6 @@ export const useCSRF = () => {
         const metaTag = document.querySelector('meta[name="csrf-token"]');
         if (metaTag) {
           const token = metaTag.getAttribute('content');
-          console.log('Found CSRF token in meta tag');
           setCsrfToken(token);
           setIsLoading(false);
           return;
@@ -54,14 +52,12 @@ export const useCSRF = () => {
         // Third, try to get token from form fields
         const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
         if (csrfInput) {
-          console.log('Found CSRF token in hidden form field');
           setCsrfToken(csrfInput.value);
           setIsLoading(false);
           return;
         }
         
         // If no token found, make a request to auth_status to set a new token
-        console.log('No CSRF token found, requesting from /api/auth/status/');
         fetch('/api/auth/status/', {
           credentials: 'include',
           cache: 'no-store'
@@ -79,10 +75,8 @@ export const useCSRF = () => {
                 
               if (foundCookie) {
                 const token = foundCookie.split('=')[1];
-                console.log(`Found CSRF token after auth request: ${foundCookie.split('=')[0]}`);
                 setCsrfToken(token);
               } else {
-                console.error('No CSRF token found even after auth request');
                 setError('Could not get CSRF token. Please ensure cookies are enabled in your browser.');
               }
               
@@ -90,12 +84,10 @@ export const useCSRF = () => {
             }, 100);
           })
           .catch(err => {
-            console.error('Failed to refresh CSRF token:', err);
             setError('Could not refresh CSRF token. Please reload the page.');
             setIsLoading(false);
           });
       } catch (err) {
-        console.error('Failed to get CSRF token:', err);
         setError(err.message || 'Failed to get CSRF token');
         setIsLoading(false);
       }
@@ -156,13 +148,9 @@ export const getCsrfToken = () => {
       return csrfInput.value;
     }
     
-    // Log all available cookies for debugging
-    console.log('Available cookies:', document.cookie);
-    
     // If we get this far, no token was found
-    console.warn('No CSRF token found in cookies, meta tags, or form fields');
   } catch (err) {
-    console.error('Error while getting CSRF token:', err);
+    // Error handling silently failed
   }
   
   // If no token is found, trigger a refresh by making a request to auth_status
@@ -170,7 +158,7 @@ export const getCsrfToken = () => {
   fetch('/api/auth/status/', { 
     credentials: 'include',
     cache: 'no-store'
-  }).catch(err => console.error('Failed to refresh CSRF token:', err));
+  }).catch(() => {});
   
   return null;
 };

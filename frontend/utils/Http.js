@@ -27,12 +27,10 @@ let cachedCsrfToken = null;
  * Helps identify available cookies for troubleshooting
  */
 const debugCookies = () => {
-    console.log('All cookies available:', document.cookie);
     const cookieList = document.cookie.split('; ').map(cookie => {
         const parts = cookie.split('=');
         return { name: parts[0], value: parts[1] };
     });
-    console.table(cookieList);
 };
 
 /**
@@ -52,7 +50,6 @@ const getCSRFTokenFromDOM = () => {
         const metaTag = document.querySelector(selector);
         if (metaTag) {
             const token = metaTag.getAttribute('content');
-            console.log(`Found CSRF token in meta tag (${selector}):`, token);
             return token;
         }
     }
@@ -61,7 +58,6 @@ const getCSRFTokenFromDOM = () => {
     const formFields = document.querySelectorAll('input[name="csrfmiddlewaretoken"]');
     if (formFields.length > 0) {
         const token = formFields[0].value;
-        console.log('Found CSRF token in form field:', token);
         return token;
     }
     
@@ -70,7 +66,6 @@ const getCSRFTokenFromDOM = () => {
     if (csrfElement) {
         const token = csrfElement.textContent || csrfElement.getAttribute('data-token');
         if (token) {
-            console.log('Found CSRF token in DOM element with ID csrf-token:', token);
             return token;
         }
     }
@@ -84,7 +79,6 @@ const getCSRFTokenFromDOM = () => {
  */
 const fetchCsrfTokenFromApi = async () => {
     try {
-        console.log('Fetching CSRF token from /api/auth/status/ endpoint...');
         const response = await fetch('/api/auth/status/', {
             credentials: 'include',
             cache: 'no-store'
@@ -97,15 +91,12 @@ const fetchCsrfTokenFromApi = async () => {
         const data = await response.json();
         
         if (data && data.csrfToken) {
-            console.log('Successfully received CSRF token from API:', data.csrfToken.substring(0, 5) + '...');
             cachedCsrfToken = data.csrfToken;
             return data.csrfToken;
         } else {
-            console.error('Auth status response did not contain csrfToken:', data);
             throw new Error('CSRF token not found in API response');
         }
     } catch (err) {
-        console.error('Error fetching CSRF token from API:', err);
         throw err;
     }
 };
@@ -119,7 +110,6 @@ const fetchCsrfTokenFromApi = async () => {
 const ensureCsrfToken = async () => {
     // First, check if we've already cached the token
     if (cachedCsrfToken) {
-        console.log('Using cached CSRF token');
         return cachedCsrfToken;
     }
     
@@ -130,7 +120,6 @@ const ensureCsrfToken = async () => {
     if (!token) {
         token = getCsrfToken();
         if (token) {
-            console.log('Found CSRF token in cookie');
             cachedCsrfToken = token;
             return token;
         }
@@ -144,7 +133,6 @@ const ensureCsrfToken = async () => {
         token = await fetchCsrfTokenFromApi();
         return token;
     } catch (err) {
-        console.error('Failed to get CSRF token:', err);
         throw new Error('Unable to obtain CSRF token. Please refresh the page and try again.');
     }
 };
@@ -162,7 +150,6 @@ const buildHeaders = (method = 'GET', token) => {
     // Add CSRF token for non-GET requests
     if (method !== 'GET' && token) {
         headers['X-CSRFToken'] = token;
-        console.log(`Added CSRF token to ${method} request headers`);
     }
     
     return headers;

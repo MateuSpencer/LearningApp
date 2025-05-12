@@ -24,3 +24,24 @@ a {
     transition-duration: var(--theme-transition-speed);
     transition-timing-function: var(--theme-transition-timing);
 }
+
+/* Add theme variables for text and background colors */
+:root {
+    --theme-bg-primary: var(--bg-primary);
+    --theme-bg-secondary: var(--bg-secondary);
+    --theme-text-primary: var(--text-primary);
+    --theme-text-secondary: var(--text-secondary);
+    --theme-code-bg: var(--color-grey-200);
+    --theme-code-text: var(--text-primary);
+    --theme-bg-hover: var(--bg-accent);
+}
+
+[data-theme="dark"] {
+    --theme-bg-primary: var(--bg-primary);
+    --theme-bg-secondary: var(--bg-secondary);
+    --theme-text-primary: var(--text-primary);
+    --theme-text-secondary: var(--text-secondary);
+    --theme-code-bg: #2d2d2d;
+    --theme-code-text: #f1f1f1;
+    --theme-bg-hover: var(--bg-accent);
+}

@@ -11,6 +11,7 @@ export default {
     // Wiki containers
     WikiIndexPage: dynamic(() => import('./WikiIndexPage')),
     WikiArticlePage: dynamic(() => import('./WikiArticlePage')),
+    WikiSearchResults: dynamic(() => import('../components/WikiSearchResults/WikiSearchResults')),
     // User content containers
     UserPostsPage: dynamic(() => import('./UserPostsPage'))
 };

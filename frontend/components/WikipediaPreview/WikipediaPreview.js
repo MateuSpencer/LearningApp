@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import s from './WikipediaPreview.module.css';
 
-const WikipediaPreview = ({ slug = '' }) => {
+const WikipediaPreview = ({ slug = '', onArticleNotFound }) => {
   // slug always a string now
   const articleTitle = slug
     .replace(/_/g, ' ')
@@ -15,13 +15,10 @@ const WikipediaPreview = ({ slug = '' }) => {
   const [loading, setLoading] = useState(false);
   const [articleExists, setArticleExists] = useState(true);
   
-  // Fetch data on component mount
-  useEffect(() => {
-    fetchWikipediaSummary();
-  }, [slug]);
-  
   // Function to fetch data from Wikipedia API
-  const fetchWikipediaSummary = async () => {
+  const fetchWikipediaSummary = useCallback(async () => {
+    if (!slug) return;
+    
     setLoading(true);
     setArticleExists(true);
     
@@ -34,25 +31,41 @@ const WikipediaPreview = ({ slug = '' }) => {
       if (!response.ok) {
         setArticleExists(false);
         setLoading(false);
+        
+        // Notify parent component that article doesn't exist
+        if (onArticleNotFound && typeof onArticleNotFound === 'function') {
+          onArticleNotFound(slug);
+        }
         return;
       }
       
       const data = await response.json();
       setSummary(data.extract);
     } catch (err) {
+      console.error('Error fetching Wikipedia summary:', err);
       // Silently handle the error
       setArticleExists(false);
+      
+      // Notify parent component that article doesn't exist
+      if (onArticleNotFound && typeof onArticleNotFound === 'function') {
+        onArticleNotFound(slug);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug, onArticleNotFound]);
+  
+  // Fetch data on component mount or when slug changes
+  useEffect(() => {
+    fetchWikipediaSummary();
+  }, [slug, fetchWikipediaSummary]);
   
   return (
     <div className={s.container}>
       <h1 className={s.centeredTitle}>
         {articleExists ? (
           <a 
-            href={`https://en.wikipedia.org/wiki/${slug}`}
+            href={`https://en.wikipedia.org/wiki/${encodeURIComponent(slug)}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -94,10 +107,7 @@ const WikipediaPreview = ({ slug = '' }) => {
 
 WikipediaPreview.propTypes = {
   slug: PropTypes.string,
-};
-
-WikipediaPreview.defaultProps = {
-  slug: '',
+  onArticleNotFound: PropTypes.func
 };
 
 export default WikipediaPreview;

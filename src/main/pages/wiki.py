@@ -25,8 +25,8 @@ class WikiPage(HeadlessPreviewMixin, RoutablePageMixin, BasePage):
         response_cls = Response if isinstance(request, Request) else JsonResponse
         return response_cls(data)
 
-    # Route for /wiki/Article_Name
-    @route(r"^(?P<article_slug>[\w-]+)/$")
+    # Route for /wiki/Article_Name - accepting all characters in the slug
+    @route(r"^(?P<article_slug>.+)/$")
     def article_route(self, request, article_slug, *args, **kwargs):
         """Handles individual article pages based on their slug"""
         context = {"request": request, "article_slug": article_slug}
@@ -40,20 +40,7 @@ class WikiPage(HeadlessPreviewMixin, RoutablePageMixin, BasePage):
         response_cls = Response if isinstance(request, Request) else JsonResponse
         return response_cls(data)
 
-    # Route for /wiki/search/?q=query
-    @route(r"^search/$")
-    def search_route(self, request, *args, **kwargs):
-        """Handles search queries"""
-        query = request.GET.get("q", "")
-
-        context = {"request": request, "query": query}
-
-        data = self.get_component_data(
-            context=context, serializer_cls="main.pages.WikiSearchSerializer"
-        )
-
-        response_cls = Response if isinstance(request, Request) else JsonResponse
-        return response_cls(data)
+    # Search functionality now handled through the main index_route with query parameters
 
     objects: PageManager
 
