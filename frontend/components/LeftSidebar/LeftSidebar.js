@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useLanguage } from '../../context/LanguageContext';
 import s from './LeftSidebar.module.css';
 import ThemeToggleButton from '../ThemeToggleButton';
 import AboutButton from '../AboutButton';
@@ -9,9 +10,14 @@ import SiteName from '../SiteName';
 
 const LeftSidebar = ({ items }) => {
     const [collapsed, setCollapsed] = useState(true);
+    const { language, setLanguage } = useLanguage();
 
     const toggleCollapse = () => {
         setCollapsed(!collapsed);
+    };
+
+    const handleChangeLanguage = () => {
+        console.log("Language change requested. Current:", language);
     };
 
     return (
@@ -34,6 +40,11 @@ const LeftSidebar = ({ items }) => {
             </div>
 
             <div className={s.Content}>
+                {/* Language Selector */}
+                <div className={s.LanguageSelector}>
+                    <span>Language: {language.toUpperCase()}</span>
+                </div>
+
                 {/* Navigation items */}
                 <nav className={s.Navigation}>
                     <ul className={s.NavList}>

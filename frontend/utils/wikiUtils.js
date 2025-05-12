@@ -1,4 +1,3 @@
-
 /**
  * Formats a string into a Wikipedia-compatible slug while preserving case and special characters
  * 
@@ -28,38 +27,73 @@ export const formatWikiSlug = (text) => {
 };
 
 /**
- * Retrieves the Wikipedia article using the REST API
- * Returns the response data if successful, or null if article doesn't exist
+ * Retrieves the Wikipedia article summary and checks if it's a disambiguation page.
+ * Returns an object with summary data, disambiguation status, and error info.
  * 
  * @param {string} slug The article slug to check
- * @returns {Promise<Object|null>} The article data or null if not found
+ * @returns {Promise<Object>} An object like { summaryData: Object|null, isDisambiguation: boolean, error: string|null }
  */
 export const fetchWikipediaArticle = async (slug) => {
-  if (!slug) return null;
-  
-  // Format the slug properly before calling the API
+  if (!slug) return { summaryData: null, isDisambiguation: false, error: 'Slug is required' };
+
   const formattedSlug = formatWikiSlug(slug);
-  
+  let summaryData = null;
+  let isDisambiguation = false;
+  let error = null;
+
   try {
-    // We only use encodeURIComponent for the API request, not for our internal URLs
-    const response = await fetch(
+    // 1. Fetch summary
+    const summaryResponse = await fetch(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedSlug)}`
     );
-    
-    if (!response.ok) {
-      return null;
+
+    if (!summaryResponse.ok) {
+      if (summaryResponse.status === 404) {
+        error = 'Article not found';
+      } else {
+        error = `Error fetching summary: ${summaryResponse.statusText}`;
+      }
+      return { summaryData: null, isDisambiguation: false, error };
     }
-    
-    const data = await response.json();
-    
-    // Store the unencoded canonical title in the response for our usage
-    if (data && data.title) {
-      data.canonicalSlug = data.title.replace(/\s+/g, '_');
+    summaryData = await summaryResponse.json();
+
+    // 2. Fetch categories to check for disambiguation
+    // Ensure a different user-agent or API key if making many requests, as per Wikipedia API etiquette.
+    // Using origin=* for typical browser-based client-side requests.
+    const categoriesResponse = await fetch(
+      `https://en.wikipedia.org/w/api.php?action=query&prop=categories&titles=${encodeURIComponent(formattedSlug)}&format=json&origin=*&cllimit=max`
+    );
+
+    if (!categoriesResponse.ok) {
+      console.warn(`Could not fetch categories for ${formattedSlug}: ${categoriesResponse.statusText}`);
+      // Proceed with summary data, but cannot confirm disambiguation status via categories
+      return { summaryData, isDisambiguation: false, error: 'Could not fetch categories' };
     }
-    
-    return data;
+
+    const categoriesData = await categoriesResponse.json();
+    const pages = categoriesData.query?.pages;
+    if (pages) {
+      const pageId = Object.keys(pages)[0];
+      const page = pages[pageId];
+      if (page && page.categories) {
+        const disambiguationCategories = [
+          "Category:All disambiguation pages",
+          "Category:Disambiguation pages",
+          "Category:All article disambiguation pages", // Added based on your previous finding
+          "Category:Redirects from ambiguous terms",
+          "Category:Redirects from other capitalisations",
+          "Category:Unprintworthy redirects",
+          // Add other known disambiguation category titles if necessary
+        ];
+        isDisambiguation = page.categories.some(cat => disambiguationCategories.includes(cat.title));
+      }
+    }
   } catch (err) {
-    console.error('Error fetching Wikipedia article:', err);
-    return null;
+    console.error('Error in fetchWikipediaArticle:', err);
+    error = err.message || 'An unexpected error occurred';
+    // If summary was fetched before error, return it, otherwise null
+    return { summaryData, isDisambiguation: false, error };
   }
+
+  return { summaryData, isDisambiguation, error };
 };

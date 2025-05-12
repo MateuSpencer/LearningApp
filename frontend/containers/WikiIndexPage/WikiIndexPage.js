@@ -5,10 +5,12 @@ import SearchBar from '../../components/SearchBar';
 import WikiSearchResults from '../../components/WikiSearchResults';
 import useWikiSearch from '../../hooks/useWikiSearch';
 import { useRouter } from 'next/router';
+import { useLanguage } from '../../context/LanguageContext'; // Import useLanguage
 import s from './WikiIndexPage.module.css';
 
 const WikiIndexPage = ({ title }) => {
   const router = useRouter();
+  const { language } = useLanguage(); // Get language from context
   
   // Custom hook for handling search
   const { query, setQuery, results, loading, error } = useWikiSearch();
@@ -25,7 +27,7 @@ const WikiIndexPage = ({ title }) => {
       // Preserve case and special characters for Wikipedia's case-sensitive URLs
       const formattedQuery = searchQuery.replace(/\s+/g, '_');
       const response = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)}`
+        `https://${language}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)}` // Use language context
       );
       
       if (response.ok) {
@@ -48,7 +50,7 @@ const WikiIndexPage = ({ title }) => {
       pathname: '/wiki',
       query: { q: searchQuery }
     }, undefined, { shallow: true });
-  }, [router]);
+  }, [router, language]); // Add language to dependency array
   
   // Initialize from URL query parameter
   useEffect(() => {
