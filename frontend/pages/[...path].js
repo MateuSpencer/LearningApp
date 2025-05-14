@@ -147,8 +147,11 @@ export async function getServerSideProps({ req, params, res }) {
                 // Define paths that should be treated as Wiki article paths
                 const isLikelyWikiArticlePath =
                     (path.startsWith('wiki/') && path !== 'wiki/index') ||
-                    (!path.includes('/') && path !== '' && !path.startsWith('accounts/')) || // check for top-level paths
-                    (path.length <= 5 && !path.includes('/') && path !== ''); // Short paths like 'cla' are likely attempts at wiki paths
+                    // Don't treat certain paths as wiki paths
+                    (!['community-posts', 'learning-resources', 'my-posts'].includes(path) &&
+                     !path.includes('/') && path !== '' && !path.startsWith('accounts/')) || // check for top-level paths
+                    (path.length <= 5 && !path.includes('/') && path !== '' &&
+                     !['community-posts', 'learning-resources', 'my-posts'].includes(path)); // Short paths like 'cla' are likely attempts at wiki paths
 
                 if (isLikelyWikiArticlePath) {
                     const attemptedTitle = (path.startsWith('wiki/') ? path.substring(5) : path).replace(/_/g, ' ');

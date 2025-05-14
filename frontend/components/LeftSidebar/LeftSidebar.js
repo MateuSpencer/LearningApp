@@ -1,35 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '../../context/LanguageContext';
 import s from './LeftSidebar.module.css';
 import ThemeToggleButton from '../ThemeToggleButton';
 import AboutButton from '../AboutButton';
 import AccountButton from '../AccountButton';
+import LanguageSelector from '../LanguageSelector';
 import Logo from '../Logo';
 import SiteName from '../SiteName';
 
-const LeftSidebar = ({ items }) => {
+const LeftSidebar = () => {
     const [collapsed, setCollapsed] = useState(true);
-    const { language, setLanguage } = useLanguage();
+    const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+    const { language } = useLanguage();
+    const collapseTimerRef = useRef(null);
+    const sidebarRef = useRef(null);
 
-    const toggleCollapse = () => {
-        setCollapsed(!collapsed);
-    };
+    const handleMouseEnter = useCallback(() => {
+        // Clear any pending collapse timer
+        if (collapseTimerRef.current) {
+            clearTimeout(collapseTimerRef.current);
+            collapseTimerRef.current = null;
+        }
+        setCollapsed(false);
+    }, []);
 
-    const handleChangeLanguage = () => {
-        console.log("Language change requested. Current:", language);
-    };
+    const handleMouseLeave = useCallback(() => {
+        if (!isLanguageDropdownOpen) {
+            // Set a timeout to delay the collapse by 500ms (half a second)
+            collapseTimerRef.current = setTimeout(() => {
+                setCollapsed(true);
+            }, 500);
+        }
+    }, [isLanguageDropdownOpen]);
+    
+    const handleLanguageDropdownToggle = useCallback((isOpen) => {
+        setIsLanguageDropdownOpen(isOpen);
+    }, []);
+    
+    // Cleanup timer when component unmounts
+    useEffect(() => {
+        return () => {
+            if (collapseTimerRef.current) {
+                clearTimeout(collapseTimerRef.current);
+            }
+        };
+    }, []);
 
     return (
-        <div className={`${s.LeftSidebar} ${collapsed ? s.Collapsed : s.Expanded}`}>
-            <button 
-                className={s.ToggleButton}
-                onClick={toggleCollapse}
-                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-                {collapsed ? '›' : '‹'}
-            </button>
-
+        <div 
+            ref={sidebarRef}
+            className={`${s.LeftSidebar} ${collapsed ? s.Collapsed : s.Expanded}`}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
             <div className={s.Header}>
               <div className={s.LogoWrapper}>
                 <Logo size="medium" />
@@ -40,14 +64,17 @@ const LeftSidebar = ({ items }) => {
             </div>
 
             <div className={s.Content}>
-                {/* Language Selector */}
-                <div className={s.LanguageSelector}>
-                    <span>Language: {language.toUpperCase()}</span>
-                </div>
-
                 {/* Navigation items */}
                 <nav className={s.Navigation}>
                     <ul className={s.NavList}>
+                        <li className={s.NavItem}>
+                            <Link href="/wiki" className={s.NavLink}>
+                                <span className={s.NavIcon}>🌐</span>
+                                <div className={s.NavTextWrapper}>
+                                    <span className={s.NavText}>Wiki Articles</span>
+                                </div>
+                            </Link>
+                        </li>
                         <li className={s.NavItem}>
                             <Link href="/learning-resources" className={s.NavLink}>
                                 <span className={s.NavIcon}>📚</span>
@@ -57,21 +84,24 @@ const LeftSidebar = ({ items }) => {
                             </Link>
                         </li>
                         <li className={s.NavItem}>
-                            <Link href="/wiki" className={s.NavLink}>
-                                <span className={s.NavIcon}>🌐</span>
+                            <Link href="/community-posts" className={s.NavLink}>
+                                <span className={s.NavIcon}>👥</span>
                                 <div className={s.NavTextWrapper}>
-                                    <span className={s.NavText}>Wiki</span>
+                                    <span className={s.NavText}>Community Posts</span>
                                 </div>
                             </Link>
                         </li>
-                        <li className={s.NavItem}>
-                            <Link href="/my-posts" className={s.NavLink}>
-                                <span className={s.NavIcon}>📝</span>
-                                <div className={s.NavTextWrapper}>
-                                    <span className={s.NavText}>My Posts</span>
-                                </div>
-                            </Link>
-                        </li>
+                        {/* SubNavItem only shows when sidebar is expanded */}
+                        {!collapsed && (
+                            <li className={`${s.NavItem} ${s.SubNavItem}`}>
+                                <Link href="/my-posts" className={s.NavLink}>
+                                    <span className={s.NavIcon}>📝</span>
+                                    <div className={s.NavTextWrapper}>
+                                        <span className={s.NavText}>My Posts</span>
+                                    </div>
+                                </Link>
+                            </li>
+                        )}
                     </ul>
                 </nav>
 
@@ -80,6 +110,9 @@ const LeftSidebar = ({ items }) => {
                     <div className={s.ButtonsContainer}>
                         <div className={`${s.ButtonWrapper} ${s.ThemeButtonWrapper}`}>
                             <ThemeToggleButton/>
+                        </div>
+                        <div className={`${s.ButtonWrapper} ${s.LanguageButtonWrapper}`}>
+                            <LanguageSelector onDropdownToggle={handleLanguageDropdownToggle} />
                         </div>
                         <div className={`${s.ButtonWrapper} ${s.AboutButtonWrapper}`}>
                             <AboutButton expanded={!collapsed} />

@@ -34,7 +34,7 @@ const BasePage = ({ children, seo, shouldRenderSeo, wagtailUserbar }) => {
             )}
             <div className={s.pageLayout}>
                 <div className={s.leftSidebar}>
-                    <LeftSidebar items={[]} />
+                    <LeftSidebar />
                 </div>
                 <main className={s.mainContent}>
                     {children}
