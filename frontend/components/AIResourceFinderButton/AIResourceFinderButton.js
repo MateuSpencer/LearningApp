@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FaBrain, FaSpinner } from 'react-icons/fa';
-import { findLearningResources } from '../../services/aiResourceFinder';
+import { findResources } from '../../api/aiResources';
 import { getActiveProviderConfig } from '../../config/aiConfig';
 import s from './AIResourceFinderButton.module.css';
 
@@ -27,11 +27,14 @@ const AIResourceFinderButton = ({ title, compact = false, onResourcesFound }) =>
       setLoading(true);
       setError(null);
       
-      // Get active provider configuration
-      const providerConfig = getActiveProviderConfig();
+      // Get active provider configuration - ensure we're using Tavily
+      const providerConfig = {
+        ...getActiveProviderConfig(),
+        provider: 'tavily' // Force using Tavily regardless of environment settings
+      };
       
       // Call the AI service to find learning resources
-      const resources = await findLearningResources(title, providerConfig);
+      const resources = await findResources(title, providerConfig);
       
       // Call the callback with the found resources
       if (onResourcesFound && resources) {

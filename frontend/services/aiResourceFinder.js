@@ -1,10 +1,8 @@
 // Service for finding learning resources using AI
-import { ChatOpenAI } from "@langchain/openai";
-import { ChatTogetherAI } from "@langchain/community/chat_models/togetherai";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { StructuredOutputParser } from "@langchain/core/output_parsers";
-import { JsonOutputFunctionsParser } from "@langchain/core/output_parsers";
 import { z } from "zod";
+// Import TavilySearch directly as it's our default provider
+import { TavilySearch } from "@langchain/tavily";
+// Other imports will be loaded dynamically when needed to prevent unnecessary loading
 
 /**
  * Helper function to safely extract and parse JSON from text that might contain markdown or other formatting
@@ -58,8 +56,12 @@ const resourceSchema = z.object({
  * - meta-llama/Llama-3.3-70B-Instruct-Turbo-Free
  * - deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free
  */
-const getTogetherAIModel = (togetherApiKey, modelName = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free") => {
+const getTogetherAIModel = async (togetherApiKey, modelName = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free") => {
   console.log(`[AIResourceFinder] Using Together AI model: ${modelName}`);
+  
+  // Dynamically import the module only when needed
+  const { ChatTogetherAI } = await import("@langchain/community/chat_models/togetherai");
+  
   return new ChatTogetherAI({
     modelName: modelName,
     temperature: 0.2,
@@ -70,7 +72,10 @@ const getTogetherAIModel = (togetherApiKey, modelName = "meta-llama/Llama-3.3-70
 /**
  * Initialize Azure OpenAI model
  */
-const getAzureOpenAIModel = (apiKey, endpoint, deploymentName) => {
+const getAzureOpenAIModel = async (apiKey, endpoint, deploymentName) => {
+  // Dynamically import the module only when needed
+  const { ChatOpenAI } = await import("@langchain/openai");
+  
   return new ChatOpenAI({
     temperature: 0.2,
     azureOpenAIApiKey: apiKey,
@@ -83,7 +88,10 @@ const getAzureOpenAIModel = (apiKey, endpoint, deploymentName) => {
 /**
  * Initialize Google Cloud model
  */
-const getGoogleCloudModel = (apiKey) => {
+const getGoogleCloudModel = async (apiKey) => {
+  // Dynamically import the module only when needed
+  const { ChatOpenAI } = await import("@langchain/openai");
+  
   return new ChatOpenAI({
     modelName: "gemini-pro",
     temperature: 0.2,
@@ -95,7 +103,10 @@ const getGoogleCloudModel = (apiKey) => {
 /**
  * Initialize OpenAI model
  */
-const getOpenAIModel = (apiKey) => {
+const getOpenAIModel = async (apiKey) => {
+  // Dynamically import the module only when needed
+  const { ChatOpenAI } = await import("@langchain/openai");
+  
   return new ChatOpenAI({
     modelName: "gpt-4o",
     temperature: 0.2,
@@ -108,6 +119,10 @@ const getOpenAIModel = (apiKey) => {
  */
 export const findLearningResources = async (topic, apiConfig) => {
   try {
+    // Import required modules
+    const { ChatPromptTemplate } = await import("@langchain/core/prompts");
+    const { StructuredOutputParser } = await import("@langchain/core/output_parsers");
+    
     // Input validation
     if (!topic || typeof topic !== 'string' || topic.trim() === '') {
       throw new Error("A valid topic is required");
@@ -127,23 +142,23 @@ export const findLearningResources = async (topic, apiConfig) => {
     let model;
     switch (provider) {
       case "together":
-        model = getTogetherAIModel(apiKey, additionalConfig.modelName);
+        model = await getTogetherAIModel(apiKey, additionalConfig.modelName);
         break;
       case "azure":
         if (!additionalConfig.endpoint || !additionalConfig.deploymentName) {
           throw new Error("Azure endpoint and deployment name are required");
         }
-        model = getAzureOpenAIModel(apiKey, additionalConfig.endpoint, additionalConfig.deploymentName);
+        model = await getAzureOpenAIModel(apiKey, additionalConfig.endpoint, additionalConfig.deploymentName);
         break;
       case "google":
-        model = getGoogleCloudModel(apiKey);
+        model = await getGoogleCloudModel(apiKey);
         break;
       case "openai":
-        model = getOpenAIModel(apiKey);
+        model = await getOpenAIModel(apiKey);
         break;
       default:
         // Default to Together AI
-        model = getTogetherAIModel(apiKey);
+        model = await getTogetherAIModel(apiKey);
     }
 
     // Create prompt template with explicit formatting instructions
@@ -279,6 +294,11 @@ DO NOT include ANY explanatory text, markdown formatting, or code blocks outside
  */
 export const findResourcesWithFunctionCalling = async (topic, apiConfig) => {
   try {
+    // Dynamically import required modules
+    const { ChatPromptTemplate } = await import("@langchain/core/prompts");
+    const { JsonOutputFunctionsParser } = await import("@langchain/core/output_parsers");
+    const { ChatOpenAI } = await import("@langchain/openai");
+    
     // Input validation
     if (!topic || typeof topic !== 'string' || topic.trim() === '') {
       throw new Error("A valid topic is required");
@@ -387,14 +407,88 @@ For each resource, provide a title, URL, brief description, and resource type.`]
   }
 };
 
+/**
+ * Find learning resources using Tavily Search API
+ */
+export const findLearningResourcesWithTavily = async (topic, apiConfig) => {
+  try {
+    // Input validation
+    if (!topic || typeof topic !== 'string' || topic.trim() === '') {
+      throw new Error("A valid topic is required");
+    }
+
+    // Use apiKey from apiConfig, or directly from environment variable
+    const tavilyApiKey = apiConfig?.apiKey || process.env.NEXT_PUBLIC_TAVILY_API_KEY;
+    
+    if (!tavilyApiKey) {
+      throw new Error("Tavily API key is required");
+    }
+
+    console.log(`[AIResourceFinder] Using Tavily Search for: ${topic}`);
+
+    // Set the environment variable that the Tavily library expects
+    process.env.TAVILY_API_KEY = tavilyApiKey;
+
+    // Configure Tavily Search - using default constructor which picks up TAVILY_API_KEY
+    const tavily = new TavilySearch({
+      maxResults: 5,
+      includeRawContent: false,
+      includeImages: false,
+      searchDepth: "moderate", // Use "basic" for faster results, "moderate" for more comprehensive
+      k: 5 // Number of results to return
+    });
+
+    // Execute search
+    const searchQuery = `best learning resources for "${topic}" for educational purposes`;
+    const searchResults = await tavily.invoke({
+      query: searchQuery
+    });
+
+    // Transform the results to match our expected format
+    const resources = searchResults.results.map(result => {
+      let resourceType = "website"; // Default type
+
+      // Determine resource type based on URL or content
+      if (result.url.includes("youtube.com") || result.url.includes("youtu.be") || 
+          result.url.includes("vimeo.com") || result.url.includes("dailymotion.com")) {
+        resourceType = "video";
+      } else if (result.url.endsWith(".pdf")) {
+        resourceType = "pdf";
+      } else if (result.url.endsWith(".jpg") || result.url.endsWith(".png") || 
+                result.url.endsWith(".gif") || result.url.endsWith(".jpeg")) {
+        resourceType = "image";
+      } else if (result.url.includes("blog") || 
+                result.url.includes("article") || 
+                result.url.includes("tutorial") ||
+                result.content.length > 100) {
+        resourceType = "article";
+      }
+
+      return {
+        title: result.title,
+        url: result.url,
+        description: result.content.substring(0, 200) + (result.content.length > 200 ? "..." : ""),
+        resourceType: resourceType
+      };
+    });
+
+    return resources;
+  } catch (error) {
+    console.error("Error finding learning resources with Tavily:", error);
+    throw error;
+  }
+};
+
 // Default export with all methods and provider options
 export default {
   findLearningResources,
   findResourcesWithFunctionCalling,
+  findLearningResourcesWithTavily,
   providers: {
     together: "together",
     azure: "azure", 
     google: "google",
-    openai: "openai"
+    openai: "openai",
+    tavily: "tavily"
   }
 };

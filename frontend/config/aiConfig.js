@@ -1,7 +1,7 @@
 // AI provider configuration file
 export const AI_CONFIG = {
   // Default provider - use environment variable or fallback to "together"
-  activeProvider: process.env.NEXT_PUBLIC_AI_PROVIDER || "together", // 'together', 'azure', 'google', 'openai'
+  activeProvider: process.env.NEXT_PUBLIC_AI_PROVIDER || "together", // 'together', 'azure', 'google', 'openai', 'tavily'
   
   // API Keys from environment variables
   apiKeys: {
@@ -20,6 +20,9 @@ export const AI_CONFIG = {
 
     // OpenAI
     openai: process.env.NEXT_PUBLIC_OPENAI_API_KEY || "",
+    
+    // Tavily
+    tavily: process.env.NEXT_PUBLIC_TAVILY_API_KEY || "",
   }
 };
 
@@ -28,7 +31,8 @@ export const AI_PROVIDERS = {
   TOGETHER: "together",
   AZURE: "azure", 
   GOOGLE: "google",
-  OPENAI: "openai"
+  OPENAI: "openai",
+  TAVILY: "tavily"
 };
 
 // Get current active provider configuration
