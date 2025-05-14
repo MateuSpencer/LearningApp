@@ -54,13 +54,14 @@ const resourceSchema = z.object({
 
 /**
  * Initialize a Together AI model
- * deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free
- * meta-llama/Llama-3.3-70B-Instruct-Turbo-Free
- * mistralai/Mixtral-8x7B-Instruct-v0.1
+ * Available models:
+ * - meta-llama/Llama-3.3-70B-Instruct-Turbo-Free
+ * - deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free
  */
-const getTogetherAIModel = (togetherApiKey) => {
+const getTogetherAIModel = (togetherApiKey, modelName = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free") => {
+  console.log(`[AIResourceFinder] Using Together AI model: ${modelName}`);
   return new ChatTogetherAI({
-    modelName: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+    modelName: modelName,
     temperature: 0.2,
     apiKey: togetherApiKey
   });
@@ -126,7 +127,7 @@ export const findLearningResources = async (topic, apiConfig) => {
     let model;
     switch (provider) {
       case "together":
-        model = getTogetherAIModel(apiKey);
+        model = getTogetherAIModel(apiKey, additionalConfig.modelName);
         break;
       case "azure":
         if (!additionalConfig.endpoint || !additionalConfig.deploymentName) {
@@ -184,6 +185,9 @@ ${formatInstructions(parser)}`],
 
     // Create the chain
     const chain = promptTemplate.pipe(model).pipe(parser);
+
+    // Log which model is being used
+    console.log(`[AIResourceFinder] Using AI model: ${provider}${additionalConfig.modelName ? ' with model: ' + additionalConfig.modelName : ''}`);
 
     // Execute the chain with retries for parsing errors
     const MAX_RETRIES = 2;
@@ -370,6 +374,9 @@ For each resource, provide a title, URL, brief description, and resource type.`]
     const parser = new JsonOutputFunctionsParser();
     
     const chain = promptTemplate.pipe(functionCallingModel).pipe(parser);
+    
+    // Log which model is being used
+    console.log(`[AIResourceFinder] Using AI model with function calling: ${apiConfig.provider}${apiConfig.modelName ? ' with model: ' + apiConfig.modelName : ''}`);
     
     const result = await chain.invoke({ topic });
     
