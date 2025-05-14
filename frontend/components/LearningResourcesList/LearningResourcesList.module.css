@@ -1,10 +1,5 @@
-.Root {
-}
-
 .container {
   margin: 2rem 0;
-  padding: 20px 0;
-  border-top: 1px solid var(--border-color);
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
@@ -15,7 +10,8 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
               border-color var(--theme-transition-speed) var(--theme-transition-timing),
-              box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
+              box-shadow var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .header {
@@ -23,21 +19,22 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .title {
   font-size: 1.5rem;
-  font-weight: 600; /* Match PostsList title weight */
+  font-weight: 600;
   margin: 0;
-  color: var(--color-primary-dark, #2AC6D0);
+  color: var(--text-primary); /* Use text-primary for proper light/dark mode support */
   transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
-.controls {
+/* Top action buttons container */
+.topActions {
   display: flex;
-  flex-direction: column;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  align-items: center;
 }
 
 .actions {
@@ -98,7 +95,9 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   animation: slideDown 0.3s ease-out; /* Add animation like PostsList filter/sort panels */
-  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 /* Keyframes for slideDown animation (copied from PostsList.module.css) */
@@ -209,7 +208,7 @@
   border-radius: 8px;
   color: var(--text-secondary, #666666);
   transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
-              border-color var(--theme-transition-speed) var(--theme-transition-timing);
+              border-color var(--theme-transition-speed) var (--theme-transition-timing);
 }
 
 .emptyState p {
@@ -252,27 +251,23 @@
 .controlsWrapper {
   margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
   transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 /* Controls bar that contains all top-level controls */
 .controlsBar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  gap: 1rem;
 }
 
 .controlsLeft {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex: 1;
-}
-
-.controlsRight {
-  display: flex;
-  justify-content: flex-end;
+  margin-right: 1rem;
 }
 
 /* Icon buttons for toggling filters and sorting */
@@ -280,12 +275,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem;
   padding: 0.5rem;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   color: var(--text-primary);
+  font-size: 0.85rem;
   transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
               border-color var(--theme-transition-speed) var(--theme-transition-timing),
               color var(--theme-transition-speed) var(--theme-transition-timing),
@@ -324,7 +321,7 @@
 .searchContainer {
   position: relative;
   flex: 1;
-  max-width: 400px;
+  max-width: none;
 }
 
 .searchInput {
@@ -390,9 +387,14 @@
 /* Filter and sort panels */
 .filterPanel, 
 .sortPanel {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
   margin-bottom: 1rem;
-  padding: 0.75rem 0;
-  animation: slideDown 0.2s ease-out;
+  animation: slideDown 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 /* Media queries for responsive design */
@@ -403,17 +405,29 @@
     gap: 0.75rem;
   }
   
-  .controlsLeft, 
-  .controlsRight {
+  .controlsLeft {
     width: 100%;
+    margin-right: 0;
+    justify-content: space-between;
   }
   
   .searchContainer {
-    max-width: none;
+    width: 100%;
   }
   
-  .addButton {
+  .topActions {
     width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .addResourceButton {
+    flex-grow: 1;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -423,4 +437,267 @@
   font-weight: 600;
   margin-bottom: 1.5rem;
   color: var(--text-primary);
+}
+
+/* AI Resources Section Styles */
+.aiResourcesSection {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: rgba(var(--color-secondary-rgb, 250, 152, 54), 0.05); /* Light orange background with opacity */
+  border: 1px solid rgba(var(--color-secondary-rgb, 250, 152, 54), 0.2);
+  border-radius: 8px;
+  animation: fadeIn 0.5s ease;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Dark mode style for AI resources section */
+[data-theme="dark"] .aiResourcesSection {
+  background-color: rgba(var(--color-secondary-rgb, 250, 152, 54), 0.08);
+}
+
+.aiResourcesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed rgba(var(--color-secondary-rgb, 250, 152, 54), 0.3);
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.aiResourcesTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-secondary, #EA6400); /* Orange color */
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+[data-theme="dark"] .aiResourcesTitle {
+  color: var(--color-secondary-light, #FFA500); /* Lighter orange for dark mode */
+}
+
+.aiResourcesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 1rem 0;
+}
+
+.aiResourceItem {
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  border-left: 4px solid var(--color-secondary-light, #FFA500);
+  transition: transform 0.2s ease, 
+              box-shadow 0.2s ease,
+              background-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Dark mode style for AI resource items */
+[data-theme="dark"] .aiResourceItem {
+  background-color: rgba(40, 40, 40, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.aiResourceItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.aiResourceItemTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.aiResourceItemTitle a {
+  color: var(--color-secondary, #EA6400);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.aiResourceItemTitle a:hover {
+  color: var(--color-secondary-dark, #D35400);
+  text-decoration: underline;
+}
+
+.aiResourceItemMeta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.aiResourceType {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background-color: rgba(255, 165, 0, 0.2);
+  color: var(--color-secondary-dark, #D35400);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Resource type specific colors */
+.resourceTypewebsite {
+  background-color: rgba(52, 152, 219, 0.2);
+  color: #2980b9;
+}
+
+.resourceTypevideo {
+  background-color: rgba(231, 76, 60, 0.2);
+  color: #c0392b;
+}
+
+.resourceTypepdf {
+  background-color: rgba(155, 89, 182, 0.2);
+  color: #8e44ad;
+}
+
+.resourceTypearticle {
+  background-color: rgba(46, 204, 113, 0.2);
+  color: #27ae60;
+}
+
+.resourceTypeimage {
+  background-color: rgba(241, 196, 15, 0.2);
+  color: #f39c12;
+}
+
+.aiResourceDescription {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.toggleButton {
+  background: none;
+  border: 1px solid var(--color-secondary-light, #FFA500);
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-secondary, #EA6400);
+  cursor: pointer;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.toggleButton:hover {
+  background-color: rgba(var(--color-secondary-rgb, 250, 152, 54), 0.1);
+}
+
+/* Button group to align Add Resource and AI Resource buttons */
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.addResourceButton {
+  background-color: var(--color-primary);
+  color: var(--bg-primary-inverse, #333);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              transform 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.addResourceButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.addResourceButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.resourceSeparator {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-align: center;
+  position: relative;
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.resourceSeparator::before,
+.resourceSeparator::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--border-color);
+  margin: 0 1rem;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* AI Button Wrapper to add some margin/padding */
+.aiButtonWrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* Button Group to align Add Resource and AI Find buttons */
+.buttonGroup {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.addResourceButton {
+  background-color: var(--color-primary);
+  color: #333; /* Dark text for better contrast on light button */
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              transform 0.2s ease,
+              box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode specific style for buttons */
+[data-theme="dark"] .addResourceButton {
+  color: #111; /* Even darker text for dark mode's bright button */
+}
+
+.addResourceButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.addResourceButton:disabled {
+  background-color: var(--color-grey-400);
+  cursor: not-allowed;
 }

@@ -6,11 +6,13 @@
     --color-primary: #01FFFF; /* Electric Cyan (highlight) */
     --color-primary-dark: #2AC6D0; /* Bright Teal */
     --color-primary-light: #E0FFFF; /* Light Cyan */
+    --color-primary-rgb: 1, 255, 255;
     
     /* Secondary Colors - Orange Theme */
     --color-secondary: #FA9836; /* Bright Orange (highlight) */
     --color-secondary-dark: #EA6400; /* Vivid Orange */
     --color-secondary-light: #FFB853; /* Soft Orange/Apricot */
+    --color-secondary-rgb: 250, 152, 54;
     
     /* Neutral Colors - Adjusted to complement the palette */
     --color-grey-100: #f8f9fa;
@@ -46,11 +48,13 @@
     --color-primary: #00BFBF; /* Darker Cyan */
     --color-primary-dark: #008B8B; /* Deep Teal */
     --color-primary-light: #00E0E0; /* Medium Cyan */
+    --color-primary-rgb: 0, 191, 191;
     
     /* Secondary Colors - Darker Variants */
     --color-secondary: #E57200; /* Deep Orange */
     --color-secondary-dark: #BF5A00; /* Burnt Orange */
     --color-secondary-light: #FF8C1A; /* Bright Orange */
+    --color-secondary-rgb: 229, 114, 0;
     
     /* Neutral Colors - Darker */
     --color-grey-100: #1e1e1e;

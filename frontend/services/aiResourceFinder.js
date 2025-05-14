@@ -439,7 +439,7 @@ export const findLearningResourcesWithTavily = async (topic, apiConfig) => {
     });
 
     // Execute search
-    const searchQuery = `best learning resources for "${topic}" for educational purposes`;
+    const searchQuery = `best learning resources for "${topic}" for educational purposes. No wikipedia pages`;
     const searchResults = await tavily.invoke({
       query: searchQuery
     });

@@ -109,9 +109,9 @@
     background-color: var(--bg-primary);
     color: var(--text-primary);
     transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
-                background-color var(--theme-transition-speed) var(--theme-transition-timing),
-                color var(--theme-transition-speed) var (--theme-transition-timing),
-                box-shadow 0.2s ease;
+            background-color var(--theme-transition-speed) var(--theme-transition-timing),
+            color var(--theme-transition-speed) var(--theme-transition-timing),
+            box-shadow 0.2s ease;
 }
 
 .searchInput:focus {
@@ -196,7 +196,7 @@
 
 .newPostButton {
     background-color: var(--color-primary);
-    color: white;
+    color: #333333;
     border: none;
     border-radius: 20px;
     padding: 0.5rem 1rem;

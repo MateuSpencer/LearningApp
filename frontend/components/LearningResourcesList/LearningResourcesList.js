@@ -6,6 +6,7 @@ import useLearningResources from '../../hooks/useLearningResources';
 import LearningResourceItem from '../LearningResourceItem/LearningResourceItem';
 import NewLearningResourceForm from '../NewLearningResourceForm/NewLearningResourceForm';
 import { LearningResourcesFilter, LearningResourcesSort, LearningResourcesPagination } from '../LearningResourcesControls';
+import AIResourceFinderButton from '../AIResourceFinderButton/AIResourceFinderButton';
 import s from './LearningResourcesList.module.css';
 
 /**
@@ -32,6 +33,11 @@ const LearningResourcesList = ({
   const router = useRouter();
   const LOGIN_URL = '/accounts/login/';
   const [showForm, setShowForm] = useState(false);
+  
+  // AI resources state
+  const [aiResources, setAiResources] = useState(null);
+  const [showAiResources, setShowAiResources] = useState(true); // Default to showing when available
+  const [aiResourcesCollapsed, setAiResourcesCollapsed] = useState(false);
   
   // State for filter and sort toggles
   const [showFilters, setShowFilters] = useState(false);
@@ -104,6 +110,24 @@ const LearningResourcesList = ({
     } else {
       setShowForm(true);
     }
+  };
+  
+  // Handle AI resources found
+  const handleAiResourcesFound = (resources) => {
+    setAiResources(resources);
+    setShowAiResources(true);
+    setAiResourcesCollapsed(false); // Expand when new resources are found
+  };
+  
+  // Handle AI resource find button click
+  const handleAiFindClick = () => {
+    if (!requireAuth()) return;
+    // Continue with the normal flow if user is authenticated
+  };
+  
+  // Toggle AI resources collapsed state
+  const toggleAiResourcesCollapsed = () => {
+    setAiResourcesCollapsed(!aiResourcesCollapsed);
   };
   
   // Handle form submission success
@@ -301,76 +325,141 @@ const LearningResourcesList = ({
 
   return (
     <div className={s.container}>
-      {/* Add centered title */}
-      <h2 className={s.centeredTitle}>Learning Resources</h2>
+      {/* Header with title and top action buttons */}
+      <div className={s.header}>
+        <h2 className={s.title}>Learning Resources</h2>
+        
+        <div className={s.topActions}>
+          {/* Add Resource button */}
+          {showAddButton && (
+            <button
+              className={s.addResourceButton}
+              onClick={handleAddResource}
+              disabled={showForm || controlsDisabled}
+            >
+              Add Resource
+            </button>
+          )}
+          
+          {/* AI Resource Finder button - only on wiki pages (with pageSlug) and for authenticated users */}
+          {pageSlug && !showAll && isAuthenticated && (
+            <AIResourceFinderButton 
+              title={pageSlug}
+              onResourcesFound={handleAiResourcesFound}
+              compact={true}
+            />
+          )}
+        </div>
+      </div>
       
+      {/* Form for adding new resources */}
+      {showForm && (
+        <NewLearningResourceForm 
+          pageSlug={pageSlug}
+          onSuccess={handleResourceAdded}
+          onCancel={handleCancelForm}
+        />
+      )}
+      
+      {/* Show AI-generated resources if available */}
+      {showAiResources && aiResources && aiResources.length > 0 && (
+        <div className={s.aiResourcesSection}>
+          <div className={s.aiResourcesHeader} onClick={() => setAiResourcesCollapsed(!aiResourcesCollapsed)}>
+            <h3 className={s.aiResourcesTitle}>
+              AI-Recommended Learning Resources ✨
+            </h3>
+            <button 
+              className={s.toggleButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                setAiResourcesCollapsed(!aiResourcesCollapsed);
+              }}
+              aria-label={aiResourcesCollapsed ? "Expand AI resources" : "Collapse AI resources"}
+            >
+              {aiResourcesCollapsed ? "Show" : "Hide"}
+            </button>
+          </div>
+          
+          {!aiResourcesCollapsed && (
+            <div className={s.aiResourcesList}>
+              {aiResources.map((resource, index) => (
+                <div key={`ai-resource-${index}`} className={s.aiResourceItem}>
+                  <h4 className={s.aiResourceItemTitle}>
+                    <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                      {resource.title}
+                    </a>
+                  </h4>
+                  <div className={s.aiResourceItemMeta}>
+                    <span className={`${s.aiResourceType} ${s[`resourceType${resource.resourceType}`]}`}>
+                      {resource.resourceType}
+                    </span>
+                  </div>
+                  <p className={s.aiResourceDescription}>
+                    {resource.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Separator between AI and user resources */}
+          <div className={s.resourceSeparator}>
+            <span>User-submitted resources below</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Controls for user resources - placed right after AI resources */}
       <div className={s.controlsWrapper}>
         <div className={s.controlsBar}>
           <div className={s.controlsLeft}>
-            {/* Filter toggle button */}
-            <button 
+            {/* Filter button */}
+            <button
               className={`${s.iconButton} ${showFilters ? s.active : ''}`}
               onClick={toggleFilters}
               disabled={controlsDisabled}
-              aria-label="Toggle filters"
-              title="Toggle filters"
+              aria-label="Show filters"
             >
               <span className={s.icon}><FilterIcon /></span>
               <span className={s.iconText}>Filter</span>
             </button>
             
-            {/* Sort toggle button */}
-            <button 
+            {/* Sort button */}
+            <button
               className={`${s.iconButton} ${showSort ? s.active : ''}`}
               onClick={toggleSort}
               disabled={controlsDisabled}
-              aria-label="Toggle sort options"
-              title="Toggle sort options"
+              aria-label="Show sort options"
             >
               <span className={s.icon}><SortIcon /></span>
               <span className={s.iconText}>Sort</span>
             </button>
-            
-            {/* Search input - always visible */}
-            <div className={s.searchContainer}>
-              <input
-                type="text"
-                className={s.searchInput}
-                placeholder="Search resources..."
-                value={searchValue}
-                onChange={handleSearchChange}
-                disabled={controlsDisabled}
-              />
-              {searchValue && (
-                <button 
-                  className={s.clearSearchButton}
-                  onClick={() => {
-                    setSearchValue('');
-                    updateFilter('search', '');
-                  }}
-                  disabled={controlsDisabled}
-                  aria-label="Clear search"
-                >
-                  ✕
-                </button>
-              )}
-              {!searchValue && (
-                <span className={s.searchIconWrapper}>
-                  <SearchIcon />
-                </span>
-              )}
-            </div>
           </div>
           
-          <div className={s.controlsRight}>
-            {/* Add Resource button */}
-            {showAddButton && (
+          {/* Search input on the right */}
+          <div className={s.searchContainer}>
+            <input
+              type="text"
+              className={s.searchInput}
+              placeholder="Search resources..."
+              value={searchValue}
+              onChange={handleSearchChange}
+              disabled={controlsDisabled}
+            />
+            <div className={s.searchIconWrapper}>
+              <SearchIcon />
+            </div>
+            {searchValue && (
               <button 
-                className={s.addButton}
-                onClick={handleAddResource}
-                disabled={showForm || controlsDisabled}
+                className={s.clearSearchButton} 
+                onClick={() => {
+                  setSearchValue('');
+                  updateFilter('search', '');
+                }}
+                disabled={!searchValue || controlsDisabled}
+                aria-label="Clear search"
               >
-                Add Resource
+                &times;
               </button>
             )}
           </div>
@@ -401,15 +490,6 @@ const LearningResourcesList = ({
           </div>
         )}
       </div>
-      
-      {/* Form for adding new resources */}
-      {showForm && (
-        <NewLearningResourceForm 
-          pageSlug={pageSlug}
-          onSuccess={handleResourceAdded}
-          onCancel={handleCancelForm}
-        />
-      )}
       
       {/* Show authentication-related errors */}
       {authLoading && <p className={s.loading}>Checking authentication...</p>}

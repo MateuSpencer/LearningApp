@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin: 1rem 0;
 }
 
 .Button {
@@ -10,20 +9,23 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: #4a6fa5; /* Blue tone */
-  color: white;
+  background-color: var(--color-primary); /* Match Add Resource button */
+  color: #333; /* Dark text on light background for better contrast */
   border: none;
-  border-radius: 4px;
-  font-weight: 600;
+  border-radius: 20px; /* Match Add Resource button */
+  font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              transform 0.2s ease,
+              box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .Button:hover {
-  background-color: #395882;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .Button:active {
@@ -32,15 +34,16 @@
 }
 
 .Button:disabled {
-  background-color: #a0aec0;
+  background-color: var(--color-grey-400);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  opacity: 0.7;
 }
 
 .CompactButton {
   padding: 0.5rem 1rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .Icon {

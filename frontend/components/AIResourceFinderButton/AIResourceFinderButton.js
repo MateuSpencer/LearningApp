@@ -12,12 +12,18 @@ import s from './AIResourceFinderButton.module.css';
  * @param {string} props.title Page title to search resources for
  * @param {boolean} props.compact Whether to show the button in compact mode
  * @param {Function} props.onResourcesFound Callback when resources are found
+ * @param {Function} props.onClick Additional click handler for authentication checks
  */
-const AIResourceFinderButton = ({ title, compact = false, onResourcesFound }) => {
+const AIResourceFinderButton = ({ title, compact = false, onResourcesFound, onClick }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const handleFindResources = async () => {
+    // Call the additional click handler if provided (e.g., for auth checks)
+    if (onClick) {
+      // If the handler returns false, stop processing
+      if (onClick() === false) return;
+    }
     if (!title) {
       setError('No topic provided for search');
       return;
@@ -66,7 +72,7 @@ const AIResourceFinderButton = ({ title, compact = false, onResourcesFound }) =>
         ) : (
           <>
             <FaBrain className={s.Icon} aria-hidden="true" />
-            <span>{compact ? 'AI Find' : 'Find AI-Recommended Resources'}</span>
+            <span>{compact ? 'AI Find ✨' : 'Find AI-Recommended Resources ✨'}</span>
           </>
         )}
       </button>
