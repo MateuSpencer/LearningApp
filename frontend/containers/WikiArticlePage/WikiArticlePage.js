@@ -7,6 +7,7 @@ import RightSidebar from '../../components/RightSidebar';
 import PostsList from '../../components/PostsList';
 import NewPostForm from '../../components/NewPostForm';
 import LearningResourcesList from '../../components/LearningResourcesList';
+import AIResourceFinderButton from '../../components/AIResourceFinderButton/AIResourceFinderButton';
 import s from './WikiArticlePage.module.css';
 import { fetchWikipediaArticle } from '../../utils/wikiUtils'; // Added import
 
@@ -15,6 +16,8 @@ const WikiArticlePage = ({ title, articleSlug }) => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [showNewPostForm, setShowNewPostForm] = useState(false);
   const [refreshPosts, setRefreshPosts] = useState(0);
+  const [aiResources, setAiResources] = useState(null);
+  const [showAiResources, setShowAiResources] = useState(false);
   
   const [articleExists, setArticleExists] = useState(false); // Remains false until positive confirmation
   const [isValidating, setIsValidating] = useState(true);
@@ -108,6 +111,12 @@ const WikiArticlePage = ({ title, articleSlug }) => {
     setShowNewPostForm(false);
     setRefreshPosts(prev => prev + 1);
   };
+  
+  // Handle AI resources found
+  const handleAiResourcesFound = (resources) => {
+    setAiResources(resources);
+    setShowAiResources(true);
+  };
 
   // This callback is likely no longer directly needed by WikipediaPreview 
   // if all redirection logic is in useEffect.
@@ -152,11 +161,59 @@ const WikiArticlePage = ({ title, articleSlug }) => {
             slug={articleSlug} 
             onArticleNotFound={handleArticleNotFound} // Keep or remove based on WikipediaPreview's own fetching logic
           />
+          
+          {/* AI Resource Finder button */}
+          <div className={s.aiButtonContainer}>
+            <AIResourceFinderButton 
+              title={articleSlug}
+              onResourcesFound={handleAiResourcesFound}
+            />
+          </div>
         </div>
         
         {/* Content sections are now primarily controlled by articleExists */}
         {articleExists && (
           <>
+            {/* AI Resources Section */}
+            {showAiResources && aiResources && aiResources.length > 0 && (
+              <div className={s.resourcesSection}>
+                <div className={s.aiResourcesContainer}>
+                  <div className={s.aiResourcesHeader}>
+                    <h3 className={s.aiResourcesTitle}>
+                      <span>AI-Recommended Learning Resources</span>
+                    </h3>
+                    <button 
+                      className={s.closeButton}
+                      onClick={() => setShowAiResources(false)}
+                      aria-label="Close AI resources"
+                    >
+                      Hide
+                    </button>
+                  </div>
+                  
+                  <div className={s.aiResourcesList}>
+                    {aiResources.map((resource, index) => (
+                      <div key={`ai-resource-${index}`} className={s.aiResourceItem}>
+                        <h4 className={s.aiResourceItemTitle}>
+                          <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                            {resource.title}
+                          </a>
+                        </h4>
+                        <div className={s.aiResourceItemMeta}>
+                          <span className={s.aiResourceType}>
+                            {resource.type}
+                          </span>
+                        </div>
+                        <p className={s.aiResourceDescription}>
+                          {resource.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className={s.resourcesSection}>
               <LearningResourcesList 
                 pageSlug={articleSlug} 

@@ -1,79 +1,3 @@
-.pageLayout {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-}
-
-.mainContent {
-  flex: 1;
-  padding: 20px;
-  max-width: calc(100% - 60px); /* Account for collapsed sidebar */
-  transition: max-width var(--theme-transition-speed) var(--theme-transition-timing);
-}
-
-.mainContent.withExpandedSidebar {
-  max-width: calc(100% - 250px); /* Account for expanded sidebar */
-}
-
-/* Loading state styling */
-.loadingSection {
-  margin: 40px 0;
-  padding: 20px;
-  text-align: center;
-  border-radius: 8px;
-  background-color: var(--theme-bg-secondary);
-  font-style: italic;
-  color: var(--theme-text-secondary);
-}
-
-.rightSidebarContainer {
-  width: 60px; /* Collapsed width */
-  min-width: 60px; /* Prevent shrinking */
-  transition: width var(--theme-transition-speed) var(--theme-transition-timing),
-              min-width var(--theme-transition-speed) var(--theme-transition-timing);
-}
-
-.rightSidebarContainer.expanded {
-  width: 250px;
-  min-width: 250px;
-}
-
-.resourcesSection {
-  margin-top: 30px;
-  padding-top: 30px;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  border-top: 1px solid var(--border-color);
-}
-
-.postsSection {
-  margin-top: 40px;
-  padding-top: 30px;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  border-top: 1px solid var(--border-color);
-}
-
-.introSection {
-  margin-bottom: 30px;
-}
-
-.postsTitle {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 24px;
-  color: var(--text-primary);
-  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
-}
-
-.aiButtonContainer {
-  display: flex;
-  justify-content: center;
-  margin-top: 24px;
-}
-
 .aiResourcesContainer {
   margin-bottom: 30px;
   padding: 20px;
@@ -96,7 +20,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0;
 }
 
 .aiResourcesList {
@@ -144,6 +67,12 @@
   font-size: 0.95rem;
   color: var(--theme-text-secondary, #6c757d);
   line-height: 1.5;
+}
+
+.aiButtonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
 }
 
 .closeButton {
