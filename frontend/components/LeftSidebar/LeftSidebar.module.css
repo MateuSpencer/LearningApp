@@ -89,6 +89,8 @@
     contain: layout;
 }
 
+/* Remove the LanguageSelectorContainer styles since we moved the language selector to the footer */
+
 .ButtonsContainer {
     display: flex;
     flex-direction: row;
@@ -99,27 +101,15 @@
     max-width: 100%; /* Ensure it doesn't exceed container width */
     flex-wrap: nowrap; /* Prevent wrapping during transition */
     min-width: 0; /* Allow container to shrink properly */
-    overflow: hidden; /* Strict hidden to prevent any scrollbar during transitions */
+    overflow: visible; /* Allow language toggle to be visible outside container */
     transform: translateZ(0); /* Hardware acceleration for smoother transitions */
-    contain: paint layout; /* Improve performance and prevent layout leaks */
-    mask-image: linear-gradient(to right, black 100%, transparent 100%); /* Mask any overflowing content */
 }
 
 .ThemeButtonWrapper {
     order: 1;  /* First icon (leftmost) */
 }
 
-.LanguageButtonWrapper {
-    order: 2;  /* Second icon after Theme toggle */
-}
-
-.AboutButtonWrapper {
-    order: 3;  /* Third icon after Language selector */
-}
-
-.AccountButtonWrapper {
-    order: 4;  /* Last icon (rightmost) */
-}
+/* AboutButtonWrapper and AccountButtonWrapper orders updated further below */
 
 .ButtonWrapper {
     display: flex;
@@ -137,8 +127,7 @@
 }
 
 .ThemeButtonWrapper,
-.AboutButtonWrapper,
-.LanguageButtonWrapper {
+.AboutButtonWrapper {
     max-width: 100px;
     width: auto;
     opacity: 1;
@@ -272,4 +261,19 @@ background-color: var(--bg-hover);
 /* Hide the subnav item completely when collapsed */
 .Collapsed .SubNavItem {
     display: none;
+}
+
+.LanguageButtonWrapper {
+    position: relative;
+    z-index: 10001; /* Higher z-index to ensure dropdown visibility */
+    order: 2; /* Place it between theme button and about button */
+    overflow: visible !important; /* Ensure dropdown is visible */
+}
+
+.AboutButtonWrapper {
+    order: 3;  /* Third icon after Language (moved up one) */
+}
+
+.AccountButtonWrapper {
+    order: 4;  /* Last icon (rightmost) */
 }

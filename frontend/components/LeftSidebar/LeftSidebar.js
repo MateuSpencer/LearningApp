@@ -11,7 +11,7 @@ import SiteName from '../SiteName';
 
 const LeftSidebar = () => {
     const [collapsed, setCollapsed] = useState(true);
-    const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+    const [isLanguageOptionsOpen, setIsLanguageOptionsOpen] = useState(false);
     const { language } = useLanguage();
     const collapseTimerRef = useRef(null);
     const sidebarRef = useRef(null);
@@ -26,16 +26,16 @@ const LeftSidebar = () => {
     }, []);
 
     const handleMouseLeave = useCallback(() => {
-        if (!isLanguageDropdownOpen) {
+        if (!isLanguageOptionsOpen) {
             // Set a timeout to delay the collapse by 500ms (half a second)
             collapseTimerRef.current = setTimeout(() => {
                 setCollapsed(true);
             }, 500);
         }
-    }, [isLanguageDropdownOpen]);
+    }, [isLanguageOptionsOpen]);
     
-    const handleLanguageDropdownToggle = useCallback((isOpen) => {
-        setIsLanguageDropdownOpen(isOpen);
+    const handleLanguageToggle = useCallback((isOpen) => {
+        setIsLanguageOptionsOpen(isOpen);
     }, []);
     
     // Cleanup timer when component unmounts
@@ -104,7 +104,7 @@ const LeftSidebar = () => {
                         )}
                     </ul>
                 </nav>
-
+                
                 <div className={s.Footer}>
                     {!collapsed && <p className={s.ThemeLabel}></p>}
                     <div className={s.ButtonsContainer}>
@@ -112,7 +112,7 @@ const LeftSidebar = () => {
                             <ThemeToggleButton/>
                         </div>
                         <div className={`${s.ButtonWrapper} ${s.LanguageButtonWrapper}`}>
-                            <LanguageSelector onDropdownToggle={handleLanguageDropdownToggle} />
+                            <LanguageSelector onToggle={handleLanguageToggle} />
                         </div>
                         <div className={`${s.ButtonWrapper} ${s.AboutButtonWrapper}`}>
                             <AboutButton expanded={!collapsed} />

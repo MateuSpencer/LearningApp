@@ -2,10 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import s from './LanguageSelector.module.css';
 
-const LanguageSelector = ({ onDropdownToggle }) => {
+const LanguageSelector = ({ onToggle }) => {
     const { language, setLanguage } = useLanguage();
     const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
+    const selectorRef = useRef(null);
 
     // Get flag emoji based on language code
     const getFlag = (langCode) => {
@@ -18,13 +18,13 @@ const LanguageSelector = ({ onDropdownToggle }) => {
         return flags[langCode] || '🌐';
     };
     
-    // Close dropdown when clicking outside
+    // Close language options when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            if (selectorRef.current && !selectorRef.current.contains(event.target)) {
                 setIsOpen(false);
-                if (onDropdownToggle) {
-                    onDropdownToggle(false);
+                if (onToggle) {
+                    onToggle(false);
                 }
             }
         };
@@ -33,13 +33,13 @@ const LanguageSelector = ({ onDropdownToggle }) => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [onDropdownToggle]);
+    }, [onToggle]);
 
-    const toggleDropdown = () => {
+    const toggleLanguageOptions = () => {
         const newIsOpen = !isOpen;
         setIsOpen(newIsOpen);
-        if (onDropdownToggle) {
-            onDropdownToggle(newIsOpen);
+        if (onToggle) {
+            onToggle(newIsOpen);
         }
     };
 
@@ -54,10 +54,10 @@ const LanguageSelector = ({ onDropdownToggle }) => {
     ];
 
     return (
-        <div className={s.LanguageSelector} ref={dropdownRef}>
+        <div className={s.LanguageSelector} ref={selectorRef}>
             <button 
                 className={s.LanguageButton} 
-                onClick={toggleDropdown}
+                onClick={toggleLanguageOptions}
                 aria-label="Select language"
                 aria-expanded={isOpen}
             >
@@ -65,16 +65,7 @@ const LanguageSelector = ({ onDropdownToggle }) => {
             </button>
             
             {isOpen && (
-                <div className={s.LanguageDropdown} style={{
-                    // Override any positioning from CSS to ensure visibility
-                    position: 'fixed',
-                    bottom: '120px',
-                    left: '30px',
-                    zIndex: 10000,
-                    visibility: 'visible',
-                    opacity: 1,
-                    display: 'block'
-                }}>
+                <div className={s.LanguageToggle}>
                     <ul className={s.LanguageList}>
                         {availableLanguages.map((lang) => (
                             <li key={lang.code}>

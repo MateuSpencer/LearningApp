@@ -31,30 +31,34 @@
     font-size: 20px;
 }
 
-.LanguageDropdown {
-    position: fixed; /* Fixed positioning to appear correctly regardless of parent */
-    bottom: 60px; /* Position higher above the button */
-    left: 30px; /* Align with the language button */
+.LanguageToggle {
+    position: absolute; /* Position relative to the parent LanguageSelector */
+    bottom: 50px; /* Position right above the button */
+    left: 110%;
+    transform: translateX(-50%); /* Center it horizontally */
     background-color: var(--bg-primary);
     border-radius: 8px;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    z-index: 10000; /* High z-index to ensure visibility */
+    z-index: 10001; /* Higher z-index to be above the sidebar */
     min-width: 150px;
     max-height: 300px; /* Limit maximum height */
     overflow-y: auto; /* Allow scrolling if many languages */
     border: 1px solid var(--border-color);
     animation: fadeIn 0.2s ease;
     pointer-events: auto; /* Ensure it can receive click events */
+    visibility: visible; /* Explicitly set to visible */
+    opacity: 1; /* Fully opaque */
+    display: block; /* Ensure it's displayed */
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(10px) translateX(-50%);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) translateX(-50%);
     }
 }
 
