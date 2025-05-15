@@ -8,11 +8,14 @@
 .contentWrapper {
     max-width: 800px;
     margin: 0 auto;
-    background-color: var(--bg-secondary);
-    border-radius: 8px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
     padding: 40px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+    box-shadow: var(--glass-shadow);
+    transition: backdrop-filter var(--theme-transition-speed) var(--theme-transition-timing),
                 box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
 }
 

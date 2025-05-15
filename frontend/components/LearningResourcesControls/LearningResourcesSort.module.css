@@ -14,15 +14,17 @@
 
 .sortSelect {
   padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   color: var(--text-primary);
   min-width: 180px;
   cursor: pointer;
   transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
-              background-color var(--theme-transition-speed) var(--theme-transition-timing),
-              color var(--theme-transition-speed) var (--theme-transition-timing);
+              backdrop-filter var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .sortSelect:focus {

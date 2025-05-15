@@ -2,17 +2,32 @@
 
     --theme-transition-speed: 0.3s;
     --theme-transition-timing: ease;
-    /* Primary Colors - Cyan/Teal Theme */
-    --color-primary: #01FFFF; /* Electric Cyan (highlight) */
+    /* Primary Colors - Cyan/Teal Theme (softer) */
+    --color-primary: #00C8C8; /* Even less intense Cyan (highlight) */
     --color-primary-dark: #2AC6D0; /* Bright Teal */
     --color-primary-light: #E0FFFF; /* Light Cyan */
-    --color-primary-rgb: 1, 255, 255;
+    --color-primary-rgb: 0, 200, 200;
     
-    /* Secondary Colors - Orange Theme */
-    --color-secondary: #FA9836; /* Bright Orange (highlight) */
+    /* Secondary Colors - Orange Theme (softer) */
+    --color-secondary: #F58A28; /* Less bright Orange (highlight) */
     --color-secondary-dark: #EA6400; /* Vivid Orange */
     --color-secondary-light: #FFB853; /* Soft Orange/Apricot */
-    --color-secondary-rgb: 250, 152, 54;
+    --color-secondary-rgb: 245, 138, 40;
+    
+    /* Modern Gradient Background Colors (less aggressive) */
+    --gradient-start: #F58A28; /* Softer Orange - less intense */
+    --gradient-middle: #80E5E5; /* Much softer Cyan - less dominant */
+    --gradient-end: #F0FFFF; /* Very Light Cyan - more prominent */
+    --gradient-edge: #FFFFFF; /* Pure white edge */
+    --gradient-middle: #00D8D8; /* Softer Cyan - less dominant */
+    --gradient-end: #F0FFFF; /* Very Light Cyan - more prominent */
+    --gradient-edge: #FFFFFF; /* Pure white edge */
+    
+    /* Glass Effect */
+    --glass-bg: rgba(255, 255, 255, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+    --glass-blur: 18px;
     
     /* Neutral Colors - Adjusted to complement the palette */
     --color-grey-100: #f8f9fa;
@@ -56,6 +71,18 @@
     --color-secondary-light: #FF8C1A; /* Bright Orange */
     --color-secondary-rgb: 229, 114, 0;
     
+    /* Modern Gradient Background Colors - Dark Mode */
+    --gradient-start: #1a1a1a; /* Almost black */
+    --gradient-middle: #003333; /* Dark Teal - even darker */
+    --gradient-end: #030303; /* Nearly black */
+    --gradient-edge: #000000; /* Pure black - more prominent */
+    
+    /* Glass Effect - Dark Mode */
+    --glass-bg: rgba(0, 0, 0, 0.3);
+    --glass-border: rgba(20, 20, 20, 0.2);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    --glass-blur: 18px;
+    
     /* Neutral Colors - Darker */
     --color-grey-100: #1e1e1e;
     --color-grey-200: #2d2d2d;
@@ -71,8 +98,8 @@
     --text-secondary: var(--color-grey-700);
     
     /* Background Colors */
-    --bg-primary: #121212; /* Dark background */
-    --bg-secondary: #1e1e1e; /* Slightly lighter background */
+    --bg-primary: #050505; /* Near black background */
+    --bg-secondary: #0a0a0a; /* Very dark background */
     --bg-accent: rgba(0, 191, 191, 0.1); /* Subtle dark cyan background */
     
     /* Border Colors */

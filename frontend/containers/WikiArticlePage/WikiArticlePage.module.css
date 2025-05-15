@@ -40,20 +40,16 @@
 
 .resourcesSection {
   margin-top: 30px;
-  padding-top: 30px;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  border-top: 1px solid var(--border-color);
 }
 
 .postsSection {
   margin-top: 40px;
-  padding-top: 30px;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  border-top: 1px solid var(--border-color);
 }
 
 .introSection {

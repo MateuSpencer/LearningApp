@@ -3,7 +3,13 @@
   max-width: 900px;
   margin: 20px auto;
   animation: fadeIn 0.3s ease-in;
-  padding: 0 15px;
+  padding: 20px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
 }
 
 @keyframes fadeIn {

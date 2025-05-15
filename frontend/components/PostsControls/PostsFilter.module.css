@@ -21,15 +21,21 @@
 
 .filterSelect {
   padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--text-primary);
+  box-shadow: var(--glass-shadow);
   color: var(--text-primary);
   min-width: 120px;
   cursor: pointer;
-  transition: border-color var(--theme-transition-speed) var (--theme-transition-timing),
-              background-color var(--theme-transition-speed) var(--theme-transition-timing),
-              color var (--theme-transition-speed) var(--theme-transition-timing);
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              backdrop-filter var(--theme-transition-speed) var(--theme-transition-timing),
+              box-shadow var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
+  box-shadow: var(--glass-shadow);
 }
 
 .filterSelect:focus {
@@ -44,11 +50,22 @@
 
 .searchInput {
   padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--text-primary);
+  box-shadow: var(--glass-shadow);
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   color: var(--text-primary);
   min-width: 200px;
+  box-shadow: var(--glass-shadow);
   transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
               background-color var(--theme-transition-speed) var(--theme-transition-timing),
               color var(--theme-transition-speed) var(--theme-transition-timing);
@@ -65,6 +82,14 @@
 }
 
 .clearButton {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--text-primary);
+  box-shadow: var(--glass-shadow);
   padding: 0.5rem 1rem;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);

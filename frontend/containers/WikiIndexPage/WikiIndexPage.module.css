@@ -79,13 +79,15 @@
 
 .instructions {
   text-align: center;
-  background-color: var(--theme-bg-secondary, rgba(17, 17, 17, 0.7));
-  border: 1px solid var(--border-color);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   padding: 30px;
-  border-radius: 8px;
+  border-radius: 16px;
   margin-top: 20px;
   max-width: 700px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--glass-shadow);
 }
 
 .instructions h2 {

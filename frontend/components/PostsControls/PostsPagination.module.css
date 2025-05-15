@@ -13,19 +13,25 @@
 
 .pageButton {
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   color: var(--text-primary);
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+  transition: backdrop-filter var(--theme-transition-speed) var(--theme-transition-timing),
               border-color var(--theme-transition-speed) var(--theme-transition-timing),
               color var(--theme-transition-speed) var(--theme-transition-timing);
+  box-shadow: var(--glass-shadow);
 }
 
 .pageButton:hover:not(:disabled) {
-  background-color: var(--bg-hover);
+  background: rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-color: rgba(var(--color-primary-rgb), 0.4);
 }
 
 .pageButton:disabled {
@@ -34,9 +40,12 @@
 }
 
 .pageButton.active {
-  background-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.85);
   color: white;
   border-color: var(--color-primary);
+  backdrop-filter: blur(calc(var(--glass-blur) * 1.5));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 1.5));
+  box-shadow: 0 8px 18px rgba(1, 255, 255, 0.25);
 }
 
 .ellipsis {

@@ -19,10 +19,13 @@
   flex-wrap: wrap;
   margin-bottom: 25px;
   padding: 16px;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: var(--glass-shadow);
+  transition: backdrop-filter var(--theme-transition-speed) var(--theme-transition-timing),
               border-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
