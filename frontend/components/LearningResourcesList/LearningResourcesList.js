@@ -401,11 +401,6 @@ const LearningResourcesList = ({
               ))}
             </div>
           )}
-          
-          {/* Separator between AI and user resources */}
-          <div className={s.resourceSeparator}>
-            <span>User-submitted resources below</span>
-          </div>
         </div>
       )}
       

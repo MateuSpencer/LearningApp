@@ -22,16 +22,12 @@
 .noResults {
   padding: 30px 20px;
   border-radius: 8px;
-  background-color: var(--theme-bg-secondary, #111111);
   text-align: center;
   margin: 30px auto;
   max-width: 500px;
-  border: 1px solid var(--border-color, #333);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .loadingText {
-  color: #01FFFF;
   font-size: 16px;
   position: relative;
   display: inline-block;

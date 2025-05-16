@@ -3,12 +3,6 @@
   max-width: 800px;
   margin: 2rem auto;
   padding: 25px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  box-shadow: var(--glass-shadow);
   transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
               box-shadow var(--theme-transition-speed) var(--theme-transition-timing),
               color var(--theme-transition-speed) var(--theme-transition-timing);
@@ -628,25 +622,6 @@
   cursor: not-allowed;
 }
 
-.resourceSeparator {
-  display: flex;
-  align-items: center;
-  margin: 1.5rem 0;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  text-align: center;
-  position: relative;
-  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
-}
-
-.resourceSeparator::before,
-.resourceSeparator::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid var(--border-color);
-  margin: 0 1rem;
-  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
-}
 
 @keyframes fadeIn {
   from {

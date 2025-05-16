@@ -3,12 +3,6 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    box-shadow: var(--glass-shadow);
     transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
                 box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
 }

@@ -71,7 +71,6 @@
     width: 75%;
     max-height: 300px; /* Enough height to show typical results without scrolling */
     overflow-y: hidden; /* Hide scrollbar by default */
-    background-color: var(--theme-bg-secondary, #111111);
     border: 1px solid var(--border-color, #333);
     border-radius: 8px;
     margin-top: 8px;

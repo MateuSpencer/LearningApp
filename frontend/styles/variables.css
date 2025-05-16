@@ -3,8 +3,8 @@
     --theme-transition-speed: 0.3s;
     --theme-transition-timing: ease;
     /* Primary Colors - Cyan/Teal Theme (softer) */
-    --color-primary: #00C8C8; /* Even less intense Cyan (highlight) */
-    --color-primary-dark: #2AC6D0; /* Bright Teal */
+    --color-primary: #01FFFF; /* Even less intense Cyan (highlight) */
+    --color-primary-dark: #01FFFF; /* Bright Teal */
     --color-primary-light: #E0FFFF; /* Light Cyan */
     --color-primary-rgb: 0, 200, 200;
     
@@ -17,9 +17,6 @@
     /* Modern Gradient Background Colors (less aggressive) */
     --gradient-start: #F58A28; /* Softer Orange - less intense */
     --gradient-middle: #80E5E5; /* Much softer Cyan - less dominant */
-    --gradient-end: #F0FFFF; /* Very Light Cyan - more prominent */
-    --gradient-edge: #FFFFFF; /* Pure white edge */
-    --gradient-middle: #00D8D8; /* Softer Cyan - less dominant */
     --gradient-end: #F0FFFF; /* Very Light Cyan - more prominent */
     --gradient-edge: #FFFFFF; /* Pure white edge */
     
@@ -50,9 +47,9 @@
     --text-secondary: var(--color-grey-600);
     
     /* Background Colors */
-    --bg-primary: var(--color-primary-light); /* Light Cyan background */
+    --bg-primary: var(--color-primary-light); /* Light cyan with slight blue tint */
     --bg-secondary: white;
-    --bg-accent: rgba(1, 255, 255, 0.1); /* Subtle cyan background */
+    --bg-accent: rgba(0, 191, 191, 0.1); /* Subtle bright cyan background accent */
     
     /* Border Colors */
     --border-color: var(--color-grey-300);
@@ -72,11 +69,10 @@
     --color-secondary-rgb: 229, 114, 0;
     
     /* Modern Gradient Background Colors - Dark Mode */
-    --gradient-start: #1a1a1a; /* Almost black */
+    --gradient-start: #001515; /* Almost black */
     --gradient-middle: #003333; /* Dark Teal - even darker */
-    --gradient-end: #030303; /* Nearly black */
-    --gradient-edge: #000000; /* Pure black - more prominent */
-    
+    --gradient-end: #001515; /* Nearly black */
+    --gradient-edge: #000909;    
     /* Glass Effect - Dark Mode */
     --glass-bg: rgba(0, 0, 0, 0.3);
     --glass-border: rgba(20, 20, 20, 0.2);
@@ -98,8 +94,8 @@
     --text-secondary: var(--color-grey-700);
     
     /* Background Colors */
-    --bg-primary: #050505; /* Near black background */
-    --bg-secondary: #0a0a0a; /* Very dark background */
+    --bg-primary: #1c2018; /* Dark greenish-black background rather than pure black */
+    --bg-secondary: #1a1e16; /* Slightly lighter greenish-black */
     --bg-accent: rgba(0, 191, 191, 0.1); /* Subtle dark cyan background */
     
     /* Border Colors */
