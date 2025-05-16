@@ -1,0 +1,100 @@
+.association {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background-color: #f9f9f9;
+    transition: all 0.2s ease-in-out;
+}
+
+.association:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.associationLayout {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+}
+
+.voteControls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 16px;
+    min-width: 40px;
+}
+
+.voteButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #757575;
+    padding: 4px;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.voteButton:hover:not(:disabled) {
+    color: #424242;
+}
+
+.voteButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.upvoted {
+    color: #4caf50;
+}
+
+.downvoted {
+    color: #f44336;
+}
+
+.voteScore {
+    font-weight: bold;
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.associationInfo {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pageLink {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.link {
+    color: #2196f3;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.link:hover {
+    color: #0d47a1;
+    text-decoration: underline;
+}
+
+.removeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #757575;
+    padding: 4px 8px;
+    font-size: 12px;
+    transition: color 0.2s ease;
+    margin-left: 8px;
+}
+
+.removeButton:hover {
+    color: #f44336;
+}
+
+.removeIcon {
+    font-size: 14px;
+}

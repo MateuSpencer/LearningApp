@@ -20,7 +20,7 @@ const LOGIN_URL = '/accounts/login/';
 export function usePosts({
   fixedFilters = {},
   initialFilters = {},
-  initialSortBy = 'votes_score',  // Default to sorting by vote score
+  initialSortBy = 'created_at',  // Default to sorting by creation date
   initialSortDirection = 'desc',
   pageSize = 10,
   autoRefetch = true
@@ -215,7 +215,7 @@ export function usePosts({
   }, [isAuthenticated, buildQueryString]);
   
   // Upvote a post
-  const upvotePost = useCallback(async (id) => {
+  const upvotePost = useCallback(async (postId, pageSlug) => {
     if (!isAuthenticated) {
       window.location.href = LOGIN_URL;
       throw new Error('You must be logged in to vote on a post.');
@@ -223,7 +223,30 @@ export function usePosts({
     
     try {
       setLoading(true);
-      const updatedPost = await httpPost(`${API_BASE_URL}/${id}/upvote/`, {});
+      
+      let updatedPost;
+      
+      // If pageSlug is provided, we need to get the association ID first
+      if (pageSlug) {
+        // Get the post to find the association ID
+        const post = await httpGet(`${API_BASE_URL}/${postId}/`);
+        
+        // Find the association with the matching page_slug
+        const association = post.page_associations?.find(a => a.page_slug === pageSlug);
+        
+        if (!association) {
+          throw new Error(`Post is not associated with page: ${pageSlug}`);
+        }
+        
+        // Vote on the association
+        await httpPost(`/api/posts/associations/${association.id}/upvote/`, {});
+        
+        // Get the updated post data
+        updatedPost = await httpGet(`${API_BASE_URL}/${postId}/`);
+      } else {
+        // Fallback to direct post upvote (if implemented)
+        updatedPost = await httpPost(`${API_BASE_URL}/${postId}/upvote/`, {});
+      }
       
       // Invalidate cache for current query
       const queryString = buildQueryString();
@@ -231,14 +254,14 @@ export function usePosts({
       
       // Update local posts array (optimistic update)
       setPosts(prevPosts => 
-        prevPosts.map(post => post.id === id ? updatedPost : post)
+        prevPosts.map(post => post.id === postId ? updatedPost : post)
       );
       
       return updatedPost;
     } catch (err) {
       const enhancedError = handleAuthError(err);
-      setError(enhancedError.message || `Failed to upvote post: ${id}`);
-      console.error(`Error upvoting post: ${id}`, err);
+      setError(enhancedError.message || `Failed to upvote post: ${postId}`);
+      console.error(`Error upvoting post: ${postId}`, err);
       throw enhancedError;
     } finally {
       setLoading(false);
@@ -246,7 +269,7 @@ export function usePosts({
   }, [isAuthenticated, buildQueryString]);
   
   // Downvote a post
-  const downvotePost = useCallback(async (id) => {
+  const downvotePost = useCallback(async (postId, pageSlug) => {
     if (!isAuthenticated) {
       window.location.href = LOGIN_URL;
       throw new Error('You must be logged in to vote on a post.');
@@ -254,7 +277,30 @@ export function usePosts({
     
     try {
       setLoading(true);
-      const updatedPost = await httpPost(`${API_BASE_URL}/${id}/downvote/`, {});
+      
+      let updatedPost;
+      
+      // If pageSlug is provided, we need to get the association ID first
+      if (pageSlug) {
+        // Get the post to find the association ID
+        const post = await httpGet(`${API_BASE_URL}/${postId}/`);
+        
+        // Find the association with the matching page_slug
+        const association = post.page_associations?.find(a => a.page_slug === pageSlug);
+        
+        if (!association) {
+          throw new Error(`Post is not associated with page: ${pageSlug}`);
+        }
+        
+        // Vote on the association
+        await httpPost(`/api/posts/associations/${association.id}/downvote/`, {});
+        
+        // Get the updated post data
+        updatedPost = await httpGet(`${API_BASE_URL}/${postId}/`);
+      } else {
+        // Fallback to direct post downvote (if implemented)
+        updatedPost = await httpPost(`${API_BASE_URL}/${postId}/downvote/`, {});
+      }
       
       // Invalidate cache for current query
       const queryString = buildQueryString();
@@ -262,14 +308,14 @@ export function usePosts({
       
       // Update local posts array (optimistic update)
       setPosts(prevPosts => 
-        prevPosts.map(post => post.id === id ? updatedPost : post)
+        prevPosts.map(post => post.id === postId ? updatedPost : post)
       );
       
       return updatedPost;
     } catch (err) {
       const enhancedError = handleAuthError(err);
-      setError(enhancedError.message || `Failed to downvote post: ${id}`);
-      console.error(`Error downvoting post: ${id}`, err);
+      setError(enhancedError.message || `Failed to downvote post: ${postId}`);
+      console.error(`Error downvoting post: ${postId}`, err);
       throw enhancedError;
     } finally {
       setLoading(false);

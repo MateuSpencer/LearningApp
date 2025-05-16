@@ -1,0 +1,406 @@
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.postContainer {
+  padding: 2rem;
+  margin-top: 1.5rem;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.statusRow {
+  display: flex;
+  margin: 1rem 0;
+}
+
+.statusLabel {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+.statusPublished {
+  background-color: rgba(0, 128, 0, 0.1);
+  color: var(--color-success);
+}
+
+.statusDraft {
+  background-color: rgba(255, 165, 0, 0.1);
+  color: var(--color-warning);
+}
+
+.statusArchived {
+  background-color: rgba(128, 128, 128, 0.1);
+  color: var(--text-secondary);
+}
+
+.authorSection {
+  margin: 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.authorInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.byAuthor, .postedDate, .updatedDate, .associatedPages {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actionButtons {
+  display: flex;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-secondary);
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  color: var(--text-primary);
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+}
+
+.editButton {
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+}
+
+.editButton:hover {
+  background-color: var(--color-info-lighter);
+}
+
+.deleteButton {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.deleteButton:hover {
+  background-color: var(--color-danger-lighter);
+}
+
+.relatedPagesSection {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.relatedPagesTitle {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.pageLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.pageAssociationItem {
+  display: inline-flex;
+  align-items: center;
+}
+
+.pagesTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.pagesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pageLink {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: var(--bg-tag);
+  color: var(--text-primary);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.pageLink:hover {
+  background-color: var(--primary-color-light);
+  transform: translateY(-1px);
+}
+
+.pageSeparator {
+  margin-left: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.contentSection {
+  display: flex;
+  gap: 2rem;
+}
+
+.votingColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.contentArea {
+  flex: 1;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.postContent {
+  line-height: 1.8;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.voteControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.voteButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--bg-secondary);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+/* Edit form styles */
+.editForm {
+  width: 100%;
+}
+
+.formTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.input, .textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.input:focus, .textarea:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.textarea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.formButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.saveButton {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.saveButton:hover:not(:disabled) {
+  background-color: var(--color-success-lighter);
+  transform: translateY(-1px);
+}
+
+.cancelButton {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.errorMessage {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.loading {
+  text-align: center;
+  padding: 1rem;
+  color: var(--text-secondary);
+}
+
+.voteButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  transform: translateY(-2px);
+}
+
+.voteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.upvoted {
+  background-color: rgba(52, 211, 153, 0.2);
+  color: #2c8f60;
+}
+
+.downvoted {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #b82d2d;
+}
+
+.voteScore {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.voteIcon {
+  font-size: 1.25rem;
+}
+
+.error {
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #b82d2d;
+  text-align: center;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Back link styles removed as they are no longer needed */
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

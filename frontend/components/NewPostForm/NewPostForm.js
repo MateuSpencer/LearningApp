@@ -6,11 +6,10 @@ import { useAuth } from '../../context/AuthContext';
 import s from './NewPostForm.module.css';
 
 const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [resourceUrl, setResourceUrl] = useState('');
   const [status, setStatus] = useState('published');
   const [error, setError] = useState(null);
-  const [urlError, setUrlError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [actualPageSlug, setActualPageSlug] = useState(pageSlug);
   
@@ -48,36 +47,18 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
     }
   }, [router, pageSlug]);
   
-  // Simple URL validation on the client side
-  const validateUrl = (url) => {
-    if (!url) return true; // Empty URLs are allowed
-    
-    // Basic URL format validation
-    const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
-    return urlPattern.test(url);
-  };
-
-  const handleUrlChange = (e) => {
-    const value = e.target.value;
-    setResourceUrl(value);
-    
-    if (value && !validateUrl(value)) {
-      setUrlError('Please enter a valid URL (e.g., https://example.com)');
-    } else {
-      setUrlError(null);
-    }
-  };
+  // URL validation removed as it's no longer needed
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!content.trim()) {
-      setError('Content is required');
+    if (!title.trim()) {
+      setError('Title is required');
       return;
     }
     
-    if (resourceUrl && !validateUrl(resourceUrl)) {
-      setUrlError('Please enter a valid URL (e.g., https://example.com)');
+    if (!content.trim()) {
+      setError('Content is required');
       return;
     }
     
@@ -89,21 +70,20 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
     try {
       setSubmitting(true);
       setError(null);
-      setUrlError(null);
       
       // Use httpPost with the extracted page slug - the token is now handled automatically
       const newPost = await httpPost(
         '/api/posts/',
         {
+          title,
           content,
-          resource_url: resourceUrl,
           status,
           page_slug: actualPageSlug
         }
       );
       
+      setTitle('');
       setContent('');
-      setResourceUrl('');
       setStatus('published');
       onSubmit(newPost);
       
@@ -122,10 +102,10 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
         refreshAuth();
       } else if (err.data) {
         // Handle field-specific errors from the server
-        if (err.data.resource_url) {
-          setUrlError(err.data.resource_url);
+        if (err.data.title) {
+          setError(err.data.title);
         }
-        if (err.data.content) {
+        else if (err.data.content) {
           setError(err.data.content);
         } else if (err.data.detail || err.data.message) {
           setError(err.data.detail || err.data.message);
@@ -145,9 +125,22 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       <h3 className={s.formTitle}>Share Your Thoughts</h3>
       
       {error && <div className={s.errorMessage}>{error}</div>}
-      {urlError && <div className={s.errorMessage}>{urlError}</div>}
       
       <form onSubmit={handleSubmit} className={s.form}>
+        <div className={s.formGroup}>
+          <label htmlFor="title" className={s.label}>Title *</label>
+          <input
+            id="title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className={s.input}
+            disabled={submitting || !isAuthenticated}
+            required
+            placeholder="Enter a title for your post"
+          />
+        </div>
+        
         <div className={s.formGroup}>
           <label htmlFor="content" className={s.label}>Content *</label>
           <textarea
@@ -159,19 +152,6 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             rows={5}
             required
             placeholder="Share your knowledge, ideas, or questions..."
-          />
-        </div>
-        
-        <div className={s.formGroup}>
-          <label htmlFor="resourceUrl" className={s.label}>Resource URL</label>
-          <input
-            id="resourceUrl"
-            type="url"
-            value={resourceUrl}
-            onChange={handleUrlChange}
-            className={s.input}
-            disabled={submitting || !isAuthenticated}
-            placeholder="https://example.com"
           />
         </div>
         
@@ -202,7 +182,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
           <button 
             type="submit" 
             className={s.submitButton}
-            disabled={submitting || !isAuthenticated || !content.trim()}
+            disabled={submitting || !isAuthenticated || !title.trim() || !content.trim()}
           >
             {submitting ? 'Posting...' : 'Post'}
           </button>

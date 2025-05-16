@@ -289,7 +289,14 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
         )
 
         if serializer.is_valid():
-            serializer.save()
+            result = serializer.save()
+            # Check if vote was deleted by checking if result is a dict with deleted=True
+            if isinstance(result, dict) and result.get("deleted"):
+                # Vote was deleted (toggled off)
+                learning_resource = result.get("learning_resource")
+                if learning_resource:
+                    learning_resource.update_quality_vote_counts()  # Ensure counts are updated
+
             # Re-fetch the resource to get updated vote counts
             resource = self.get_object()
             return Response(self.get_serializer(resource).data)
@@ -322,7 +329,14 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
         )
 
         if serializer.is_valid():
-            serializer.save()
+            result = serializer.save()
+            # Check if vote was deleted by checking if result is a dict with deleted=True
+            if isinstance(result, dict) and result.get("deleted"):
+                # Vote was deleted (toggled off)
+                learning_resource = result.get("learning_resource")
+                if learning_resource:
+                    learning_resource.update_difficulty_vote_counts()  # Ensure counts are updated
+
             # Re-fetch the resource to get updated vote counts
             resource = self.get_object()
             return Response(self.get_serializer(resource).data)
@@ -485,7 +499,7 @@ class ResourcePageAssociationViewSet(viewsets.ModelViewSet):
         Upvote a resource's appropriateness for a page.
         Creates an upvote if no vote exists.
         Changes to an upvote if previously downvoted.
-        Does nothing if already upvoted.
+        Removes the vote if already upvoted (toggle).
         """
         association = self.get_object()
         user = request.user
@@ -496,9 +510,9 @@ class ResourcePageAssociationViewSet(viewsets.ModelViewSet):
                 association=association, user=user
             )
 
-            # If already upvoted, do nothing
+            # If already upvoted, toggle it off by deleting
             if existing_vote.vote_type == vote_type:
-                pass  # Vote remains the same
+                existing_vote.delete()
             else:
                 # Change vote: update existing downvote to upvote
                 existing_vote.vote_type = vote_type
@@ -522,7 +536,7 @@ class ResourcePageAssociationViewSet(viewsets.ModelViewSet):
         Downvote a resource's appropriateness for a page.
         Creates a downvote if no vote exists.
         Changes to a downvote if previously upvoted.
-        Does nothing if already downvoted.
+        Removes the vote if already downvoted (toggle).
         """
         association = self.get_object()
         user = request.user
@@ -533,9 +547,9 @@ class ResourcePageAssociationViewSet(viewsets.ModelViewSet):
                 association=association, user=user
             )
 
-            # If already downvoted, do nothing
+            # If already downvoted, toggle it off by deleting
             if existing_vote.vote_type == vote_type:
-                pass  # Vote remains the same
+                existing_vote.delete()
             else:
                 # Change vote: update existing upvote to downvote
                 existing_vote.vote_type = vote_type

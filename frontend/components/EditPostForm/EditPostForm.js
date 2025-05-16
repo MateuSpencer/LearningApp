@@ -8,11 +8,10 @@ import s from './EditPostForm.module.css';
 const EditPostForm = ({ post, onSave, onCancel }) => {
   const router = useRouter();
   const { isAuthenticated, refreshAuth } = useAuth();
+  const [title, setTitle] = useState(post?.title || '');
   const [content, setContent] = useState(post?.content || '');
-  const [resourceUrl, setResourceUrl] = useState(post?.resource_url || '');
   const [status, setStatus] = useState(post?.status || 'published');
   const [error, setError] = useState(null);
-  const [urlError, setUrlError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
   // Check authentication
@@ -22,36 +21,18 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
     }
   }, [isAuthenticated, router]);
 
-  // Simple URL validation on the client side
-  const validateUrl = (url) => {
-    if (!url) return true; // Empty URLs are allowed
-    
-    // Basic URL format validation
-    const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
-    return urlPattern.test(url);
-  };
-
-  const handleUrlChange = (e) => {
-    const value = e.target.value;
-    setResourceUrl(value);
-    
-    if (value && !validateUrl(value)) {
-      setUrlError('Please enter a valid URL (e.g., https://example.com)');
-    } else {
-      setUrlError(null);
-    }
-  };
+  // URL validation removed as it's no longer needed
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!content.trim()) {
-      setError('Content is required');
+    if (!title.trim()) {
+      setError('Title is required');
       return;
     }
     
-    if (resourceUrl && !validateUrl(resourceUrl)) {
-      setUrlError('Please enter a valid URL (e.g., https://example.com)');
+    if (!content.trim()) {
+      setError('Content is required');
       return;
     }
     
@@ -69,8 +50,8 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
       const updatedPost = await httpPut(
         `/api/posts/${post.id}/`,
         {
+          title,
           content,
-          resource_url: resourceUrl,
           status,
           page_slug: post.page_slug // Explicitly include the page_slug
         }
@@ -89,10 +70,9 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
         }, 1500);
       } else if (err.response && err.response.status === 403) {
         setError('You don\'t have permission to edit this post.');
-      } else if (err.data && err.data.resource_url) {
-        // Handle specific resource URL validation errors from the server
-        setUrlError(err.data.resource_url);
-        setError(null);
+      } else if (err.data && err.data.title) {
+        // Handle specific title validation errors from the server
+        setError(err.data.title);
       } else {
         setError(`Failed to update post: ${err.message || 'Unknown error'}`);
       }
@@ -106,9 +86,21 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
       <h3 className={s.formTitle}>Edit Post</h3>
       
       {error && <div className={s.errorMessage}>{error}</div>}
-      {urlError && <div className={s.errorMessage}>{urlError}</div>}
       
       <form onSubmit={handleSubmit} className={s.form}>
+        <div className={s.formGroup}>
+          <label htmlFor="title" className={s.label}>Title *</label>
+          <input
+            id="title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className={s.input}
+            disabled={submitting || !isAuthenticated}
+            required
+          />
+        </div>
+        
         <div className={s.formGroup}>
           <label htmlFor="content" className={s.label}>Content *</label>
           <textarea
@@ -119,18 +111,6 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
             disabled={submitting || !isAuthenticated}
             rows={5}
             required
-          />
-        </div>
-        
-        <div className={s.formGroup}>
-          <label htmlFor="resourceUrl" className={s.label}>Resource URL</label>
-          <input
-            id="resourceUrl"
-            type="url"
-            value={resourceUrl}
-            onChange={handleUrlChange}
-            className={s.input}
-            disabled={submitting || !isAuthenticated}
           />
         </div>
         
@@ -174,6 +154,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
 EditPostForm.propTypes = {
   post: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title: PropTypes.string,
     content: PropTypes.string,
     status: PropTypes.string,
     page_slug: PropTypes.string

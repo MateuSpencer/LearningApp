@@ -10,7 +10,7 @@ const PostsSort = ({
   sortBy, 
   sortDirection, 
   onSortChange,
-  allowedSortFields = ['created_at', 'title', 'updated_at', 'votes_score'],
+  allowedSortFields = ['created_at', 'title', 'updated_at'],
   disabled = false 
 }) => {
   const handleSortChange = (e) => {
@@ -32,14 +32,7 @@ const PostsSort = ({
         onChange={handleSortChange}
         disabled={disabled}
       >
-        {/* Add votes sorting options */}
-        {allowedSortFields.includes('votes_score') && (
-          <>
-            <option value="votes_score:desc">Most Popular</option>
-            <option value="votes_score:asc">Least Popular</option>
-          </>
-        )}
-        
+        {/* Add date sorting options */}
         {allowedSortFields.includes('created_at') && (
           <>
             <option value="created_at:desc">Newest First</option>

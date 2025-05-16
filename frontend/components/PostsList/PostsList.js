@@ -25,7 +25,7 @@ const PostsList = ({
   onNewPost, 
   showOnlyMyPosts = false,
   allowedFilters = ['status', 'timeframe', 'search'],
-  allowedSortFields = ['votes_score', 'created_at', 'updated_at', 'status'],
+  allowedSortFields = ['created_at', 'updated_at', 'status'],
   fixedFilters = {}
 }) => {
   const router = useRouter();
@@ -337,7 +337,7 @@ const PostsList = ({
     if (!requireAuth()) return;
     
     try {
-      await upvotePost(postId);
+      await upvotePost(postId, pageSlug);
     } catch (err) {
       console.error('Failed to upvote post:', err);
       
@@ -354,7 +354,7 @@ const PostsList = ({
     if (!requireAuth()) return;
     
     try {
-      await downvotePost(postId);
+      await downvotePost(postId, pageSlug);
     } catch (err) {
       console.error('Failed to downvote post:', err);
       
@@ -535,12 +535,17 @@ const PostsList = ({
               />
             );
           }
+          
+          // Find the association for the current pageSlug if we're on a wiki page
+          const association = pageSlug ? post.page_associations?.find(a => a.page_slug === pageSlug) : null;
+
           return (
             <Post
               key={post.id}
               id={post.id}
+              title={post.title}
               content={post.content}
-              resource_url={post.resource_url}
+              content_preview={post.content_preview}
               author={post.author_username}
               createdAt={post.created_at}
               currentUser={user?.username}
@@ -548,16 +553,19 @@ const PostsList = ({
               primary_slug={post.primary_slug}
               page_slug={post.page_slug}
               status={post.status}
-              upvotes_count={post.upvotes_count}
-              downvotes_count={post.downvotes_count}
-              votes_score={post.votes_score}
-              user_vote={post.user_vote}
+              page_associations={post.page_associations}
+              // Appropriateness vote props - only pass if we have a valid association
+              appropriateness_upvotes={association?.appropriateness_upvotes}
+              appropriateness_downvotes={association?.appropriateness_downvotes}
+              appropriateness_score={association?.appropriateness_score}
+              user_vote={association?.user_vote}
+              // Only pass vote handlers when we have an association (on a wiki page)
+              onUpvote={association ? handleUpvote : null}
+              onDownvote={association ? handleDownvote : null}
               onEdit={handleEdit}
               onDelete={handleDeleteClick}
-              onUpvote={handleUpvote}
-              onDownvote={handleDownvote}
-              canModify={isAuthenticated && !authLoading && post.author_username === user?.username}
               canVote={isAuthenticated && !authLoading}
+              canModify={isAuthenticated && !authLoading && post.author_username === user?.username}
             />
           );
         })}

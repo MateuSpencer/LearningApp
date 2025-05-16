@@ -1,67 +1,31 @@
 from rest_framework import serializers
-from .models import Post, Tag, Category, SecondarySlug, Vote
+from .models import Post, PostPageAssociation, PostAppropriatenessVote
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 
 User = get_user_model()
 
 
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ["id", "name", "slug"]
-        read_only_fields = ["id", "slug"]
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    parent_name = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = Category
-        fields = ["id", "name", "slug", "description", "parent", "parent_name"]
-        read_only_fields = ["id", "slug"]
-
-    def get_parent_name(self, obj):
-        if obj.parent:
-            return obj.parent.name
-        return None
-
-
-class SecondarySlugSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SecondarySlug
-        fields = ["id", "slug", "created_at"]
-        read_only_fields = ["id", "created_at"]
-
-
 class PostSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     author_username = serializers.SerializerMethodField()
-    tags = TagSerializer(many=True, read_only=True)
-    categories = CategorySerializer(many=True, read_only=True)
-    secondary_slugs = SecondarySlugSerializer(many=True, read_only=True)
     created_date = serializers.SerializerMethodField()
     updated_date = serializers.SerializerMethodField()
-    tag_names = serializers.ListField(
+    content_preview = serializers.SerializerMethodField()
+    # Add page associations
+    page_associations = serializers.SerializerMethodField(read_only=True)
+    # Optional associated page slugs for creating new associations
+    page_slugs = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=False
     )
-    category_names = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False
-    )
-    # Add vote-related fields
-    upvotes_count = serializers.IntegerField(read_only=True)
-    downvotes_count = serializers.IntegerField(read_only=True)
-    votes_score = serializers.IntegerField(read_only=True)
-    user_vote = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
         fields = [
             "id",
+            "title",
             "content",
-            "resource_url",
-            "primary_slug",
-            "page_slug",
+            "content_preview",
             "author",
             "author_name",
             "author_username",
@@ -70,27 +34,17 @@ class PostSerializer(serializers.ModelSerializer):
             "created_date",
             "updated_date",
             "status",
-            "tags",
-            "categories",
-            "secondary_slugs",
             "metadata",
-            "tag_names",
-            "category_names",
-            # Add vote-related fields
-            "upvotes_count",
-            "downvotes_count",
-            "votes_score",
-            "user_vote",
+            "page_associations",
+            "page_slugs",
         ]
         read_only_fields = [
             "id",
             "created_at",
             "updated_at",
             "author",
-            "primary_slug",
-            "upvotes_count",
-            "downvotes_count",
-            "votes_score",
+            "content_preview",
+            "page_associations",
         ]
 
     def get_author_name(self, obj):
@@ -105,10 +59,33 @@ class PostSerializer(serializers.ModelSerializer):
     def get_updated_date(self, obj):
         return obj.updated_at.strftime("%B %d, %Y")
 
+    def get_page_associations(self, obj):
+        """Return a list of page slugs this post is associated with"""
+        associations = obj.page_associations.all()
+        return [
+            {
+                "id": str(assoc.id),
+                "page_slug": assoc.page_slug,
+                "appropriateness_score": assoc.appropriateness_score,
+                "user_vote": self.get_user_association_vote(assoc),
+            }
+            for assoc in associations
+        ]
+
+    def get_user_association_vote(self, association):
+        """Get the user's vote for a specific association"""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return None
+
+        try:
+            vote = association.appropriateness_votes.get(user=request.user)
+            return vote.vote_type
+        except PostAppropriatenessVote.DoesNotExist:
+            return None
+
     def create(self, validated_data):
-        # Handle tags and categories
-        tag_names = validated_data.pop("tag_names", [])
-        category_names = validated_data.pop("category_names", [])
+        page_slugs = validated_data.pop("page_slugs", [])
 
         # Set the current user as the author
         validated_data["author"] = self.context["request"].user
@@ -116,18 +93,21 @@ class PostSerializer(serializers.ModelSerializer):
         # Create the post instance
         post = Post.objects.create(**validated_data)
 
-        # Add tags
-        self._handle_tags(post, tag_names)
+        # Create page associations
+        user = self.context["request"].user
 
-        # Add categories
-        self._handle_categories(post, category_names)
+        # A post must be associated with at least one page
+        if not page_slugs:
+            raise serializers.ValidationError(
+                {"page_slugs": "At least one page slug is required"}
+            )
+
+        self._handle_page_associations(post, page_slugs, user)
 
         return post
 
     def update(self, instance, validated_data):
-        # Handle tags and categories
-        tag_names = validated_data.pop("tag_names", None)
-        category_names = validated_data.pop("category_names", None)
+        page_slugs = validated_data.pop("page_slugs", None)
 
         # Update the instance with validated data
         for attr, value in validated_data.items():
@@ -135,81 +115,115 @@ class PostSerializer(serializers.ModelSerializer):
 
         instance.save()
 
-        # Update tags if provided
-        if tag_names is not None:
-            self._handle_tags(instance, tag_names)
+        # Update page associations if provided
+        if page_slugs is not None:
+            # Cannot remove all associations - a post must be associated with at least one page
+            if not page_slugs:
+                raise serializers.ValidationError(
+                    {"page_slugs": "Post must remain associated with at least one page"}
+                )
 
-        # Update categories if provided
-        if category_names is not None:
-            self._handle_categories(instance, category_names)
+            user = self.context["request"].user
+            self._handle_page_associations(instance, page_slugs, user)
 
         return instance
 
-    def _handle_tags(self, post, tag_names):
-        # Clear existing tags if empty list provided
-        if tag_names == []:
-            post.tags.clear()
-            return
+    def _handle_page_associations(self, post, page_slugs, user):
+        """
+        Handle page associations for a post
+        A post must always be associated with at least one page
+        """
+        # Create new associations for each slug that doesn't have one yet
+        for slug in page_slugs:
+            if not post.page_associations.filter(page_slug=slug).exists():
+                PostPageAssociation.objects.create(
+                    post=post, page_slug=slug, added_by=user
+                )
 
-        # Add tags to the post
-        for tag_name in tag_names:
-            tag, created = Tag.objects.get_or_create(
-                name=tag_name, defaults={"slug": slugify(tag_name)}
-            )
-            post.tags.add(tag)
+    def get_content_preview(self, obj):
+        """Return a truncated version of the content for list views"""
+        if len(obj.content) > 200:
+            return obj.content[:200] + "..."
+        return obj.content
 
-    def _handle_categories(self, post, category_names):
-        # Clear existing categories if empty list provided
-        if category_names == []:
-            post.categories.clear()
-            return
 
-        # Add categories to the post
-        for category_name in category_names:
-            category, created = Category.objects.get_or_create(
-                name=category_name, defaults={"slug": slugify(category_name)}
-            )
-            post.categories.add(category)
+class PostPageAssociationSerializer(serializers.ModelSerializer):
+    post_title = serializers.CharField(source="post.title", read_only=True)
+    post_status = serializers.CharField(source="post.status", read_only=True)
+    post_author = serializers.CharField(source="post.author.username", read_only=True)
+    added_by_username = serializers.CharField(
+        source="added_by.username", read_only=True
+    )
+    user_vote = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = PostPageAssociation
+        fields = [
+            "id",
+            "post",
+            "post_title",
+            "post_status",
+            "post_author",
+            "page_slug",
+            "added_by",
+            "added_by_username",
+            "added_at",
+            "appropriateness_upvotes",
+            "appropriateness_downvotes",
+            "appropriateness_score",
+            "user_vote",
+        ]
+        read_only_fields = [
+            "id",
+            "added_at",
+            "appropriateness_upvotes",
+            "appropriateness_downvotes",
+            "appropriateness_score",
+        ]
 
     def get_user_vote(self, obj):
-        """Return the current user's vote on this post, if any"""
+        """Return the current user's vote on this association, if any"""
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return None
 
         try:
-            vote = obj.votes.get(user=request.user)
+            vote = obj.appropriateness_votes.get(user=request.user)
             return vote.vote_type
-        except Vote.DoesNotExist:
+        except PostAppropriatenessVote.DoesNotExist:
             return None
 
 
-class VoteSerializer(serializers.ModelSerializer):
+class PostAppropriatenessVoteSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Vote
-        fields = ["id", "post", "vote_type", "created_at"]
+        model = PostAppropriatenessVote
+        fields = ["id", "association", "vote_type", "created_at"]
         read_only_fields = ["id", "created_at"]
 
     def create(self, validated_data):
-        # Get the current user
         user = self.context["request"].user
-        post = validated_data["post"]
+        association = validated_data["association"]
         vote_type = validated_data["vote_type"]
 
-        # Check if the user already has a vote for this post
+        # Check if the user already has a vote for this association
         try:
             # If vote exists, update it
-            existing_vote = Vote.objects.get(post=post, user=user)
+            existing_vote = PostAppropriatenessVote.objects.get(
+                association=association, user=user
+            )
+
+            # Same vote type means toggle off (delete vote)
             if existing_vote.vote_type == vote_type:
-                # If voting the same way, remove the vote (toggle off)
                 existing_vote.delete()
                 return None
-            else:
-                # Change vote type
-                existing_vote.vote_type = vote_type
-                existing_vote.save()
-                return existing_vote
 
-        except Vote.DoesNotExist:
+            # Different vote type means update
+            existing_vote.vote_type = vote_type
+            existing_vote.save()
+            return existing_vote
+
+        except PostAppropriatenessVote.DoesNotExist:
             # Create a new vote
-            return Vote.objects.create(post=post, user=user, vote_type=vote_type)
+            return PostAppropriatenessVote.objects.create(
+                association=association, user=user, vote_type=vote_type
+            )

@@ -1,4 +1,5 @@
-from rest_framework import viewsets, permissions, filters, status
+from rest_framework import viewsets, permissions, filters
+from rest_framework import status as http_status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
@@ -14,11 +15,12 @@ from django_filters.rest_framework import (
 from django.db.models import Q
 from django.utils import timezone
 import datetime
-import requests
-from requests.exceptions import RequestException
-import re
-from .models import Post, Tag, Category, Vote
-from .serializers import PostSerializer, VoteSerializer
+from .models import Post, PostPageAssociation, PostAppropriatenessVote
+from .serializers import (
+    PostSerializer,
+    PostPageAssociationSerializer,
+    PostAppropriatenessVoteSerializer,
+)
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 
@@ -67,23 +69,17 @@ class PostFilter(FilterSet):
     author = CharFilter(field_name="author__username")
     author_id = UUIDFilter(field_name="author__id")
 
-    # Slug filters
-    primary_slug = CharFilter(field_name="primary_slug")
+    # Page slug filter
     page_slug = CharFilter(method="filter_by_page_slug")
 
     # Status filter
     status = CharFilter(field_name="status")
-
-    # Tag and category filters
-    tag = CharFilter(method="filter_by_tag")
-    category = CharFilter(method="filter_by_category")
 
     class Meta:
         model = Post
         fields = [
             "author",
             "author_id",
-            "primary_slug",
             "page_slug",
             "status",
             "created_after",
@@ -93,8 +89,6 @@ class PostFilter(FilterSet):
             "created_today",
             "created_this_week",
             "created_this_month",
-            "tag",
-            "category",
         ]
 
     def filter_created_today(self, queryset, name, value):
@@ -117,34 +111,6 @@ class PostFilter(FilterSet):
             return queryset.filter(created_at__date__gte=start_of_month)
         return queryset
 
-    def filter_by_tag(self, queryset, name, value):
-        # Support comma-separated tag slugs or names
-        if not value:
-            return queryset
-
-        tags = [tag.strip() for tag in value.split(",")]
-        tag_query = Q()
-
-        for tag in tags:
-            tag_query |= Q(tags__slug=tag) | Q(tags__name=tag)
-
-        return queryset.filter(tag_query).distinct()
-
-    def filter_by_category(self, queryset, name, value):
-        # Support comma-separated category slugs or names
-        if not value:
-            return queryset
-
-        categories = [category.strip() for category in value.split(",")]
-        category_query = Q()
-
-        for category in categories:
-            category_query |= Q(categories__slug=category) | Q(
-                categories__name=category
-            )
-
-        return queryset.filter(category_query).distinct()
-
     def filter_by_page_slug(self, queryset, name, value):
         """
         Filter to match posts by page_slug, supporting exact matches
@@ -152,11 +118,8 @@ class PostFilter(FilterSet):
         if not value:
             return queryset
 
-        # Match both exact page_slug and posts that contain this as part of their page_slug
-        # This handles cases where posts are created with the full article path
-        return queryset.filter(
-            Q(page_slug=value) | Q(page_slug__contains=value)
-        ).distinct()
+        # Get posts that have associations with this page slug
+        return queryset.filter(page_associations__page_slug=value).distinct()
 
 
 class AdvancedSearchFilter(filters.SearchFilter):
@@ -178,6 +141,23 @@ class AdvancedSearchFilter(filters.SearchFilter):
         return search_fields
 
 
+class PostPageAssociationFilter(FilterSet):
+    """
+    Custom filter for post page associations
+    """
+
+    post_id = UUIDFilter(field_name="post__id")
+    author = CharFilter(field_name="post__author__username")
+
+    class Meta:
+        model = PostPageAssociation
+        fields = {
+            "page_slug": ["exact"],
+            "added_at": ["gt", "lt"],
+            "appropriateness_score": ["gt", "lt", "exact"],
+        }
+
+
 @method_decorator(ensure_csrf_cookie, name="list")
 @method_decorator(csrf_protect, name="create")
 @method_decorator(csrf_protect, name="update")
@@ -190,7 +170,6 @@ class PostViewSet(viewsets.ModelViewSet):
     Filtering:
     - author: Filter by author username (e.g., ?author=john)
     - author_id: Filter by author UUID (e.g., ?author_id=123e4567-e89b-12d3-a456-426614174000)
-    - primary_slug: Filter by primary slug (e.g., ?primary_slug=my-post)
     - page_slug: Filter by page slug (e.g., ?page_slug=my-page)
     - status: Filter by status (e.g., ?status=published)
     - created_after: Filter by creation date greater than (e.g., ?created_after=2023-01-01T00:00:00Z)
@@ -200,8 +179,6 @@ class PostViewSet(viewsets.ModelViewSet):
     - created_today: Filter posts created today (e.g., ?created_today=true)
     - created_this_week: Filter posts created this week (e.g., ?created_this_week=true)
     - created_this_month: Filter posts created this month (e.g., ?created_this_month=true)
-    - tag: Filter by tag name or slug (e.g., ?tag=news,technology)
-    - category: Filter by category name or slug (e.g., ?category=tutorials,guides)
 
     Search:
     - search: Search in title and content (e.g., ?search=keyword)
@@ -213,11 +190,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     Sorting:
     - ordering: Sort by field (e.g., ?ordering=title or ?ordering=-created_at)
-       Available fields: created_at, updated_at, status, votes_score (vote difference)
-
-    Voting:
-    - POST /api/posts/{id}/upvote/ to upvote a post
-    - POST /api/posts/{id}/downvote/ to downvote a post
+       Available fields: created_at, updated_at, status
     """
 
     serializer_class = PostSerializer
@@ -229,20 +202,19 @@ class PostViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
     ]
     filterset_class = PostFilter
-    search_fields = ["content", "primary_slug", "author__username"]
+    search_fields = ["title", "content", "author__username"]
     ordering_fields = [
         "created_at",
         "updated_at",
         "status",
         "author__username",
-        "primary_slug",
-        "votes_score",  # Add votes_score for sorting by vote difference
+        "title",
     ]
-    ordering = ["-votes_score", "-created_at"]  # Default to sort by votes and then date
+    ordering = ["-created_at"]  # Default to sort by date
 
     def get_queryset(self):
         queryset = Post.objects.select_related("author").prefetch_related(
-            "tags", "categories", "secondary_slugs"
+            "page_associations"
         )
 
         # For authenticated users, filter to show only:
@@ -259,105 +231,293 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-    def validate_resource_url(self, url):
-        """
-        Validate that a URL exists and returns a success status code
-        """
-        if not url:
-            return True  # No URL provided, validation passes
-
-        # Check for valid URL format
-        url_pattern = re.compile(
-            r"^(?:http|https)://"  # http:// or https://
-            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain
-            r"localhost|"  # localhost
-            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # or ipv4
-            r"(?::\d+)?"  # optional port
-            r"(?:/?|[/?]\S+)$",
-            re.IGNORECASE,
-        )
-
-        if not url_pattern.match(url):
-            raise ValidationError({"resource_url": "Invalid URL format"})
-
-        # Try to fetch the URL to see if it exists
-        try:
-            response = requests.head(url, timeout=5, allow_redirects=True)
-
-            # Check if the request was successful
-            if response.status_code >= 400:
-                raise ValidationError(
-                    {"resource_url": f"URL returned status code {response.status_code}"}
-                )
-
-        except RequestException as e:
-            raise ValidationError(
-                {"resource_url": f"URL could not be accessed: {str(e)}"}
-            )
-
-        return True
+    # Resource URL validation removed as it's no longer needed
 
     def perform_create(self, serializer):
-        # Validate resource URL if provided
-        resource_url = self.request.data.get("resource_url")
-        if resource_url:
-            self.validate_resource_url(resource_url)
-
-        # Call the serializer's save method
-        serializer.save()
+        # Set the author to the current user and save
+        serializer.save(author=self.request.user)
 
     def perform_update(self, serializer):
-        # Validate resource URL if provided
-        resource_url = self.request.data.get("resource_url")
-        if resource_url:
-            self.validate_resource_url(resource_url)
-
-        # Update the post
+        # Only update if the user is the author (handled by permission class)
         serializer.save()
+
+    @action(
+        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def associate_with_page(self, request, pk=None):
+        """
+        Associate a post with a page
+        Requires page_slug in the request body
+        """
+        post = self.get_object()
+        page_slug = request.data.get("page_slug")
+
+        if not page_slug:
+            return Response(
+                {"detail": "page_slug is required"},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if association already exists
+        if PostPageAssociation.objects.filter(post=post, page_slug=page_slug).exists():
+            return Response(
+                {"detail": f"Post is already associated with page '{page_slug}'"},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create the association
+        association = PostPageAssociation.objects.create(
+            post=post, page_slug=page_slug, added_by=request.user
+        )
+
+        # Return the updated post with associations
+        return Response(self.get_serializer(post).data)
+
+    @action(
+        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def remove_page_association(self, request, pk=None):
+        """
+        Remove a post's association with a page
+        Requires page_slug in the request body
+        """
+        post = self.get_object()
+        page_slug = request.data.get("page_slug")
+        association_id = request.data.get("association_id")
+
+        if not page_slug and not association_id:
+            return Response(
+                {"detail": "Either page_slug or association_id is required"},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Only allow the author or the person who added the association to remove it
+        if association_id:
+            try:
+                association = PostPageAssociation.objects.get(
+                    id=association_id, post=post
+                )
+            except PostPageAssociation.DoesNotExist:
+                return Response(
+                    {"detail": "Association not found"},
+                    status=http_status.HTTP_404_NOT_FOUND,
+                )
+        else:
+            try:
+                association = PostPageAssociation.objects.get(
+                    post=post, page_slug=page_slug
+                )
+            except PostPageAssociation.DoesNotExist:
+                return Response(
+                    {"detail": f"Post is not associated with page '{page_slug}'"},
+                    status=http_status.HTTP_404_NOT_FOUND,
+                )
+
+        # Check permissions
+        if request.user != post.author and request.user != association.added_by:
+            return Response(
+                {"detail": "You don't have permission to remove this association"},
+                status=http_status.HTTP_403_FORBIDDEN,
+            )
+
+        # Don't allow removing the last association
+        if post.page_associations.count() <= 1:
+            return Response(
+                {
+                    "detail": "Cannot remove the last page association. A post must be associated with at least one page."
+                },
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Remove the association
+        association.delete()
+
+        # Return the updated post
+        return Response(self.get_serializer(post).data)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new post with page association
+
+        Requires title, content, and page_slug at minimum
+        Automatically sets the current user as the author
+        """
+        # Extract data
+        title = request.data.get("title")
+        content = request.data.get("content")
+        page_slug = request.data.get("page_slug")
+        status = request.data.get("status", "draft")  # Default to draft
+        metadata = request.data.get("metadata", {})
+
+        if not title:
+            return Response(
+                {"title": "Title is required"},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not content:
+            return Response(
+                {"content": "Content is required"},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not page_slug:
+            return Response(
+                {"page_slug": "Page slug is required"},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create the post with the current user as author
+        post = Post.objects.create(
+            title=title,
+            content=content,
+            author=request.user,
+            status=status,
+            metadata=metadata,
+        )
+
+        # Associate with the page
+        association = PostPageAssociation.objects.create(
+            post=post, page_slug=page_slug, added_by=request.user
+        )
+
+        # Return the complete post with association
+        serializer = self.get_serializer(post)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=http_status.HTTP_201_CREATED, headers=headers
+        )
+
+
+class PostPageAssociationViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for post page associations
+
+    Filtering:
+    - page_slug: Filter by page slug (e.g., ?page_slug=my-page)
+    - post_id: Filter by post ID (e.g., ?post_id=123e4567-e89b-12d3-a456-426614174000)
+    - added_at: Filter by addition date (e.g., ?added_at__gt=2023-01-01T00:00:00Z)
+    - appropriateness_score: Filter by score (e.g., ?appropriateness_score__gt=5)
+
+    Pagination:
+    - page: Page number (e.g., ?page=2)
+    - page_size: Number of results per page (e.g., ?page_size=20)
+
+    Voting:
+    - POST /api/post-associations/{id}/upvote/ to upvote an association
+    - POST /api/post-associations/{id}/downvote/ to downvote an association
+    """
+
+    serializer_class = PostPageAssociationSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = PostPagination
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_class = PostPageAssociationFilter
+    ordering_fields = [
+        "added_at",
+        "appropriateness_score",
+    ]
+    ordering = [
+        "-appropriateness_score",
+        "-added_at",
+    ]  # Default to sort by score and date
+
+    def get_queryset(self):
+        # Filter by page_slug or post_id if provided in query params
+        page_slug = self.request.query_params.get("page_slug", None)
+        post_id = self.request.query_params.get("post_id", None)
+
+        # Use select_related for foreign keys to optimize performance
+        queryset = PostPageAssociation.objects.select_related(
+            "post", "post__author", "added_by"
+        )
+
+        # Apply filters if provided
+        if page_slug:
+            queryset = queryset.filter(page_slug=page_slug)
+
+        if post_id:
+            queryset = queryset.filter(post__id=post_id)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(added_by=self.request.user)
 
     @action(
         detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
     )
     def upvote(self, request, pk=None):
         """
-        Upvote a post
-        Creates a new upvote if the user hasn't voted yet
-        Changes to an upvote if the user previously downvoted
-        Removes the vote if the user already upvoted (toggle off)
+        Upvote a post's appropriateness for a page.
+        Creates an upvote if no vote exists.
+        Changes to an upvote if previously downvoted.
+        Removes the vote if already upvoted (toggle).
         """
-        post = self.get_object()
+        association = self.get_object()
+        user = request.user
+        vote_type = "upvote"
 
-        serializer = VoteSerializer(
-            data={"post": post.id, "vote_type": "upvote"}, context={"request": request}
-        )
+        try:
+            existing_vote = PostAppropriatenessVote.objects.get(
+                association=association, user=user
+            )
 
-        if serializer.is_valid():
-            vote = serializer.save()
-            # Re-fetch the post to get updated vote counts
-            post = self.get_object()
-            return Response(self.get_serializer(post).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # If already upvoted, toggle it off by deleting
+            if existing_vote.vote_type == vote_type:
+                existing_vote.delete()
+            else:
+                # Change vote: update existing downvote to upvote
+                existing_vote.vote_type = vote_type
+                existing_vote.save()
+
+        except PostAppropriatenessVote.DoesNotExist:
+            # Create new upvote
+            PostAppropriatenessVote.objects.create(
+                association=association, user=user, vote_type=vote_type
+            )
+
+        # Always re-fetch the association to get updated vote counts
+        association.refresh_from_db()
+        return Response(self.get_serializer(association).data)
 
     @action(
         detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
     )
     def downvote(self, request, pk=None):
         """
-        Downvote a post
-        Creates a new downvote if the user hasn't voted yet
-        Changes to a downvote if the user previously upvoted
-        Removes the vote if the user already downvoted (toggle off)
+        Downvote a post's appropriateness for a page.
+        Creates a downvote if no vote exists.
+        Changes to a downvote if previously upvoted.
+        Removes the vote if already downvoted (toggle).
         """
-        post = self.get_object()
+        association = self.get_object()
+        user = request.user
+        vote_type = "downvote"
 
-        serializer = VoteSerializer(
-            data={"post": post.id, "vote_type": "downvote"},
-            context={"request": request},
-        )
+        try:
+            existing_vote = PostAppropriatenessVote.objects.get(
+                association=association, user=user
+            )
 
-        if serializer.is_valid():
-            vote = serializer.save()
-            # Re-fetch the post to get updated vote counts
-            post = self.get_object()
-            return Response(self.get_serializer(post).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # If already downvoted, toggle it off by deleting
+            if existing_vote.vote_type == vote_type:
+                existing_vote.delete()
+            else:
+                # Change vote: update existing upvote to downvote
+                existing_vote.vote_type = vote_type
+                existing_vote.save()
+
+        except PostAppropriatenessVote.DoesNotExist:
+            # Create new downvote
+            PostAppropriatenessVote.objects.create(
+                association=association, user=user, vote_type=vote_type
+            )
+
+        # Always re-fetch the association to get updated vote counts
+        association.refresh_from_db()
+        return Response(self.get_serializer(association).data)

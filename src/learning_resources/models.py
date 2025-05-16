@@ -62,18 +62,19 @@ class LearningResource(TimestampMixin, models.Model):
     def update_quality_vote_counts(self):
         """Update the cached quality vote count fields"""
         result = self.quality_votes.aggregate(
-            count=models.Count("id"), sum=Sum("rating")
+            count=models.Count("id"), sum=models.Sum("rating")
         )
 
-        self.quality_vote_count = result.get("count", 0)
-        self.quality_vote_sum = result.get("sum", 0)
+        self.quality_vote_count = result.get("count", 0) or 0  # Ensure never NULL
+        # Ensure sum is never None, default to 0 if there are no votes
+        self.quality_vote_sum = result.get("sum", 0) or 0  # Ensure never NULL
         self.save(update_fields=["quality_vote_count", "quality_vote_sum"])
 
     def update_difficulty_vote_counts(self):
         """Update the cached difficulty vote count fields"""
-        beginner_count = self.difficulty_votes.filter(level="beginner").count()
-        moderate_count = self.difficulty_votes.filter(level="moderate").count()
-        advanced_count = self.difficulty_votes.filter(level="advanced").count()
+        beginner_count = self.difficulty_votes.filter(level="beginner").count() or 0
+        moderate_count = self.difficulty_votes.filter(level="moderate").count() or 0
+        advanced_count = self.difficulty_votes.filter(level="advanced").count() or 0
 
         self.difficulty_beginner_count = beginner_count
         self.difficulty_moderate_count = moderate_count

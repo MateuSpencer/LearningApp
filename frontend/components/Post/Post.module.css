@@ -17,6 +17,8 @@
 .post:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-primary, #01FFFF);
+    backdrop-filter: blur(calc(var(--glass-blur) * 1.5));
 }
 
 /* Layout for post with vote controls */
@@ -95,11 +97,36 @@
 
 .title {
     margin-top: 0;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
     transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.titleLink {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.titleLink:hover {
+    color: var(--color-primary);
+}
+
+.contentPreview {
+    margin-bottom: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 .content {
@@ -174,24 +201,30 @@
 }
 
 .topic {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
     margin-left: 10px;
     font-style: italic;
     color: var(--color-primary);
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    flex-wrap: wrap;
 }
 
 .pageLink {
-    color: var(--color-primary);
     text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s ease;
+    color: var(--color-primary);
+    background-color: var(--tag-bg);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
 }
 
 .pageLink:hover {
-    color: var(--color-primary-dark);
-    text-decoration: underline;
+    background-color: var(--color-primary-light);
+    color: var(--text-on-primary);
 }
 
 /* Status styles */
@@ -215,17 +248,8 @@
     color: #6c757d;
 }
 
-/* Status indicator on post */
-.post.statusDraft {
-    border-left: 3px solid #ffc107;
-}
-
-.post.statusPublished {
-    border-left: 3px solid #28a745;
-}
-
+/* Status indicator on post - borders removed */
 .post.statusArchived {
-    border-left: 3px solid #6c757d;
     opacity: 0.8;
 }
 

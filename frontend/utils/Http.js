@@ -165,6 +165,13 @@ const checkStatus = (response) => {
     error.response = response;
     error.status = response.status;
     
+    // Handle 404 errors specially
+    if (response.status === 404) {
+        error.message = 'Not Found';
+        error.isNotFoundError = true; // Add a flag to identify 404 errors
+        throw error;
+    }
+    
     // Try to parse the error message from the response if possible
     return response.text().then(text => {
         try {

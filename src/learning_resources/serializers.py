@@ -202,7 +202,8 @@ class QualityVoteSerializer(serializers.ModelSerializer):
             # Same rating means toggle off (delete vote)
             if existing_vote.rating == rating:
                 existing_vote.delete()
-                return None
+                # Mark that the vote was deleted to handle properly in the view
+                return {"deleted": True, "learning_resource": learning_resource}
 
             # Different rating means update
             existing_vote.rating = rating
@@ -237,7 +238,8 @@ class DifficultyVoteSerializer(serializers.ModelSerializer):
             # Same level means toggle off (delete vote)
             if existing_vote.level == level:
                 existing_vote.delete()
-                return None
+                # Mark that the vote was deleted to handle properly in the view
+                return {"deleted": True, "learning_resource": learning_resource}
 
             # Different level means update
             existing_vote.level = level
@@ -272,7 +274,8 @@ class AppropriatenessVoteSerializer(serializers.ModelSerializer):
             # Same vote type means toggle off (delete vote)
             if existing_vote.vote_type == vote_type:
                 existing_vote.delete()
-                return None
+                # Mark that the vote was deleted to handle properly in the view
+                return {"deleted": True, "association": association}
 
             # Different vote type means update
             existing_vote.vote_type = vote_type
