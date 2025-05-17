@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { basePageWrap } from '../BasePage';
 import PostsList from '../../components/PostsList';
 import { useAuth } from '../../context/AuthContext';
-import s from './CommunityPostsIndexPage.module.css';
+import s from './PostsIndexPage.module.css';
 
-const CommunityPostsIndexPage = ({ title, description }) => {
+const PostsIndexPage = ({ title, description }) => {
     const { isAuthenticated } = useAuth();
     const [showNewPostForm, setShowNewPostForm] = useState(false);
     
@@ -33,14 +33,14 @@ const CommunityPostsIndexPage = ({ title, description }) => {
     );
 };
 
-CommunityPostsIndexPage.propTypes = {
+PostsIndexPage.propTypes = {
     title: PropTypes.string,
     description: PropTypes.string
 };
 
-CommunityPostsIndexPage.defaultProps = {
-    title: 'Community Posts',
+PostsIndexPage.defaultProps = {
+    title: 'Posts',
     description: 'Explore posts shared by our community members.',
 };
 
-export default basePageWrap(CommunityPostsIndexPage);
+export default basePageWrap(PostsIndexPage);

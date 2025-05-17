@@ -15,8 +15,8 @@ export default {
     // Learning resources containers
     LearningResourcesIndexPage: dynamic(() => import('./LearningResourcesIndexPage')),
     LearningResourceDetailPage: dynamic(() => import('./LearningResourcePage')),
-    // Community content containers
-    CommunityPostsIndexPage: dynamic(() => import('./CommunityPostsIndexPage')),
-    // User content containers
-    UserPostsPage: dynamic(() => import('./UserPostsPage'))
+    // Posts containers
+    PostsIndexPage: dynamic(() => import('./PostsIndexPage')),
+    PostPage: dynamic(() => import('./PostPage')),
+    MyPostsPage: dynamic(() => import('./MyPostsPage'))
 };

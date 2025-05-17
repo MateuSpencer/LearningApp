@@ -84,7 +84,7 @@ const LeftSidebar = () => {
                             </Link>
                         </li>
                         <li className={s.NavItem}>
-                            <Link href="/community-posts" className={s.NavLink}>
+                            <Link href="/posts" className={s.NavLink}>
                                 <span className={s.NavIcon}>👥</span>
                                 <div className={s.NavTextWrapper}>
                                     <span className={s.NavText}>Community Posts</span>
@@ -94,7 +94,7 @@ const LeftSidebar = () => {
                         {/* SubNavItem only shows when sidebar is expanded */}
                         {!collapsed && (
                             <li className={`${s.NavItem} ${s.SubNavItem}`}>
-                                <Link href="/my-posts" className={s.NavLink}>
+                                <Link href="/posts/my-posts" className={s.NavLink}>
                                     <span className={s.NavIcon}>📝</span>
                                     <div className={s.NavTextWrapper}>
                                         <span className={s.NavText}>My Posts</span>

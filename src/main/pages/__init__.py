@@ -10,3 +10,5 @@ from .wiki import *  # NOQA
 from .wiki_serializer import *  # NOQA
 from .learning_resources import *  # NOQA
 from .learning_resources_serializer import *  # NOQA
+from .posts import *  # NOQA
+from .posts_serializer import *  # NOQA
