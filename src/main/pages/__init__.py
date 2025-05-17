@@ -8,3 +8,5 @@ from .about import *  # NOQA
 from .about_serializer import *  # NOQA
 from .wiki import *  # NOQA
 from .wiki_serializer import *  # NOQA
+from .learning_resources import *  # NOQA
+from .learning_resources_serializer import *  # NOQA
