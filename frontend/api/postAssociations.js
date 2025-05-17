@@ -8,7 +8,6 @@ export const postAssociations = {
             const queryParams = pageSlug ? `?page_slug=${encodeURIComponent(pageSlug)}` : '';
             return await httpGet(`${API_BASE_URL}/${queryParams}`);
         } catch (error) {
-            console.error('Error fetching post associations:', error);
             throw error;
         }
     },
@@ -17,7 +16,6 @@ export const postAssociations = {
         try {
             return await httpGet(`${API_BASE_URL}/${id}/`);
         } catch (error) {
-            console.error(`Error fetching post association with id ${id}:`, error);
             throw error;
         }
     },
@@ -26,7 +24,6 @@ export const postAssociations = {
         try {
             return await httpPost(`${API_BASE_URL}/`, associationData);
         } catch (error) {
-            console.error('Error creating post association:', error);
             throw error;
         }
     },
@@ -35,7 +32,6 @@ export const postAssociations = {
         try {
             return await httpDelete(`${API_BASE_URL}/${id}/`);
         } catch (error) {
-            console.error(`Error deleting post association with id ${id}:`, error);
             throw error;
         }
     },
@@ -45,7 +41,6 @@ export const postAssociations = {
         try {
             return await httpPost(`${API_BASE_URL}/${id}/upvote/`, {});
         } catch (error) {
-            console.error(`Error upvoting post association with id ${id}:`, error);
             throw error;
         }
     },
@@ -54,7 +49,6 @@ export const postAssociations = {
         try {
             return await httpPost(`${API_BASE_URL}/${id}/downvote/`, {});
         } catch (error) {
-            console.error(`Error downvoting post association with id ${id}:`, error);
             throw error;
         }
     }

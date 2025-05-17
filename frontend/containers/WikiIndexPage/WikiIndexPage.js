@@ -26,9 +26,13 @@ const WikiIndexPage = ({ title }) => {
       // First check if there's an exact match for the query
       // Preserve case and special characters for Wikipedia's case-sensitive URLs
       const formattedQuery = searchQuery.replace(/\s+/g, '_');
-      const response = await fetch(
-        `https://${language}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)}` // Use language context
-      );
+      
+      // Properly encode the query for API request
+      const encodedQuery = encodeURIComponent(formattedQuery);
+      
+      const apiUrl = `https://${language}.wikipedia.org/api/rest_v1/page/summary/${encodedQuery}`;
+      
+      const response = await fetch(apiUrl);
       
       if (response.ok) {
         // Get the canonical title from Wikipedia's API response
@@ -37,8 +41,13 @@ const WikiIndexPage = ({ title }) => {
         const canonicalSlug = data.title.replace(/\s+/g, '_');
         
         // Direct match found, navigate directly to the wiki article page
-        // Do not encode the URL to ensure special characters remain unencoded
-        router.push(`/wiki/${canonicalSlug}`);
+        // Use the "as" parameter to handle special characters properly
+        const targetUrl = `/wiki/${canonicalSlug}`;
+        
+        router.push({
+          pathname: '/wiki/[slug]',
+          query: { slug: canonicalSlug },
+        }, targetUrl);
         return;
       }
     } catch (err) {

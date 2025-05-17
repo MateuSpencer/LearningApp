@@ -111,7 +111,7 @@ const SearchBar = ({
             
             setSuggestions(enhancedSuggestions);
         } catch (err) {
-            console.error('Error fetching suggestions:', err);
+            // Silently handle errors
             setSuggestions([]);
         } finally {
             setLoading(false);
@@ -123,8 +123,12 @@ const SearchBar = ({
         try {
             // Preserve case for Wikipedia's case-sensitive URLs
             const formattedQuery = searchQuery.replace(/\s+/g, '_');
+            
+            // Use encodeURIComponent for API request but keep original for navigation
+            const encodedQuery = encodeURIComponent(formattedQuery);
+            
             const response = await fetch(
-                `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)}`
+                `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedQuery}`
             );
             
             if (response.ok) {
@@ -134,17 +138,28 @@ const SearchBar = ({
                 const canonicalSlug = data.title.replace(/\s+/g, '_');
                 
                 // Direct match found, navigate directly to the wiki article page
-                router.push(`/wiki/${encodeURIComponent(canonicalSlug)}`);
+                // Use router.push with object syntax to better handle special characters
+                
+                router.push({
+                    pathname: '/wiki/[slug]',
+                    query: { slug: canonicalSlug },
+                }, `/wiki/${canonicalSlug}`);
+                
                 return true;
             } else {
                 // No direct match, go to main wiki page with search query
-                router.push(`/wiki?q=${encodeURIComponent(searchQuery)}`);
+                router.push({
+                    pathname: '/wiki',
+                    query: { q: searchQuery }
+                });
                 return false;
             }
         } catch (err) {
-            console.error('Error checking page exists:', err);
             // On error, go to main wiki page with search query
-            router.push(`/wiki?q=${encodeURIComponent(searchQuery)}`);
+            router.push({
+                pathname: '/wiki',
+                query: { q: searchQuery }
+            });
             return false;
         }
     };
@@ -177,11 +192,47 @@ const SearchBar = ({
         
         // First check if this exactly matches a Wikipedia article
         try {
-            // Convert the query to slug format while preserving case
+            // Use our formatWikiSlug utility to properly handle special characters
+            // Import the formatWikiSlug function at the top of the file if it's not already imported
             const formattedQuery = sanitizedQuery.replace(/\s+/g, '_');
-            const response = await fetch(
-                `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(formattedQuery)}`
-            );
+            
+            // Check for problematic characters
+            const problematicChars = {
+              '\u2013': '-', // en dash to regular hyphen (U+2013)
+              '\u2014': '-', // em dash to regular hyphen (U+2014)
+              '\u2018': "'", // fancy single quotes (U+2018)
+              '\u2019': "'", // fancy single quotes (U+2019)
+              '\u201C': '"', // fancy double quotes (U+201C)
+              '\u201D': '"', // fancy double quotes (U+201D)
+              '\u201E': '"', // fancy double quotes (U+201E)
+              '\u00AB': '"', // fancy quotes (U+00AB)
+              '\u00BB': '"'  // fancy quotes (U+00BB)
+            };
+            
+            let safeQuery = formattedQuery;
+            for (const [specialChar, replacement] of Object.entries(problematicChars)) {
+              if (safeQuery.includes(specialChar)) {
+                // Using split and join instead of RegExp to avoid escaping issues with Unicode
+                safeQuery = safeQuery.split(specialChar).join(replacement);
+              }
+            }
+            
+            // Check specifically for en dash after replacement
+            if (safeQuery.includes('–')) {
+              // Try a direct replacement of the en dash
+              safeQuery = safeQuery.split('–').join('-');
+            }
+            
+            // Use encodeURIComponent for API URL
+            const encodedQuery = encodeURIComponent(safeQuery);
+            
+            const apiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedQuery}`;
+            
+            // Add a small delay to ensure the browser has time to process the request
+            // Sometimes browsers can throttle multiple rapid requests
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            const response = await fetch(apiUrl);
             
             if (response.ok) {
                 // Get the canonical title from Wikipedia's API response
@@ -190,11 +241,16 @@ const SearchBar = ({
                 const canonicalSlug = data.title.replace(/\s+/g, '_');
                 
                 // Direct match found, navigate to the wiki article page with correct case
-                router.push(`/wiki/${canonicalSlug}`);
+                // Use router.push with object syntax to properly handle special characters
+                
+                router.push({
+                    pathname: '/wiki/[slug]',
+                    query: { slug: canonicalSlug },
+                }, `/wiki/${canonicalSlug}`);
+                
                 return; // Exit early as we've already navigated
             }
         } catch (err) {
-            console.error('Error checking for exact page match:', err);
             // Continue with normal search flow if there's an error
         }
 
@@ -203,8 +259,42 @@ const SearchBar = ({
             onSearch(sanitizedQuery);
         } else {
             // Default behavior if onSearch is not provided (e.g., for a global search bar)
+            
+            // Handle problematic characters
+            const problematicChars = {
+                '\u2013': '-', // en dash to regular hyphen (U+2013)
+                '\u2014': '-', // em dash to regular hyphen (U+2014)
+                '\u2018': "'", // fancy single quotes (U+2018)
+                '\u2019': "'", // fancy single quotes (U+2019)
+                '\u201C': '"', // fancy double quotes (U+201C)
+                '\u201D': '"', // fancy double quotes (U+201D)
+                '\u201E': '"', // fancy double quotes (U+201E)
+                '\u00AB': '"', // fancy quotes (U+00AB)
+                '\u00BB': '"'  // fancy quotes (U+00BB)
+            };
+            
+            let safeQuery = sanitizedQuery;
+            let hadProblematicChars = false;
+            
+            for (const [specialChar, replacement] of Object.entries(problematicChars)) {
+                if (safeQuery.includes(specialChar)) {
+                    // Using split and join instead of RegExp to avoid escaping issues with Unicode
+                    safeQuery = safeQuery.split(specialChar).join(replacement);
+                    hadProblematicChars = true;
+                }
+            }
+            
+            // Check for en dash specifically
+            if (safeQuery.includes('–')) {
+                safeQuery = safeQuery.split('–').join('-');
+                hadProblematicChars = true;
+            }
+            
             if (router && router.push) {
-                router.push(`/wiki?q=${encodeURIComponent(sanitizedQuery)}`);
+                router.push({
+                    pathname: '/wiki',
+                    query: { q: safeQuery }
+                });
             } else {
                 console.warn('SearchBar: onSearch prop not provided and router not available for default action.');
             }
@@ -244,11 +334,11 @@ const SearchBar = ({
         // Format suggestion and navigate directly to wiki article page - preserve case for Wikipedia
         const formattedSuggestion = suggestion.title.replace(/\s+/g, '_');
         
-        // Use router.push with the pathname option to avoid query parameter issues
-        // Use encodeURIComponent to handle special characters properly while preserving case
+        // Use router.push with the object syntax to handle special characters properly
         router.push({
-            pathname: `/wiki/${encodeURIComponent(formattedSuggestion)}`
-        });
+            pathname: '/wiki/[slug]',
+            query: { slug: formattedSuggestion },
+        }, `/wiki/${formattedSuggestion}`);
     };
 
     return (

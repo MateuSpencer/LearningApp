@@ -43,6 +43,26 @@ export function middleware(request) {
                 }
             }
             
+            // Check for problematic characters in the URL that need special handling
+            const problematicChars = {
+                '–': '-', // en dash to regular hyphen
+                '—': '-', // em dash to regular hyphen
+            };
+            
+            let containsProblematicChars = false;
+            let updatedSlug = slug;
+            
+            for (const [specialChar, replacement] of Object.entries(problematicChars)) {
+                if (updatedSlug.includes(specialChar)) {
+                    updatedSlug = updatedSlug.replace(new RegExp(specialChar, 'g'), replacement);
+                    containsProblematicChars = true;
+                }
+            }
+            
+            if (containsProblematicChars) {
+                return NextResponse.redirect(new URL(`/wiki/${updatedSlug}`, origin), 301); // Permanent redirect
+            }
+            
             // Skip middleware processing for direct wiki article URLs
             // This prevents valid paths from being intercepted while ensuring proper handling of special characters
             if (pathname.startsWith('/wiki/')) {

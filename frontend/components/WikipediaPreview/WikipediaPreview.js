@@ -24,9 +24,11 @@ const WikipediaPreview = ({ slug = '', onArticleNotFound }) => {
     
     try {
       // Using Wikipedia's REST API to fetch page summary
-      const response = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`
-      );
+      const encodedSlug = encodeURIComponent(slug);
+      
+      const apiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodedSlug}`;
+      
+      const response = await fetch(apiUrl);
       
       if (!response.ok) {
         setArticleExists(false);
@@ -42,7 +44,6 @@ const WikipediaPreview = ({ slug = '', onArticleNotFound }) => {
       const data = await response.json();
       setSummary(data.extract);
     } catch (err) {
-      console.error('Error fetching Wikipedia summary:', err);
       // Silently handle the error
       setArticleExists(false);
       
@@ -68,6 +69,7 @@ const WikipediaPreview = ({ slug = '', onArticleNotFound }) => {
             href={`https://en.wikipedia.org/wiki/${encodeURIComponent(slug)}`}
             target="_blank"
             rel="noopener noreferrer"
+            data-special-chars="preserved"
           >
             {articleTitle}
           </a>
@@ -88,9 +90,10 @@ const WikipediaPreview = ({ slug = '', onArticleNotFound }) => {
             <p className={s.articleText}>{summary}</p>
             <div className={s.readMoreLink}>
               <a 
-                href={`https://en.wikipedia.org/wiki/${slug}`} 
+                href={`https://en.wikipedia.org/wiki/${encodeURIComponent(slug)}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
+                data-special-chars="preserved"
               >
                 Read full article on Wikipedia →
               </a>

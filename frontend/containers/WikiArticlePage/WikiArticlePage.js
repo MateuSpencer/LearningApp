@@ -40,19 +40,24 @@ const WikiArticlePage = ({ title, articleSlug }) => {
         if (!router.isReady) return; // Prevent state updates if component unmounted or router changed
 
         if (error && error === 'Article not found') {
-          console.log(`Article "${articleSlug}" not found. Redirecting.`);
-          router.push(`/wiki/?q=${encodeURIComponent(articleSlug)}`);
+          // Use the proper router push method with query parameters
+          router.push({
+            pathname: '/wiki',
+            query: { q: articleSlug }
+          });
           return;
         }
         
         if (isDisambiguation) {
-          console.log(`Article "${articleSlug}" is a disambiguation page. Redirecting.`);
-          router.push(`/wiki/?q=${encodeURIComponent(articleSlug)}`);
+          // Use the proper router push method with query parameters
+          router.push({
+            pathname: '/wiki',
+            query: { q: articleSlug }
+          });
           return;
         }
 
         if (error) {
-          console.warn(`Error validating article "${articleSlug}": ${error}`);
           // Optionally, still redirect or show an error message on other errors
           // For now, we'll assume it doesn't exist if there's an error and no summary
           if (!summaryData) {
@@ -71,7 +76,6 @@ const WikiArticlePage = ({ title, articleSlug }) => {
         }
       } catch (e) {
         // Catch any unexpected errors from fetchWikipediaArticle or within this async block
-        console.error(`Unexpected error during article validation for "${articleSlug}":`, e);
         if (router.isReady) {
           // router.push(`/wiki/?q=${encodeURIComponent(articleSlug)}`);
         }
@@ -86,7 +90,6 @@ const WikiArticlePage = ({ title, articleSlug }) => {
 
     validationTimeoutRef.current = setTimeout(() => {
       if (isValidating && router.isReady) {
-        console.warn(`Validation timeout for "${articleSlug}".`);
         setIsValidating(false);
         // Fallback: if validation times out, consider it not found or problematic
         // router.push(`/wiki/?q=${encodeURIComponent(articleSlug)}`);
@@ -114,7 +117,7 @@ const WikiArticlePage = ({ title, articleSlug }) => {
   // However, WikipediaPreview might still call it if it has its own internal fetch.
   // For now, let's assume it might still be called, but its role is diminished.
   const handleArticleNotFound = useCallback(() => {
-    console.log('handleArticleNotFound called, but redirection should be handled by useEffect.');
+    // Redirection is handled by useEffect
     // if (router.isReady) {
     //   router.push(`/wiki/?q=${encodeURIComponent(articleSlug)}`);
     // }
