@@ -7,6 +7,7 @@ import LearningResourceItem from '../LearningResourceItem/LearningResourceItem';
 import NewLearningResourceForm from '../NewLearningResourceForm/NewLearningResourceForm';
 import { LearningResourcesFilter, LearningResourcesSort, LearningResourcesPagination } from '../LearningResourcesControls';
 import AIResourceFinderButton from '../AIResourceFinderButton/AIResourceFinderButton';
+import AIResourcesDisplay from '../AIResourcesDisplay/AIResourcesDisplay';
 import s from './LearningResourcesList.module.css';
 
 /**
@@ -363,8 +364,8 @@ const LearningResourcesList = ({
       
       {/* Show AI-generated resources if available */}
       {showAiResources && aiResources && aiResources.length > 0 && (
-        <div className={s.aiResourcesSection}>
-          <div className={s.aiResourcesHeader} onClick={() => setAiResourcesCollapsed(!aiResourcesCollapsed)}>
+        <div className={s.resourcesList}>
+          <div className={s.aiResourcesHeader} onClick={toggleAiResourcesCollapsed}>
             <h3 className={s.aiResourcesTitle}>
               AI-Recommended Learning Resources ✨
             </h3>
@@ -372,7 +373,7 @@ const LearningResourcesList = ({
               className={s.toggleButton}
               onClick={(e) => {
                 e.stopPropagation();
-                setAiResourcesCollapsed(!aiResourcesCollapsed);
+                toggleAiResourcesCollapsed();
               }}
               aria-label={aiResourcesCollapsed ? "Expand AI resources" : "Collapse AI resources"}
             >
@@ -381,25 +382,12 @@ const LearningResourcesList = ({
           </div>
           
           {!aiResourcesCollapsed && (
-            <div className={s.aiResourcesList}>
-              {aiResources.map((resource, index) => (
-                <div key={`ai-resource-${index}`} className={s.aiResourceItem}>
-                  <h4 className={s.aiResourceItemTitle}>
-                    <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                      {resource.title}
-                    </a>
-                  </h4>
-                  <div className={s.aiResourceItemMeta}>
-                    <span className={`${s.aiResourceType} ${s[`resourceType${resource.resourceType}`]}`}>
-                      {resource.resourceType}
-                    </span>
-                  </div>
-                  <p className={s.aiResourceDescription}>
-                    {resource.description}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <AIResourcesDisplay 
+              resources={aiResources} 
+              onAddResource={handleResourceAdded} 
+              onClose={() => setShowAiResources(false)}
+              pageSlug={pageSlug}
+            />
           )}
         </div>
       )}

@@ -432,6 +432,18 @@
 
 /* AI Resources Section Styles */
 .aiResourcesSection {
+  background: rgba(31, 32, 35, 0.85); /* Dark background with slight transparency */
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  overflow: hidden;
+  color: white;
   margin-bottom: 2rem;
   padding: 1.5rem;
   background-color: rgba(var(--color-secondary-rgb, 250, 152, 54), 0.05); /* Light orange background with opacity */
@@ -451,23 +463,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   cursor: pointer;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px dashed rgba(var(--color-secondary-rgb, 250, 152, 54), 0.3);
-  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .aiResourcesTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
   margin: 0;
-  color: var(--color-secondary, #EA6400); /* Orange color */
-  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+  font-size: 1.25rem;
+  color: #FF8C00; /* Orange title to match the screenshot */
+  font-weight: 600;
 }
 
-[data-theme="dark"] .aiResourcesTitle {
-  color: var(--color-secondary-light, #FFA500); /* Lighter orange for dark mode */
+.toggleButton {
+  background: none;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  color: #FF8C00;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggleButton:hover {
+  background-color: rgba(255, 140, 0, 0.1);
 }
 
 .aiResourcesList {
@@ -615,7 +634,7 @@
 }
 
 .addResourceButton:disabled {
-  opacity: 0.6;
+  background-color: var(--color-grey-400);
   cursor: not-allowed;
 }
 

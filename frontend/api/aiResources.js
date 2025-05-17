@@ -1,4 +1,5 @@
 import aiResourceFinder from '../services/aiResourceFinder';
+import { learningResources } from './learningResources';
 import { httpPost } from '../utils/Http';
 
 /**
@@ -72,8 +73,18 @@ export const findResources = async (topic, options = {}) => {
  */
 export const addAIResource = async (resourceData) => {
   try {
-    // Use the httpPost utility which handles CSRF automatically
-    return await httpPost('/api/learning-resources/', resourceData);
+    // Make sure we have all required fields
+    if (!resourceData.title || !resourceData.url || !resourceData.page_slug) {
+      throw new Error('Missing required fields: title, url, or page_slug');
+    }
+    
+    // Use the learningResources.createFromUrl method instead of direct API call
+    return await learningResources.createFromUrl({
+      url: resourceData.url,
+      title: resourceData.title,
+      pageSlug: resourceData.page_slug,
+      resourceType: resourceData.resource_type || 'website'
+    });
   } catch (error) {
     console.error('Error adding AI resource:', error);
     throw error;

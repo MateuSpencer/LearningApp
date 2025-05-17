@@ -1,12 +1,11 @@
 .Container {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  margin-top: 2rem;
+  /* No background or border needed since we're using the parent container */
+  padding: 0;
+  margin: 0;
   width: 100%;
-  max-width: 800px;
   overflow: hidden;
+  color: white;
+  transition: all 0.3s ease;
 }
 
 .Header {
@@ -19,35 +18,38 @@
 .Title {
   margin: 0;
   font-size: 1.25rem;
-  color: #2d3748;
+  color: #FF8C00; /* Orange title to match the screenshot */
+  font-weight: 600;
 }
 
 .CloseButton {
   background: none;
   border: none;
   cursor: pointer;
-  color: #718096;
+  color: var(--text-secondary);
   font-size: 1.25rem;
   padding: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .CloseButton:hover {
-  color: #2d3748;
+  color: var(--color-primary);
 }
 
 .ResourceList {
   list-style: none;
   padding: 0;
   margin: 0;
+  width: 100%;
 }
 
 .ResourceItem {
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  background-color: inherit; /* Inherit background from parent container */
+  border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
   display: flex;
@@ -58,7 +60,7 @@
 
 .ResourceItem:hover {
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--glass-shadow);
 }
 
 .ResourceContent {
@@ -74,8 +76,8 @@
 
 .ResourceType {
   font-size: 0.8rem;
-  color: #718096;
-  background-color: #f7fafc;
+  color: var(--text-secondary);
+  background: rgba(255, 140, 0, 0.2); /* Slightly stronger orange for badge */
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   display: inline-flex;
@@ -85,20 +87,21 @@
 
 .ResourceTitle {
   margin: 0 0 0.5rem 0;
-  color: #2d3748;
+  color: white; /* White text on dark background */
   font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .ResourceDescription {
   margin: 0.5rem 0;
   font-size: 0.9rem;
-  color: #4a5568;
+  color: rgba(255, 255, 255, 0.7); /* Light gray text for descriptions */
   line-height: 1.5;
 }
 
 .ResourceUrl {
   font-size: 0.8rem;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.5); /* Dimmer text for URLs */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -106,12 +109,12 @@
 }
 
 .ExternalLink {
-  color: #4a6fa5;
-  transition: color 0.2s;
+  color: var(--color-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .ExternalLink:hover {
-  color: #395882;
+  color: var(--color-primary-dark);
 }
 
 .ResourceActions {
@@ -122,27 +125,33 @@
 }
 
 .AddButton {
-  background-color: #48bb78;
+  background-color: #60cc8d; /* Matching the turquoise in the screenshot */
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 20px; /* More rounded like in the screenshot */
   padding: 0.5rem 0.75rem;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .AddButton:hover {
-  background-color: #38a169;
+  background-color: #4eb97c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 .AddButton.Added {
-  background-color: #718096;
+  background-color: var(--color-primary);
   cursor: default;
 }
 
 .AddButton:disabled {
-  background-color: #a0aec0;
+  background-color: var(--text-tertiary);
   cursor: not-allowed;
 }
 
@@ -163,7 +172,7 @@
 .EmptyState {
   text-align: center;
   padding: 2rem 0;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.7);
   font-style: italic;
 }
 

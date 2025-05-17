@@ -33,10 +33,9 @@ const AIResourceFinderButton = ({ title, compact = false, onResourcesFound, onCl
       setLoading(true);
       setError(null);
       
-      // Get active provider configuration - ensure we're using Tavily
+      // Get active provider configuration
       const providerConfig = {
         ...getActiveProviderConfig(),
-        provider: 'tavily' // Force using Tavily regardless of environment settings
       };
       
       // Call the AI service to find learning resources
