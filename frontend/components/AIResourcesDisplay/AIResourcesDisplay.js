@@ -93,7 +93,6 @@ const AIResourcesDisplay = ({ resources, onAddResource, onClose, pageSlug, exist
       
       // Check if the operation was successful
       if (result.success === false) {
-        console.log('Resource already exists:', result.message);
         // Still mark as added even if it already exists
         setAddedResources(prev => ({ ...prev, [resource.url]: true }));
       } else {

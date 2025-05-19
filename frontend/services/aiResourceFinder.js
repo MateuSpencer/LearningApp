@@ -33,7 +33,6 @@ const extractJsonFromText = (text) => {
     
     return null;
   } catch (error) {
-    console.error("Error extracting JSON:", error);
     return null;
   }
 };
@@ -57,8 +56,6 @@ const resourceSchema = z.object({
  * - deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free
  */
 const getTogetherAIModel = async (togetherApiKey, modelName = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free") => {
-  console.log(`[AIResourceFinder] Using Together AI model: ${modelName}`);
-  
   // Dynamically import the module only when needed
   const { ChatTogetherAI } = await import("@langchain/community/chat_models/togetherai");
   
@@ -201,9 +198,6 @@ ${formatInstructions(parser)}`],
     // Create the chain
     const chain = promptTemplate.pipe(model).pipe(parser);
 
-    // Log which model is being used
-    console.log(`[AIResourceFinder] Using AI model: ${provider}${additionalConfig.modelName ? ' with model: ' + additionalConfig.modelName : ''}`);
-
     // Execute the chain with retries for parsing errors
     const MAX_RETRIES = 2;
     let attempts = 0;
@@ -217,7 +211,6 @@ ${formatInstructions(parser)}`],
         return result.resources;
       } catch (error) {
         lastError = error;
-        console.warn(`Attempt ${attempts + 1} failed:`, error.message);
         
         // If it's not a parsing error, don't retry
         if (!error.message.includes("parsing") && 
@@ -230,7 +223,6 @@ ${formatInstructions(parser)}`],
         
         // On the last retry, attempt a direct call to the model without the parser
         if (attempts === MAX_RETRIES) {
-          console.log("Attempting direct model call without structured output...");
           try {
             // Make a direct call to the model with explicit formatting instructions
             const directPrompt = ChatPromptTemplate.fromMessages([
@@ -273,7 +265,6 @@ DO NOT include ANY explanatory text, markdown formatting, or code blocks outside
             
             throw new Error("Failed to extract valid JSON structure from model response");
           } catch (directError) {
-            console.error("Direct model approach failed:", directError);
             throw lastError; // Throw the original error
           }
         }
@@ -283,7 +274,6 @@ DO NOT include ANY explanatory text, markdown formatting, or code blocks outside
     throw lastError || new Error("Failed to find learning resources");
 
   } catch (error) {
-    console.error("Error finding learning resources:", error);
     throw error;
   }
 };
@@ -395,14 +385,10 @@ For each resource, provide a title, URL, brief description, and resource type.`]
     
     const chain = promptTemplate.pipe(functionCallingModel).pipe(parser);
     
-    // Log which model is being used
-    console.log(`[AIResourceFinder] Using AI model with function calling: ${apiConfig.provider}${apiConfig.modelName ? ' with model: ' + apiConfig.modelName : ''}`);
-    
     const result = await chain.invoke({ topic });
     
     return result.resources;
   } catch (error) {
-    console.error("Error finding learning resources with function calling:", error);
     throw error;
   }
 };
@@ -423,8 +409,6 @@ export const findLearningResourcesWithTavily = async (topic, apiConfig) => {
     if (!tavilyApiKey) {
       throw new Error("Tavily API key is required");
     }
-
-    console.log(`[AIResourceFinder] Using Tavily Search for: ${topic}`);
 
     // Set the environment variable that the Tavily library expects
     process.env.TAVILY_API_KEY = tavilyApiKey;
@@ -474,7 +458,6 @@ export const findLearningResourcesWithTavily = async (topic, apiConfig) => {
 
     return resources;
   } catch (error) {
-    console.error("Error finding learning resources with Tavily:", error);
     throw error;
   }
 };

@@ -46,9 +46,7 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
         title: resource.title,
         resourceType: resource.resource_type
       };
-      
-      console.log('Generating summary for:', resourceData);
-      
+            
       // First generate the summary
       const generationResult = await generateSummary(resourceData);
       

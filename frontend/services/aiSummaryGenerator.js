@@ -43,7 +43,6 @@ const parseMarkdownSections = (markdown) => {
     
     return result;
   } catch (error) {
-    console.error("Error parsing markdown sections:", error);
     return result;
   }
 };
@@ -71,7 +70,7 @@ const extractJsonFromText = (text) => {
       try {
         return JSON.parse(jsonBlockMatch[1].trim());
       } catch (e) {
-        console.warn("Found code block but content isn't valid JSON:", e.message);
+        // Continue to next extraction method
       }
     }
     
@@ -132,7 +131,6 @@ const extractJsonFromText = (text) => {
     
     return null;
   } catch (error) {
-    console.error("Error in JSON extraction process:", error);
     return null;
   }
 };
@@ -151,8 +149,6 @@ const summarySchema = z.object({
  * - deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free
  */
 const getTogetherAIModel = async (togetherApiKey, modelName = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free") => {
-  console.log(`[AISummaryGenerator] Using Together AI model: ${modelName}`);
-  
   // Dynamically import the module only when needed
   const { ChatTogetherAI } = await import("@langchain/community/chat_models/togetherai");
   
@@ -286,12 +282,8 @@ Type: {resourceType}`]
     // Create the chain
     const chain = promptTemplate.pipe(model);
 
-    // Log which model is being used
-    console.log(`[AISummaryGenerator] Using AI model: ${provider}${additionalConfig.modelName ? ' with model: ' + additionalConfig.modelName : ''}`);
-
     // Execute the chain and process the markdown response
     try {
-      console.log(`[AISummaryGenerator] Generating markdown summary...`);
       const response = await chain.invoke({
         url,
         title,
@@ -300,7 +292,6 @@ Type: {resourceType}`]
       
       // Extract the content from the response
       const markdownContent = response.content;
-      console.log(`[AISummaryGenerator] Generated markdown summary successfully`);
       
       // Parse the markdown into structured sections
       const sections = parseMarkdownSections(markdownContent);
@@ -311,11 +302,8 @@ Type: {resourceType}`]
         highlights: sections.highlights || []
       };
     } catch (error) {
-      console.warn("Markdown summary generation failed:", error.message);
-      
       // Fallback approach - direct call to model with markdown formatting instructions
       try {
-        console.log("[AISummaryGenerator] Attempting fallback with direct markdown prompt...");
         // Make a direct call to the model with clearer formatting instructions
         const directPrompt = ChatPromptTemplate.fromMessages([
           ["system", `You are a helpful assistant that creates summaries of educational content.
@@ -345,13 +333,11 @@ Type: ${resourceType}`]
         
         // Extract the content from the response
         const markdownContent = directResponse.content;
-        console.log("[AISummaryGenerator] Raw fallback response:", markdownContent.substring(0, 100) + "...");
         
         // Parse the markdown into structured sections
         const sections = parseMarkdownSections(markdownContent);
         
         if (sections.summary) {
-          console.log("[AISummaryGenerator] Successfully extracted markdown sections");
           return {
             summary: sections.summary,
             mainParts: sections.mainParts || "Details of the resource were not available",
@@ -359,7 +345,6 @@ Type: ${resourceType}`]
           };
         }
         
-        console.warn("[AISummaryGenerator] Could not extract valid markdown sections, returning basic response");
         // If we still don't have valid sections, create a basic response structure
         return {
           summary: "Unable to generate a structured summary. Please try again later.",
@@ -367,8 +352,6 @@ Type: ${resourceType}`]
           highlights: ["Summary generation encountered an issue"]
         };
       } catch (directError) {
-        console.error("All summary generation approaches failed:", directError);
-        
         // Return a basic structure instead of throwing
         return {
           summary: "Unable to generate a summary at this time. Please try again later.",
@@ -379,7 +362,6 @@ Type: ${resourceType}`]
     }
 
   } catch (error) {
-    console.error("Error generating resource summary:", error);
     throw error;
   }
 };
@@ -485,9 +467,6 @@ Type: {resourceType}`]
     
     const chain = promptTemplate.pipe(functionCallingModel).pipe(parser);
     
-    // Log which model is being used
-    console.log(`[AISummaryGenerator] Using AI model with function calling: ${apiConfig.provider}`);
-    
     try {
       const result = await chain.invoke({
         url,
@@ -496,10 +475,8 @@ Type: {resourceType}`]
       });
       return result;
     } catch (error) {
-      console.error("Function calling approach failed:", error.message);
       
       // Fallback to standard approach
-      console.log("Function calling failed, falling back to markdown prompt approach...");
       
       // Create a standard prompt with markdown formatting
       const standardPrompt = ChatPromptTemplate.fromMessages([
@@ -530,13 +507,11 @@ Type: ${resourceType}`]
       
       // Extract the markdown content from the response
       const markdownContent = directResponse.content;
-      console.log("[AISummaryGenerator] Raw fallback response:", markdownContent.substring(0, 100) + "...");
       
       // Parse the markdown into structured sections
       const sections = parseMarkdownSections(markdownContent);
       
       if (sections.summary) {
-        console.log("[AISummaryGenerator] Successfully extracted markdown sections");
         return {
           summary: sections.summary,
           mainParts: sections.mainParts || "Details not available",
@@ -545,7 +520,6 @@ Type: ${resourceType}`]
       }
       
       // If still failing, provide a basic response in markdown format
-      console.warn("[AISummaryGenerator] Could not extract valid markdown sections, returning basic response");
       return {
         summary: "Unable to generate a detailed summary at this time. Please try again later.",
         mainParts: "Could not analyze the resource structure.",
@@ -553,8 +527,6 @@ Type: ${resourceType}`]
       };
     }
   } catch (error) {
-    console.error("Error generating resource summary with function calling:", error);
-    
     // Return a basic structure instead of throwing
     return {
       summary: "Unable to generate a summary at this time due to technical difficulties. Please try again later.",

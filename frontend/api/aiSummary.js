@@ -36,8 +36,6 @@ export const generateSummary = async (resourceData, options = {}) => {
       Object.assign(apiConfig, getActiveProviderConfig());
     }
     
-    console.log(`Generating summary for resource ${resourceData.id} using provider: ${apiConfig.provider}`);
-    
     // Choose the appropriate method based on function calling preference and provider support
     const useFunctionCalling = options.useFunctionCalling && 
       ['openai', 'azure', 'google'].includes(apiConfig.provider);
@@ -61,7 +59,6 @@ export const generateSummary = async (resourceData, options = {}) => {
         );
       }
     } catch (generationError) {
-      console.error('Error in summary generation:', generationError);
       // Create a fallback summary
       summaryResult = {
         summary: "Unable to generate a summary at this time. The service may be temporarily unavailable or the URL content could not be properly analyzed."
@@ -72,7 +69,6 @@ export const generateSummary = async (resourceData, options = {}) => {
       summary: typeof summaryResult === 'string' ? summaryResult : (summaryResult.summary || ''),
     };
   } catch (error) {
-    console.error('Error in summary generation process:', error);
     throw error;
   }
 };

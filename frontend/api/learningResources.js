@@ -23,7 +23,6 @@ export const learningResources = {
             
             return await httpGet(url);
         } catch (error) {
-            console.error('Error fetching learning resources:', error);
             throw error;
         }
     },
@@ -39,7 +38,6 @@ export const learningResources = {
             // Otherwise, treat as object and use getAll
             return learningResources.getAll(filters);
         } catch (error) {
-            console.error('Error fetching learning resources:', error);
             throw error;
         }
     },
@@ -48,7 +46,6 @@ export const learningResources = {
         try {
             return await httpGet(`${RESOURCES_ENDPOINT}/${id}/`);
         } catch (error) {
-            console.error(`Error fetching learning resource with id ${id}:`, error);
             throw error;
         }
     },
@@ -57,7 +54,6 @@ export const learningResources = {
         try {
             return await httpPost(`${RESOURCES_ENDPOINT}/`, resourceData);
         } catch (error) {
-            console.error('Error creating learning resource:', error);
             throw error;
         }
     },
@@ -117,7 +113,6 @@ export const learningResources = {
             }
             
             // For other errors, log and re-throw
-            console.error('Error creating resource from URL:', error);
             throw error;
         }
     },
@@ -139,7 +134,6 @@ export const learningResources = {
                     response.results[0].learning_resource : null
             };
         } catch (error) {
-            console.error('Error checking if URL exists:', error);
             throw error;
         }
     },
@@ -148,7 +142,6 @@ export const learningResources = {
         try {
             return await httpPut(`${RESOURCES_ENDPOINT}/${id}/`, resourceData);
         } catch (error) {
-            console.error(`Error updating learning resource with id ${id}:`, error);
             throw error;
         }
     },
@@ -157,7 +150,6 @@ export const learningResources = {
         try {
             return await httpDelete(`${RESOURCES_ENDPOINT}/${id}/`);
         } catch (error) {
-            console.error(`Error deleting learning resource with id ${id}:`, error);
             throw error;
         }
     },
@@ -169,7 +161,6 @@ export const learningResources = {
                 rating
             });
         } catch (error) {
-            console.error(`Error submitting quality vote for resource ${resourceId}:`, error);
             throw error;
         }
     },
@@ -181,7 +172,6 @@ export const learningResources = {
                 level
             });
         } catch (error) {
-            console.error(`Error submitting difficulty vote for resource ${resourceId}:`, error);
             throw error;
         }
     },
@@ -196,7 +186,6 @@ export const learningResources = {
             };
             return await httpPost(`${RESOURCE_URLS_ENDPOINT}/`, payload);
         } catch (error) {
-            console.error(`Error adding URL to resource ${resourceId}:`, error);
             throw error;
         }
     },
@@ -208,7 +197,6 @@ export const learningResources = {
             const response = await httpGet(url);
             return response;
         } catch (error) {
-            console.error(`Error fetching associations for page ${pageSlug}:`, error);
             throw error;
         }
     },
@@ -234,7 +222,6 @@ export const learningResources = {
             
             return result;
         } catch (error) {
-            console.error(`Error creating association between resource ${resourceId} and page ${pageSlug}:`, error);
             throw error;
         }
     },
@@ -244,7 +231,6 @@ export const learningResources = {
         try {
             return await httpPost(`${ASSOCIATIONS_ENDPOINT}/${associationId}/upvote/`, {});
         } catch (error) {
-            console.error(`Error upvoting association ${associationId}:`, error);
             throw error;
         }
     },
@@ -253,7 +239,6 @@ export const learningResources = {
         try {
             return await httpPost(`${ASSOCIATIONS_ENDPOINT}/${associationId}/downvote/`, {});
         } catch (error) {
-            console.error(`Error downvoting association ${associationId}:`, error);
             throw error;
         }
     },
@@ -264,7 +249,6 @@ export const learningResources = {
             // Updated to use resource_id parameter for consistency
             return await httpGet(`${ASSOCIATIONS_ENDPOINT}/?resource_id=${resourceId}`);
         } catch (error) {
-            console.error(`Error fetching associations for resource ${resourceId}:`, error);
             throw error;
         }
     },
@@ -284,8 +268,6 @@ export const learningResources = {
             }
             
             const summaryEndpoint = `${RESOURCES_ENDPOINT}/${resourceId}/set_ai_summary/`;
-            console.log("Saving summary to endpoint:", summaryEndpoint);
-            console.log("Summary content length:", summaryText.length);
             
             try {
                 // Make the API call to save the summary
@@ -293,20 +275,11 @@ export const learningResources = {
                     ai_summary: summaryText
                 });
                 
-                console.log("Summary saved successfully:", result);
-                
                 return result;
             } catch (error) {
-                // Add more detailed logging for debugging
-                console.error(`Error saving summary to resource ${resourceId}:`, error);
-                if (error.response) {
-                    console.error('HTTP status:', error.response.status);
-                    console.error('Response data:', error.response.data);
-                }
                 throw error;
             }
         } catch (error) {
-            console.error(`Error saving summary to resource ${resourceId}:`, error);
             throw error;
         }
     },
@@ -314,52 +287,8 @@ export const learningResources = {
     getResourceSummary: async (resourceId) => {
         try {
             const endpoint = `${RESOURCES_ENDPOINT}/${resourceId}/ai_summary/`;
-            console.log("Fetching summary from endpoint:", endpoint);
             return await httpGet(endpoint);
         } catch (error) {
-            console.error(`Error getting summary for resource ${resourceId}:`, error);
-            throw error;
-        }
-    },
-    
-    // Save AI summary to a resource
-    saveSummaryToResource: async (resourceId, summaryData) => {
-        try {
-            // Prepare the summary text - no complex formatting
-            let summaryText = '';
-            
-            // If summaryData is already a string, use it directly
-            if (typeof summaryData === 'string') {
-                summaryText = summaryData;
-            } else {
-                // Just use the main summary text
-                summaryText = summaryData.summary || '';
-            }
-            
-            const summaryEndpoint = `${RESOURCES_ENDPOINT}/${resourceId}/set_ai_summary/`;
-            console.log("Saving summary to endpoint:", summaryEndpoint);
-            console.log("Summary content length:", summaryText.length);
-            
-            try {
-                // Make the API call to save the summary
-                const result = await httpPost(summaryEndpoint, {
-                    ai_summary: summaryText
-                });
-                
-                console.log("Summary saved successfully:", result);
-                
-                return result;
-            } catch (error) {
-                // Add more detailed logging for debugging
-                console.error(`Error saving summary to resource ${resourceId}:`, error);
-                if (error.response) {
-                    console.error('HTTP status:', error.response.status);
-                    console.error('Response data:', error.response.data);
-                }
-                throw error;
-            }
-        } catch (error) {
-            console.error(`Error saving summary to resource ${resourceId}:`, error);
             throw error;
         }
     }
