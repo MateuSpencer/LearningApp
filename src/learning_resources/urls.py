@@ -21,4 +21,16 @@ router.register(
 urlpatterns = [
     # Include router URLs
     path("", include(router.urls)),
+    # Add backward compatibility for validate_url endpoint (with underscore)
+    path(
+        "validate_url/",
+        LearningResourceViewSet.as_view({"post": "validate_url"}),
+        name="validate_url",
+    ),
+    # Add endpoint for fetching YouTube metadata
+    path(
+        "youtube-metadata/<str:video_id>/",
+        LearningResourceViewSet.as_view({"get": "youtube_metadata"}),
+        name="youtube-metadata",
+    ),
 ]

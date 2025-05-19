@@ -27,7 +27,7 @@ const LearningResourcesList = ({
   showAll = false,
   onAddResource,
   showAddButton = true,
-  allowedFilters = ['type', 'search', 'difficulty'],
+  allowedFilters = ['type', 'category', 'search', 'difficulty'],
   allowedSortFields = ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   fixedFilters = {}
 }) => {

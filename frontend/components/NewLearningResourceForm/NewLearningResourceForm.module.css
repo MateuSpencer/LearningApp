@@ -1,6 +1,3 @@
-.Root {
-}
-
 .formContainer {
   width: 100%;
   max-width: 800px;
@@ -76,8 +73,10 @@
 }
 
 .input:disabled, .textarea:disabled, .select:disabled {
-  background-color: var(--bg-disabled, #f5f5f5);
+  background-color: var(--bg-primary);
+  opacity: 0.8;
   cursor: not-allowed;
+  border-color: var(--border-color, #e0e0e0);
 }
 
 .helpText {
@@ -148,4 +147,163 @@
 .submitButton:disabled, .cancelButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* New styles for URL validation */
+.urlInputGroup {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: relative;
+  flex-wrap: nowrap;
+}
+
+.urlInputGroup input {
+  flex: 1;
+  min-width: 0; /* Allows flex item to shrink below its default minimum width */
+}
+
+.validateButton {
+  background-color: var(--color-primary, #01FFFF);
+  color: #333333;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--theme-transition-speed) var(--theme-transition-timing);
+  white-space: nowrap;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+.validateButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark, #2AC6D0);
+  transform: translateY(-1px);
+}
+
+.validateButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.validationIcon {
+  position: absolute;
+  right: 130px; /* Position to the left of validate button */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4CAF50;
+  font-size: 1.25rem;
+}
+
+.validatedInput {
+  border-color: #4CAF50 !important;
+  background-color: rgba(76, 175, 80, 0.05);
+}
+
+.successMessage {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #43A047;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.suggestionContainer {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: rgba(33, 150, 243, 0.1);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.suggestedUrl {
+  font-family: monospace;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: var(--color-primary-dark, #2AC6D0);
+}
+
+.useSuggestedButton {
+  background-color: var(--color-primary-light, #01FFFF);
+  color: #333333;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.useSuggestedButton:hover {
+  background-color: var(--color-primary, #01FFFF);
+}
+
+.validatedButton {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+.validatedButton:hover:not(:disabled) {
+  background-color: #43A047 !important;
+}
+
+.needsValidationButton {
+  background-color: #FF9800 !important;
+  color: white !important;
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+}
+
+.needsValidationButton:hover:not(:disabled) {
+  background-color: #F57C00 !important;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666666);
+  margin-top: 6px;
+}
+
+.lockedField {
+  background-color: var(--bg-muted, rgba(128, 128, 128, 0.1)) !important;
+  border-left: 3px solid #4CAF50 !important;
+  padding-left: 15px !important;
+  color: var(--text-primary) !important;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
+  pointer-events: none; /* Prevent interaction with the field */
+  opacity: 0.9;
+}
+
+.lockedFieldLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lockIcon {
+  color: #4CAF50;
+  font-size: 0.8rem;
 }

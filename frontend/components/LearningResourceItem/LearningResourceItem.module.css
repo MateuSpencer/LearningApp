@@ -197,8 +197,7 @@
 
 .difficultyLevel {
   font-size: 0.9rem;
-  font-weight: 500;
-  color: #ffffff;
+  color: var(--text-secondary);
   padding: 3px 10px;
   border-radius: 12px;
 }

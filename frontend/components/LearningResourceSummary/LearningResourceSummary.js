@@ -113,7 +113,7 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
     <div className={styles.summaryContainer}>
       <div className={styles.summaryCard}>
         <div className={styles.summaryHeader}>
-          <h3>AI Summary</h3>
+          <h3>✨ AI Summary ✨</h3>
           <div className={styles.headerActions}>
             {hasSummary && (
               <button 

@@ -12,15 +12,19 @@ class LearningResource(TimestampMixin, models.Model):
 
     RESOURCE_TYPE_CHOICES = (
         ("video", "Video"),
+        ("youtube", "YouTube"),  # Added for explicit YouTube categorization
         ("pdf", "PDF"),
         ("image", "Image"),
         ("website", "Website"),
         ("article", "Article"),
+        ("book", "Book"),  # Added for completeness
+        ("course", "Course"),  # Added for completeness
+        ("tool", "Tool"),  # Added for completeness
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
-    resource_type = models.CharField(max_length=10, choices=RESOURCE_TYPE_CHOICES)
+    resource_type = models.CharField(max_length=20, choices=RESOURCE_TYPE_CHOICES)
 
     # Fields for aggregating votes
     quality_vote_count = models.IntegerField(default=0)

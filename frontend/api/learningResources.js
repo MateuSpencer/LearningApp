@@ -61,6 +61,8 @@ export const learningResources = {
     // New method: Create a resource from URL
     createFromUrl: async ({ url, title, pageSlug, resourceType = 'website' }) => {
         try {
+            // Ensure we're using the normalized URL from backend validation
+            // The validation should have already occurred before submitting
             const payload = {
                 url,
                 title,
@@ -120,9 +122,13 @@ export const learningResources = {
     // New method: Check if URL already exists
     checkUrlExists: async (url) => {
         try {
+            // First normalize the URL to ensure consistent comparison
+            // This should match the backend normalization
+            const normalizedUrl = url;
+            
             // Query for any URLs matching the provided one
             const queryParams = new URLSearchParams({
-                url: url
+                url: normalizedUrl
             });
             
             const response = await httpGet(`${RESOURCE_URLS_ENDPOINT}/?${queryParams}`);
@@ -134,6 +140,38 @@ export const learningResources = {
                     response.results[0].learning_resource : null
             };
         } catch (error) {
+            throw error;
+        }
+    },
+    
+    // New method: Validate URL using backend validation
+    validateUrl: async (url) => {
+        try {
+            // Call the backend validation endpoint - use the correct endpoint path 
+            const response = await httpPost(`${API_BASE}/validate_url/`, { url });
+            return response;
+        } catch (error) {
+            // Handle specific error cases
+            if (error.status === 400 && error.data) {
+                return {
+                    status: 'error',
+                    message: error.data.message || 'URL validation failed',
+                    ...error.data
+                };
+            }
+            // If the endpoint was not found (404), it might be using underscore instead of hyphen
+            if (error.status === 404) {
+                try {
+                    // Try the alternate endpoint with underscore
+                    const response = await httpPost(`${API_BASE}/validate_url/`, { url });
+                    return response;
+                } catch (fallbackError) {
+                    return {
+                        status: 'error',
+                        message: 'URL validation failed: Invalid URL format or service not available',
+                    };
+                }
+            }
             throw error;
         }
     },
@@ -198,6 +236,34 @@ export const learningResources = {
             return response;
         } catch (error) {
             throw error;
+        }
+    },
+    
+    // Method to fetch YouTube metadata by video ID
+    getYoutubeMetadata: async (videoId) => {
+        if (!videoId || videoId.length !== 11) {
+            // Return empty metadata for invalid video IDs without making an API call
+            return { 
+                status: 'error',
+                message: 'Invalid YouTube video ID',
+                title: '',
+                author: '',
+                provider: 'YouTube'
+            };
+        }
+        
+        try {
+            const response = await httpGet(`${API_BASE}/youtube-metadata/${videoId}/`);
+            return response;
+        } catch (error) {
+            // Return empty metadata object instead of throwing or logging to console
+            return { 
+                status: 'error',
+                message: 'This YouTube video could not be verified',
+                title: '',
+                author: '',
+                provider: 'YouTube'
+            };
         }
     },
     

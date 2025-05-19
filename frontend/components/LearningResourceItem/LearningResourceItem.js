@@ -75,11 +75,44 @@ const LearningResourceItem = ({
     if (!url) return '';
     try {
       const urlObj = new URL(url);
+      
+      // Enhanced YouTube URL handling
+      if (urlObj.hostname.includes('youtube.com') && urlObj.pathname === '/watch') {
+        const videoId = urlObj.searchParams.get('v');
+        if (videoId) {
+          return `youtube.com/watch?v=${videoId}`;
+        }
+      } else if (urlObj.hostname.includes('youtu.be')) {
+        // Handle youtu.be short links
+        const path = urlObj.pathname.replace('/', '');
+        if (path) {
+          return `youtu.be/${path}`;
+        }
+      }
+      
       // Return domain name + path (truncated if too long)
       const path = urlObj.pathname === '/' ? '' : urlObj.pathname;
       const displayPath = path.length > 20 ? path.substring(0, 17) + '...' : path;
+      
+      // For non-YouTube URLs, include query parameters
+      if (!urlObj.hostname.includes('youtube.com') && urlObj.search && urlObj.search.length > 0) {
+        const queryString = urlObj.search.length > 20 ? urlObj.search.substring(0, 17) + '...' : urlObj.search;
+        return urlObj.hostname + displayPath + queryString;
+      }
+      
       return urlObj.hostname + displayPath;
     } catch (err) {
+      // Handle YouTube URLs that might not parse correctly
+      if (url.includes('youtube.com/watch') && !url.includes('?v=')) {
+        // Try to fix malformed YouTube URLs
+        if (url.includes('youtube.com/watch')) {
+          // Extract video ID if possible
+          const match = url.match(/youtube\.com\/watch\/?([a-zA-Z0-9_-]{11})/);
+          if (match && match[1]) {
+            return `youtube.com/watch?v=${match[1]}`;
+          }
+        }
+      }
       return url;
     }
   };
@@ -87,15 +120,18 @@ const LearningResourceItem = ({
   // Get icon based on resource type
   const getResourceTypeIcon = (type) => {
     switch (type) {
-      case 'video': return '🎥';
-      case 'pdf': return '📄';
-      case 'image': return '🖼️';
-      case 'article': return '📰';
-      case 'course': return '📚';
-      case 'documentation': return '📋';
-      case 'tutorial': return '📝';
-      case 'tool': return '🛠️';
-      default: return '🔗';
+      case 'youtube': return '📺'; // Better YouTube icon (TV screen)
+      case 'video': return '🎬'; // Movie clapper board
+      case 'pdf': return '📄'; // Document icon
+      case 'image': return '🖼️'; // Picture frame icon
+      case 'article': return '📰'; // Newspaper icon
+      case 'book': return '📚'; // Books icon
+      case 'course': return '🎓'; // Graduation cap icon
+      case 'documentation': return '📋'; // Clipboard icon
+      case 'tutorial': return '📝'; // Notepad icon
+      case 'tool': return '🛠️'; // Tools icon
+      case 'website': return '🌐'; // Globe icon
+      default: return '🔗'; // Chain link icon
     }
   };
   

@@ -11,8 +11,16 @@ from django.db import models
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 import requests
+from urllib.parse import urlparse
 from requests.exceptions import RequestException
 from django.utils import timezone
+
+from .utils import (
+    normalize_url,
+    validate_url,
+    extract_youtube_video_id,
+    get_youtube_video_metadata,
+)
 
 from .models import (
     LearningResource,
@@ -67,6 +75,9 @@ class ResourceFilter(FilterSet):
     # Add filter for difficulty level
     difficulty = CharFilter(method="filter_by_difficulty")
 
+    # Add filter for specific resource types
+    resource_category = CharFilter(method="filter_by_resource_category")
+
     class Meta:
         model = LearningResource
         fields = {
@@ -105,6 +116,31 @@ class ResourceFilter(FilterSet):
         # Apply the filter
         return queryset.filter(filter_conditions)
 
+    def filter_by_resource_category(self, queryset, name, value):
+        """
+        Filter resources by category (grouping similar resource types)
+        """
+        if not value or value == "all":
+            return queryset
+
+        # Map category names to resource types
+        category_map = {
+            "video": ["video", "youtube"],  # Group video and YouTube
+            "document": ["pdf", "article", "book"],  # Group document-like resources
+            "website": ["website", "tool"],  # Group website-like resources
+            "course": ["course"],  # Courses
+            "image": ["image"],  # Images
+        }
+
+        if value not in category_map:
+            return queryset
+
+        # Get the resource types for this category
+        resource_types = category_map[value]
+
+        # Filter by any of these resource types
+        return queryset.filter(resource_type__in=resource_types)
+
 
 class ResourcePageAssociationFilter(FilterSet):
     """
@@ -135,7 +171,9 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
     API endpoint for learning resources with filtering, searching, and sorting
 
     Filtering:
-    - resource_type: Filter by resource type (e.g., ?resource_type=video)
+    - resource_type: Filter by specific resource type (e.g., ?resource_type=video)
+    - resource_category: Filter by grouped category (e.g., ?resource_category=document)
+    - difficulty: Filter by difficulty level (e.g., ?difficulty=beginner)
     - created_at: Filter by creation date (e.g., ?created_at__gt=2023-01-01T00:00:00Z)
     - updated_at: Filter by update date (e.g., ?updated_at__lt=2023-12-31T23:59:59Z)
 
@@ -153,6 +191,9 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
     Voting:
     - POST /api/learning-resources/{id}/quality-vote/ to vote on quality (1-5 stars)
     - POST /api/learning-resources/{id}/difficulty-vote/ to vote on difficulty level
+
+    URL Validation:
+    - POST /api/learning-resources/validate_url/ to validate a URL before submission
     """
 
     serializer_class = LearningResourceSerializer
@@ -183,14 +224,13 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
         """
         Validate that a URL exists and returns a success status code
         """
-        try:
-            response = requests.head(url, timeout=5, allow_redirects=True)
-            if response.status_code >= 400:
-                raise ValidationError(
-                    f"URL validation failed: {url} returned status code {response.status_code}"
-                )
-        except RequestException as e:
-            raise ValidationError(f"URL validation failed: {str(e)}")
+        validation_result = validate_url(url)
+        if validation_result["status"] == "error":
+            raise ValidationError(
+                f"URL validation failed: {validation_result['message']}"
+            )
+
+        return validation_result["recommended_url"]
 
     def create(self, request, *args, **kwargs):
         """
@@ -223,10 +263,40 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Normalize the URL for storage and checking duplicates
+        validation_result = validate_url(url)
+        normalized_url = validation_result["normalized_url"]
+
+        # Set the resource type based on URL type for YouTube URLs
+        if validation_result["url_type"] == "youtube":
+            resource_type = "youtube"  # Use the specific YouTube resource type
+
         # Check if URL already exists
-        existing_url = ResourceURL.objects.filter(url=url).first()
-        if existing_url:
+        parsed_url = urlparse(normalized_url)
+
+        # Special handling for YouTube URLs
+        if "youtube.com" in parsed_url.netloc and parsed_url.path == "/watch":
+            from urllib.parse import parse_qs
+
+            # Extract video ID from query parameters
+            query_params = parse_qs(parsed_url.query)
+            if "v" in query_params:
+                video_id = query_params["v"][0]
+                # Search for YouTube URLs with this video ID
+                existing_urls = ResourceURL.objects.filter(
+                    url__contains=f"youtube.com/watch?v={video_id}"
+                ).select_related("learning_resource")
+        else:
+            # For non-YouTube URLs, check by host and path only
+            url_host_path = f"{parsed_url.netloc}{parsed_url.path}"
+            # Find any URLs that match with this host+path (protocol agnostic)
+            existing_urls = ResourceURL.objects.filter(
+                url__icontains=url_host_path
+            ).select_related("learning_resource")
+
+        if existing_urls.exists():
             # Instead of returning a 400 error, return a 200 response with the existing resource info
+            existing_url = existing_urls.first()
             existing_resource = existing_url.learning_resource
             return Response(
                 {
@@ -245,10 +315,13 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         resource = serializer.instance
 
+        # Use the recommended URL (HTTPS if available)
+        final_url = validation_result["recommended_url"]
+
         # Create the URL
         ResourceURL.objects.create(
             learning_resource=resource,
-            url=url,
+            url=final_url,
             is_primary=True,  # First URL is automatically primary
         )
 
@@ -407,6 +480,99 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
                 "ai_summary_generated_at": resource.ai_summary_generated_at,
             }
         )
+
+    @action(
+        detail=False, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def validate_url(self, request):
+        """
+        Validate a URL before submission:
+        1. Check if URL already exists in the system (normalized form)
+        2. Normalize YouTube URLs by removing params after video ID
+        3. Check if URL is available via HTTPS, fallback to HTTP if not
+        4. Return validation status and suggested corrections
+        """
+        url = request.data.get("url")
+        if not url:
+            return Response(
+                {"status": "error", "message": "URL is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Full validation
+        validation_result = validate_url(url)
+
+        # Check if URL already exists in our system (using normalized form)
+        normalized_url = validation_result["normalized_url"]
+
+        # Parse the normalized URL to extract host, path, and query parameters for YouTube
+        parsed_url = urlparse(normalized_url)
+
+        # Special handling for YouTube URLs
+        if validation_result["url_type"] == "youtube":
+            # Get the video ID that was extracted during validation
+            video_id = validation_result.get("youtube_video_id")
+
+            # If we have a video ID, fetch the metadata for the YouTube video
+            if video_id:
+                # Add YouTube video metadata (title, author, etc.) to the response
+                metadata = get_youtube_video_metadata(video_id)
+                validation_result["metadata"] = metadata
+
+                # Search for YouTube URLs with this video ID to check for duplicates
+                existing_urls = ResourceURL.objects.filter(
+                    url__contains=f"youtube.com/watch?v={video_id}"
+                ).select_related("learning_resource")
+            else:
+                existing_urls = ResourceURL.objects.none()
+        else:
+            # For non-YouTube URLs, check by host and path
+            url_host_path = f"{parsed_url.netloc}{parsed_url.path}"
+            # Find any URLs that match with this host+path
+            existing_urls = ResourceURL.objects.filter(
+                url__icontains=url_host_path
+            ).select_related("learning_resource")
+
+        if existing_urls.exists():
+            existing_url = existing_urls.first()
+            validation_result["status"] = "duplicate"
+            validation_result["message"] = "This URL already exists in the system"
+            validation_result["existing_resource"] = {
+                "id": str(existing_url.learning_resource.id),
+                "title": existing_url.learning_resource.title,
+                "resource_type": existing_url.learning_resource.resource_type,
+            }
+
+        return Response(validation_result)
+
+    @action(
+        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def youtube_metadata(self, request, video_id=None):
+        """
+        Get metadata for a YouTube video by ID
+        """
+        if not video_id or len(video_id) != 11:
+            return Response(
+                {
+                    "status": "error",
+                    "message": "Invalid YouTube video ID. ID must be 11 characters.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        metadata = get_youtube_video_metadata(video_id)
+
+        if not metadata or not metadata.get("title"):
+            return Response(
+                {
+                    "status": "error",
+                    "message": "Could not fetch metadata for this video ID. The video may be private, removed, or does not exist.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response({"status": "success", **metadata})
 
 
 @method_decorator(ensure_csrf_cookie, name="list")

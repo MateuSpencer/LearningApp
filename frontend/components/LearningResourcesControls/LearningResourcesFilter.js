@@ -65,28 +65,34 @@ const LearningResourcesFilter = ({
             disabled={disabled}
           >
             <option value="all">All Types</option>
+            <option value="youtube">YouTube</option>
             <option value="video">Video</option>
             <option value="pdf">PDF</option>
             <option value="image">Image</option>
             <option value="website">Website</option>
             <option value="article">Article</option>
+            <option value="book">Book</option>
+            <option value="course">Course</option>
+            <option value="tool">Tool</option>
           </select>
         </div>
       )}
 
-      {allowedFilters.includes('difficulty') && (
+      {allowedFilters.includes('category') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Difficulty:</label>
+          <label className={styles.filterLabel}>Category:</label>
           <select
             className={styles.filterSelect}
-            value={filters.difficulty || 'all'}
-            onChange={(e) => handleFilterChange('difficulty', e.target.value)}
+            value={filters.resource_category || 'all'}
+            onChange={(e) => handleFilterChange('resource_category', e.target.value)}
             disabled={disabled}
           >
-            <option value="all">All Levels</option>
-            <option value="beginner">Beginner</option>
-            <option value="moderate">Moderate</option>
-            <option value="advanced">Advanced</option>
+            <option value="all">All Categories</option>
+            <option value="video">Videos</option>
+            <option value="document">Documents</option>
+            <option value="website">Websites</option>
+            <option value="course">Courses</option>
+            <option value="image">Images</option>
           </select>
         </div>
       )}
