@@ -29,6 +29,17 @@ class LearningResource(TimestampMixin, models.Model):
     difficulty_moderate_count = models.IntegerField(default=0)
     difficulty_advanced_count = models.IntegerField(default=0)
 
+    # AI-generated summary field
+    ai_summary = models.TextField(
+        blank=True, null=True, verbose_name="AI-generated summary"
+    )
+    ai_summary_generated = models.BooleanField(
+        default=False, verbose_name="AI summary has been generated"
+    )
+    ai_summary_generated_at = models.DateTimeField(
+        blank=True, null=True, verbose_name="When AI summary was generated"
+    )
+
     class Meta:
         verbose_name = "Learning Resource"
         verbose_name_plural = "Learning Resources"

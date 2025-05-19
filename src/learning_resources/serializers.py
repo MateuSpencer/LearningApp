@@ -48,6 +48,9 @@ class LearningResourceSerializer(serializers.ModelSerializer):
             "user_quality_vote",
             "user_difficulty_vote",
             "url_list",
+            "ai_summary",
+            "ai_summary_generated",
+            "ai_summary_generated_at",
         ]
         read_only_fields = [
             "id",
@@ -58,6 +61,8 @@ class LearningResourceSerializer(serializers.ModelSerializer):
             "difficulty_beginner_count",
             "difficulty_moderate_count",
             "difficulty_advanced_count",
+            "ai_summary_generated",
+            "ai_summary_generated_at",
         ]
 
     def get_average_quality_rating(self, obj):

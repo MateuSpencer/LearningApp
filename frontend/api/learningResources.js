@@ -1,6 +1,6 @@
 import { httpGet, httpPost, httpPut, httpDelete } from '../utils/Http';
 
-// Define correct API endpoint paths - this is the key fix
+// Define correct API endpoint paths
 const API_BASE = '/api/learning-resources';
 const RESOURCES_ENDPOINT = `${API_BASE}/learning-resources`;
 const ASSOCIATIONS_ENDPOINT = `${API_BASE}/resource-associations`;
@@ -265,6 +265,101 @@ export const learningResources = {
             return await httpGet(`${ASSOCIATIONS_ENDPOINT}/?resource_id=${resourceId}`);
         } catch (error) {
             console.error(`Error fetching associations for resource ${resourceId}:`, error);
+            throw error;
+        }
+    },
+
+    // AI Summary operations
+    saveSummaryToResource: async (resourceId, summaryData) => {
+        try {
+            // Prepare the summary text - no complex formatting
+            let summaryText = '';
+            
+            // If summaryData is already a string, use it directly
+            if (typeof summaryData === 'string') {
+                summaryText = summaryData;
+            } else {
+                // Just use the main summary text
+                summaryText = summaryData.summary || '';
+            }
+            
+            const summaryEndpoint = `${RESOURCES_ENDPOINT}/${resourceId}/set_ai_summary/`;
+            console.log("Saving summary to endpoint:", summaryEndpoint);
+            console.log("Summary content length:", summaryText.length);
+            
+            try {
+                // Make the API call to save the summary
+                const result = await httpPost(summaryEndpoint, {
+                    ai_summary: summaryText
+                });
+                
+                console.log("Summary saved successfully:", result);
+                
+                return result;
+            } catch (error) {
+                // Add more detailed logging for debugging
+                console.error(`Error saving summary to resource ${resourceId}:`, error);
+                if (error.response) {
+                    console.error('HTTP status:', error.response.status);
+                    console.error('Response data:', error.response.data);
+                }
+                throw error;
+            }
+        } catch (error) {
+            console.error(`Error saving summary to resource ${resourceId}:`, error);
+            throw error;
+        }
+    },
+
+    getResourceSummary: async (resourceId) => {
+        try {
+            const endpoint = `${RESOURCES_ENDPOINT}/${resourceId}/ai_summary/`;
+            console.log("Fetching summary from endpoint:", endpoint);
+            return await httpGet(endpoint);
+        } catch (error) {
+            console.error(`Error getting summary for resource ${resourceId}:`, error);
+            throw error;
+        }
+    },
+    
+    // Save AI summary to a resource
+    saveSummaryToResource: async (resourceId, summaryData) => {
+        try {
+            // Prepare the summary text - no complex formatting
+            let summaryText = '';
+            
+            // If summaryData is already a string, use it directly
+            if (typeof summaryData === 'string') {
+                summaryText = summaryData;
+            } else {
+                // Just use the main summary text
+                summaryText = summaryData.summary || '';
+            }
+            
+            const summaryEndpoint = `${RESOURCES_ENDPOINT}/${resourceId}/set_ai_summary/`;
+            console.log("Saving summary to endpoint:", summaryEndpoint);
+            console.log("Summary content length:", summaryText.length);
+            
+            try {
+                // Make the API call to save the summary
+                const result = await httpPost(summaryEndpoint, {
+                    ai_summary: summaryText
+                });
+                
+                console.log("Summary saved successfully:", result);
+                
+                return result;
+            } catch (error) {
+                // Add more detailed logging for debugging
+                console.error(`Error saving summary to resource ${resourceId}:`, error);
+                if (error.response) {
+                    console.error('HTTP status:', error.response.status);
+                    console.error('Response data:', error.response.data);
+                }
+                throw error;
+            }
+        } catch (error) {
+            console.error(`Error saving summary to resource ${resourceId}:`, error);
             throw error;
         }
     }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { basePageWrap } from '../BasePage';
 import { useAuth } from '../../context/AuthContext';
 import learningResources from '../../api/learningResources';
+import LearningResourceSummary from '../../components/LearningResourceSummary/LearningResourceSummary';
 import s from './LearningResourcePage.module.css';
 
 // Helper function to check if URL is from YouTube
@@ -138,17 +139,21 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
     try {
       setLoading(true);
       
+      // If clicking on the same star rating that's already selected, remove the vote
+      const ratingToSubmit = rating === qualityRating ? null : rating;
+      
       // Submit the vote
-      await learningResources.submitQualityVote(resourceId, rating);
+      await learningResources.submitQualityVote(resourceId, ratingToSubmit);
       
       // Update local state optimistically
-      setQualityRating(rating);
-      setUserVotes(prev => ({ ...prev, quality: rating }));
+      setQualityRating(ratingToSubmit || 0);
+      setUserVotes(prev => ({ ...prev, quality: ratingToSubmit }));
       
       // Refetch to get updated aggregate values
       const updatedResource = await learningResources.getById(resourceId);
       setResource(updatedResource);
     } catch (err) {
+      console.error("Error submitting quality vote for resource", resourceId, ":", err);
       // Handle session expiration
       if (err.response && err.response.status === 401) {
         refreshAuth();
@@ -283,6 +288,12 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
         </div>
       )}
       
+      {/* Metadata section - moved near top */}
+      <div className={s.metadata}>
+        <div className={s.created}>Created: {new Date(resource.created_at).toLocaleDateString()}</div>
+        <div className={s.updated}>Last Updated: {new Date(resource.updated_at).toLocaleDateString()}</div>
+      </div>
+      
       {primaryUrl && (
         <>
           {/* URL fallback message - moved above the iframe */}
@@ -393,10 +404,45 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
         </div>
       )}
       
-      <div className={s.metadata}>
-        <div className={s.created}>Created: {new Date(resource.created_at).toLocaleDateString()}</div>
-        <div className={s.updated}>Last Updated: {new Date(resource.updated_at).toLocaleDateString()}</div>
-      </div>
+      {/* AI Summary Section */}
+      <LearningResourceSummary 
+        resource={resource} 
+        onSummaryGenerated={(result) => {
+          // Update the resource state when a summary is generated
+          if (result) {
+            // If the result contains a structured summary object
+            let summaryText = '';
+            
+            if (typeof result === 'string') {
+              summaryText = result;
+            } else if (result.summary) {
+              // Format the summary as text with highlights and target audience
+              summaryText = result.summary;
+              
+              // Add highlights if available
+              if (result.highlights && result.highlights.length > 0) {
+                summaryText += '\n\nKey Highlights:\n';
+                result.highlights.forEach((highlight, idx) => {
+                  summaryText += `${idx + 1}. ${highlight}\n`;
+                });
+              }
+              
+              // Add target audience if available
+              if (result.targetAudience) {
+                summaryText += `\nTarget Audience: ${result.targetAudience}`;
+              }
+            }
+            
+            // Update the resource state with new summary data
+            setResource({
+              ...resource,
+              ai_summary: summaryText || result.ai_summary || '',
+              ai_summary_generated: true,
+              ai_summary_generated_at: new Date().toISOString()
+            });
+          }
+        }} 
+      />
     </div>
   );
 };

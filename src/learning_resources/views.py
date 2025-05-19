@@ -7,11 +7,12 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from django_filters import CharFilter
 from django.db.models import Q
-from django.db import models  # Add missing models import
+from django.db import models
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 import requests
 from requests.exceptions import RequestException
+from django.utils import timezone
 
 from .models import (
     LearningResource,
@@ -128,6 +129,7 @@ class ResourcePageAssociationFilter(FilterSet):
 @method_decorator(csrf_protect, name="destroy")
 @method_decorator(csrf_protect, name="quality_vote")
 @method_decorator(csrf_protect, name="difficulty_vote")
+@method_decorator(csrf_protect, name="set_ai_summary")
 class LearningResourceViewSet(viewsets.ModelViewSet):
     """
     API endpoint for learning resources with filtering, searching, and sorting
@@ -342,6 +344,70 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
             return Response(self.get_serializer(resource).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(
+        detail=True, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def ai_summary(self, request, pk=None):
+        """
+        Get the AI-generated summary for a learning resource
+        """
+        resource = self.get_object()
+
+        if not resource.ai_summary_generated:
+            return Response(
+                {"detail": "AI summary has not been generated yet."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(
+            {
+                "ai_summary": resource.ai_summary,
+                "ai_summary_generated": resource.ai_summary_generated,
+                "ai_summary_generated_at": resource.ai_summary_generated_at,
+            }
+        )
+
+    @action(
+        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def set_ai_summary(self, request, pk=None):
+        """
+        Set the AI-generated summary for a learning resource
+        Only allows setting the summary if it hasn't been generated yet
+        """
+        resource = self.get_object()
+
+        # Check if summary has already been generated
+        if resource.ai_summary_generated:
+            return Response(
+                {
+                    "detail": "AI summary has already been generated and cannot be regenerated."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate that ai_summary is provided
+        ai_summary = request.data.get("ai_summary")
+        if not ai_summary:
+            return Response(
+                {"detail": "AI summary is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Update the resource with the AI summary
+        resource.ai_summary = ai_summary
+        resource.ai_summary_generated = True
+        resource.ai_summary_generated_at = timezone.now()
+        resource.save()
+
+        return Response(
+            {
+                "ai_summary": resource.ai_summary,
+                "ai_summary_generated": resource.ai_summary_generated,
+                "ai_summary_generated_at": resource.ai_summary_generated_at,
+            }
+        )
+
 
 @method_decorator(ensure_csrf_cookie, name="list")
 @method_decorator(csrf_protect, name="create")
@@ -389,8 +455,8 @@ class ResourcePageAssociationViewSet(viewsets.ModelViewSet):
     - page_size: Number of results per page (e.g., ?page_size=20)
 
     Voting:
-    - POST /api/resource-associations/{id}/upvote/ to upvote an association
-    - POST /api/resource-associations/{id}/downvote/ to downvote an association
+    - POST /api/associations/{id}/upvote/ to upvote an association
+    - POST /api/associations/{id}/downvote/ to downvote an association
     """
 
     serializer_class = ResourcePageAssociationSerializer
