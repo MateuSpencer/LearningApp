@@ -24,8 +24,7 @@ const PostsList = ({
   pageSlug, 
   onNewPost, 
   showOnlyMyPosts = false,
-  allowedFilters = ['status', 'timeframe', 'search'],
-  allowedSortFields = ['created_at', 'updated_at', 'status'],
+  allowedFilters = ['status', 'search'],
   fixedFilters = {}
 }) => {
   const router = useRouter();
@@ -85,8 +84,7 @@ const PostsList = ({
     currentPage,
     totalPages,
     filters,
-    sortBy,
-    sortDirection,
+    order,
     loading,
     error,
     fetchPosts,
@@ -102,8 +100,7 @@ const PostsList = ({
     downvotePost
   } = usePosts({
     fixedFilters: computedFixedFilters,
-    initialSortBy: 'votes_score',
-    initialSortDirection: 'desc',
+    initialOrder: 'newest',
     pageSize: 10
   });
   
@@ -269,8 +266,8 @@ const PostsList = ({
   };
   
   // Handle sort changes
-  const handleSortChange = (field, direction) => {
-    updateSort(field, direction);
+  const handleSortChange = (newOrder) => {
+    updateSort(newOrder);
   };
   
   // Handle page changes
@@ -492,10 +489,8 @@ const PostsList = ({
         {showSort && (
           <div className={s.sortPanel}>
             <PostsSort 
-              sortBy={sortBy}
-              sortDirection={sortDirection}
+              order={order}
               onSortChange={handleSortChange}
-              allowedSortFields={allowedSortFields}
               disabled={controlsDisabled}
             />
           </div>
@@ -587,7 +582,6 @@ PostsList.propTypes = {
   onNewPost: PropTypes.func,
   showOnlyMyPosts: PropTypes.bool,
   allowedFilters: PropTypes.arrayOf(PropTypes.string),
-  allowedSortFields: PropTypes.arrayOf(PropTypes.string),
   fixedFilters: PropTypes.object
 };
 
@@ -595,8 +589,7 @@ PostsList.defaultProps = {
   pageSlug: '',
   onNewPost: null,
   showOnlyMyPosts: false,
-  allowedFilters: ['status', 'timeframe', 'search'],
-  allowedSortFields: ['votes_score', 'created_at', 'updated_at', 'status'],
+  allowedFilters: ['status', 'search'],
   fixedFilters: {}
 };
 

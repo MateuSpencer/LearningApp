@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
 import styles from './PostsFilter.module.css';
 
 /**
  * Filter component for PostsList
- * Provides UI for filtering posts based on status, tags, or other criteria
+ * Provides UI for filtering posts based on status
  */
 const PostsFilter = ({ 
   filters, 
@@ -72,38 +70,6 @@ const PostsFilter = ({
         </div>
       )}
 
-      {allowedFilters.includes('timeframe') && (
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Date Range:</label>
-          <div className={styles.dateRangeContainer}>
-            <div className={styles.dateInputWrapper}>
-              <label className={styles.dateLabel}>From:</label>
-              <DatePicker
-                selected={filters.created_after ? new Date(filters.created_after) : null}
-                onChange={(date) => handleFilterChange('created_after_date', date)}
-                className={styles.dateInput}
-                dateFormat="yyyy-MM-dd"
-                placeholderText="Select start date"
-                disabled={disabled}
-                isClearable
-              />
-            </div>
-            <div className={styles.dateInputWrapper}>
-              <label className={styles.dateLabel}>To:</label>
-              <DatePicker
-                selected={filters.created_before ? new Date(filters.created_before) : null}
-                onChange={(date) => handleFilterChange('created_before_date', date)}
-                className={styles.dateInput}
-                dateFormat="yyyy-MM-dd"
-                placeholderText="Select end date"
-                disabled={disabled}
-                isClearable
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       {allowedFilters.includes('search') && (
         <div className={styles.filterGroup}>
           <input
@@ -116,8 +82,6 @@ const PostsFilter = ({
           />
         </div>
       )}
-
-      {/* We can add more filter types here as needed */}
       
       {Object.keys(filters).length > 0 && (
         <button 

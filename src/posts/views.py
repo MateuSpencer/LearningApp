@@ -27,7 +27,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """
-    Custom permission to only allow authors of a post to edit or delete it.
+    Custom permission to only allow owners of an object to edit it.
     """
 
     def has_object_permission(self, request, view, obj):
@@ -37,6 +37,23 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
 
         # Write permissions are only allowed to the author
         return obj.author == request.user
+
+
+class SimpleOrderingFilter(filters.BaseFilterBackend):
+    """
+    Filter that allows ordering by newest first or oldest first only.
+    """
+
+    order_param = "order"
+
+    def filter_queryset(self, request, queryset, view):
+        order_param = request.query_params.get(self.order_param, "newest")
+
+        if order_param == "oldest":
+            return queryset.order_by("created_at")
+
+        # Default to newest first
+        return queryset.order_by("-created_at")
 
 
 class PostPagination(PageNumberPagination):
@@ -189,8 +206,8 @@ class PostViewSet(viewsets.ModelViewSet):
     - page_size: Number of results per page (e.g., ?page_size=20)
 
     Sorting:
-    - ordering: Sort by field (e.g., ?ordering=title or ?ordering=-created_at)
-       Available fields: created_at, updated_at, status
+    - order: Sort by newest or oldest (e.g., ?order=newest or ?order=oldest)
+       Default is newest first if not specified
     """
 
     serializer_class = PostSerializer
@@ -199,17 +216,10 @@ class PostViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         AdvancedSearchFilter,
-        filters.OrderingFilter,
+        SimpleOrderingFilter,
     ]
     filterset_class = PostFilter
     search_fields = ["title", "content", "author__username"]
-    ordering_fields = [
-        "created_at",
-        "updated_at",
-        "status",
-        "author__username",
-        "title",
-    ]
     ordering = ["-created_at"]  # Default to sort by date
 
     def get_queryset(self):

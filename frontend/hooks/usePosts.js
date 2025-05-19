@@ -20,8 +20,7 @@ const LOGIN_URL = '/accounts/login/';
 export function usePosts({
   fixedFilters = {},
   initialFilters = {},
-  initialSortBy = 'created_at',  // Default to sorting by creation date
-  initialSortDirection = 'desc',
+  initialOrder = 'newest',  // Default to newest first
   pageSize = 10,
   autoRefetch = true
 } = {}) {
@@ -37,8 +36,7 @@ export function usePosts({
   
   // State for filters and sorting
   const [filters, setFilters] = useState(initialFilters);
-  const [sortBy, setSortBy] = useState(initialSortBy);
-  const [sortDirection, setSortDirection] = useState(initialSortDirection);
+  const [order, setOrder] = useState(initialOrder);
   
   // Cache previous results to avoid unnecessary refetches
   const cacheRef = useRef({});
@@ -76,12 +74,11 @@ export function usePosts({
     queryParams.append('page', currentPage);
     queryParams.append('page_size', pageSize);
     
-    // Add sorting params
-    const orderingValue = (sortDirection === 'desc' ? '-' : '') + sortBy;
-    queryParams.append('ordering', orderingValue);
+    // Add sorting param (either 'newest' or 'oldest')
+    queryParams.append('order', order);
     
     return queryParams.toString();
-  }, [fixedFilters, filters, currentPage, pageSize, sortBy, sortDirection]);
+  }, [fixedFilters, filters, currentPage, pageSize, order]);
   
   // Main fetch function
   const fetchPosts = useCallback(async (options = {}) => {
@@ -349,9 +346,8 @@ export function usePosts({
   }, []);
   
   // Update sorting
-  const updateSort = useCallback((newSortBy, newSortDirection = 'desc') => {
-    setSortBy(newSortBy);
-    setSortDirection(newSortDirection);
+  const updateSort = useCallback((newOrder) => {
+    setOrder(newOrder);
     // Reset to first page when sorting changes
     setCurrentPage(1);
   }, []);
@@ -391,8 +387,7 @@ export function usePosts({
     totalPages,
     pageSize,
     filters,
-    sortBy,
-    sortDirection,
+    order,
     
     // Auth state
     isAuthenticated,
