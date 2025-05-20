@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import learningResources from '../../api/learningResources';
@@ -120,7 +121,16 @@ const LearningResourceItem = ({
   // Get icon based on resource type
   const getResourceTypeIcon = (type) => {
     switch (type) {
-      case 'youtube': return '📺'; // Better YouTube icon (TV screen)
+      case 'youtube': 
+        return (
+          <Image 
+            src="/img/youtube_logo.png" 
+            alt="YouTube" 
+            width={24} 
+            height={24} 
+            className={s.youtubeIcon}
+          />
+        );
       case 'video': return '🎬'; // Movie clapper board
       case 'pdf': return '📄'; // Document icon
       case 'image': return '🖼️'; // Picture frame icon
