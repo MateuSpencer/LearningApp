@@ -27,13 +27,21 @@ const LearningResourcesList = ({
   showAll = false,
   onAddResource,
   showAddButton = true,
-  allowedFilters = ['type', 'category', 'search', 'difficulty'],
+  allowedFilters = ['type', 'difficulty', 'search'],
   allowedSortFields = ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   fixedFilters = {}
 }) => {
   const router = useRouter();
   const LOGIN_URL = '/accounts/login/';
   const [showForm, setShowForm] = useState(false);
+  
+  // Track changes to dependencies for proper refetching
+  const prevDepsRef = useRef({ 
+    pageSlug: null, 
+    showAll: false, 
+    username: null, 
+    isAuthenticated: false
+  });
   
   // AI resources state
   const [aiResources, setAiResources] = useState(null);
@@ -49,7 +57,7 @@ const LearningResourcesList = ({
   const searchTimeoutRef = useRef(null);
   
   // Use the centralized auth context
-  const { isAuthenticated, isLoading: authLoading, error: authError } = useAuth();
+  const { isAuthenticated, user, isLoading: authLoading, error: authError, refreshAuth } = useAuth();
   
   // Set up fixed filters based on props
   const computedFixedFilters = useMemo(() => {
@@ -93,6 +101,47 @@ const LearningResourcesList = ({
     autoRefetch: true
   });
   
+  // Create stable reference to fetchResources
+  const fetchResourcesRef = useRef(fetchResources);
+  useEffect(() => {
+    fetchResourcesRef.current = fetchResources;
+  }, [fetchResources]);
+  
+  // Create stable function for fetching resources
+  const stableFetchResources = useCallback((options) => {
+    return fetchResourcesRef.current(options);
+  }, []);
+  
+  // Store previous dependencies for comparison
+  useEffect(() => {
+    prevDepsRef.current = { 
+      pageSlug,
+      showAll,
+      username: user?.username, 
+      isAuthenticated
+    };
+  }, [pageSlug, showAll, user?.username, isAuthenticated]);
+  
+  // Refetch resources when key dependencies change
+  useEffect(() => {
+    const prevDeps = prevDepsRef.current;
+    
+    // Check if any critical dependency has changed
+    const hasPageContextChanged = 
+      prevDeps.pageSlug !== pageSlug ||
+      prevDeps.showAll !== showAll;
+      
+    const hasAuthChanged = 
+      prevDeps.username !== user?.username ||
+      prevDeps.isAuthenticated !== isAuthenticated;
+    
+    // Always fetch on initial load or when page context changes
+    // Also fetch when auth changes and we're showing user-specific content
+    if (hasPageContextChanged || (hasAuthChanged && isAuthenticated)) {
+      stableFetchResources({ force: true });
+    }
+  }, [pageSlug, showAll, user?.username, isAuthenticated, stableFetchResources]);
+  
   // Handler for authentication-required actions
   const requireAuth = useCallback(() => {
     if (!isAuthenticated) {
@@ -135,7 +184,7 @@ const LearningResourcesList = ({
   const handleResourceAdded = () => {
     setShowForm(false);
     // Refresh the list with the newly added resource
-    fetchResources({ force: true });
+    stableFetchResources({ force: true });
   };
   
   // Handle form cancellation
@@ -151,6 +200,12 @@ const LearningResourcesList = ({
       await upvoteAssociation(associationId);
     } catch (err) {
       console.error('Failed to upvote resource:', err);
+      
+      // Handle 401 unauthorized errors (session expired)
+      if (err.response && err.response.status === 401) {
+        refreshAuth(); // Try to refresh authentication state
+        router.push(LOGIN_URL);
+      }
     }
   };
   
@@ -161,6 +216,12 @@ const LearningResourcesList = ({
       await downvoteAssociation(associationId);
     } catch (err) {
       console.error('Failed to downvote resource:', err);
+      
+      // Handle 401 unauthorized errors (session expired)
+      if (err.response && err.response.status === 401) {
+        refreshAuth(); // Try to refresh authentication state
+        router.push(LOGIN_URL);
+      }
     }
   };
   
@@ -534,7 +595,7 @@ const LearningResourcesList = ({
             
             // All other properties belong to the association
             const associationProps = {
-              id: item.id,
+              id: item.association_id || item.id, // Use association_id when available, fallback to resource id
               appropriateness_upvotes: item.appropriateness_upvotes,
               appropriateness_downvotes: item.appropriateness_downvotes,
               user_vote: item.user_vote,
@@ -585,7 +646,7 @@ LearningResourcesList.defaultProps = {
   showAll: false,
   onAddResource: null,
   showAddButton: true,
-  allowedFilters: ['type', 'search', 'difficulty'],
+  allowedFilters: ['type', 'difficulty', 'search'],
   allowedSortFields: ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   fixedFilters: {}
 };

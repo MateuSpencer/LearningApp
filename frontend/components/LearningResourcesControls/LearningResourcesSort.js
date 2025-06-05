@@ -42,8 +42,8 @@ const LearningResourcesSort = ({
         
         {allowedSortFields.includes('quality_vote_count') && (
           <>
-            <option value="quality_vote_count:desc">Most Rated First</option>
-            <option value="quality_vote_count:asc">Least Rated First</option>
+            <option value="quality_vote_count:desc">Most Voted First</option>
+            <option value="quality_vote_count:asc">Least Voted First</option>
           </>
         )}
         
@@ -58,13 +58,6 @@ const LearningResourcesSort = ({
           <>
             <option value="updated_at:desc">Recently Updated</option>
             <option value="updated_at:asc">Least Recently Updated</option>
-          </>
-        )}
-        
-        {allowedSortFields.includes('title') && (
-          <>
-            <option value="title:asc">Title (A-Z)</option>
-            <option value="title:desc">Title (Z-A)</option>
           </>
         )}
       </select>

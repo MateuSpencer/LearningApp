@@ -78,6 +78,9 @@ class ResourceFilter(FilterSet):
     # Add filter for specific resource types
     resource_category = CharFilter(method="filter_by_resource_category")
 
+    # Add filter for page associations
+    page_slug = CharFilter(method="filter_by_page_slug")
+
     class Meta:
         model = LearningResource
         fields = {
@@ -140,6 +143,16 @@ class ResourceFilter(FilterSet):
 
         # Filter by any of these resource types
         return queryset.filter(resource_type__in=resource_types)
+
+    def filter_by_page_slug(self, queryset, name, value):
+        """
+        Filter resources by page association
+        """
+        if not value:
+            return queryset
+
+        # Filter resources that are associated with the specified page
+        return queryset.filter(page_associations__page_slug=value).distinct()
 
 
 class ResourcePageAssociationFilter(FilterSet):
@@ -218,7 +231,20 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
     ]  # Default to sort by quality rating and date
 
     def get_queryset(self):
-        return LearningResource.objects.all()
+        """
+        Get queryset with optional filtering by page_slug
+        """
+        queryset = LearningResource.objects.all()
+
+        # Filter by page_slug if provided
+        page_slug = self.request.query_params.get("page_slug")
+        if page_slug:
+            # Filter resources that are associated with the specified page
+            queryset = queryset.filter(
+                page_associations__page_slug=page_slug
+            ).distinct()
+
+        return queryset
 
     def validate_resource_url(self, url):
         """

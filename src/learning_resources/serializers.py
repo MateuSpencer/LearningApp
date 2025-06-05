@@ -23,6 +23,12 @@ class LearningResourceSerializer(serializers.ModelSerializer):
     dominant_difficulty_level = serializers.SerializerMethodField()
     user_quality_vote = serializers.SerializerMethodField()
     user_difficulty_vote = serializers.SerializerMethodField()
+    # Association fields for page-specific context
+    association_id = serializers.SerializerMethodField()
+    appropriateness_upvotes = serializers.SerializerMethodField()
+    appropriateness_downvotes = serializers.SerializerMethodField()
+    user_vote = serializers.SerializerMethodField()
+    page_slug = serializers.SerializerMethodField()
     # Optional field for creating a resource with URLs
     url_list = serializers.ListField(
         child=serializers.URLField(), write_only=True, required=False
@@ -47,6 +53,11 @@ class LearningResourceSerializer(serializers.ModelSerializer):
             "primary_url",
             "user_quality_vote",
             "user_difficulty_vote",
+            "association_id",
+            "appropriateness_upvotes",
+            "appropriateness_downvotes",
+            "user_vote",
+            "page_slug",
             "url_list",
             "ai_summary",
             "ai_summary_generated",
@@ -101,6 +112,79 @@ class LearningResourceSerializer(serializers.ModelSerializer):
             return vote.level
         except DifficultyVote.DoesNotExist:
             return None
+
+    def get_association_id(self, obj):
+        """Return the association ID when filtering by page_slug"""
+        request = self.context.get("request")
+        if not request:
+            return None
+
+        page_slug = request.query_params.get("page_slug")
+        if not page_slug:
+            return None
+
+        try:
+            association = obj.page_associations.get(page_slug=page_slug)
+            return association.id
+        except ResourcePageAssociation.DoesNotExist:
+            return None
+
+    def get_appropriateness_upvotes(self, obj):
+        """Return the appropriateness upvotes for the association when filtering by page_slug"""
+        request = self.context.get("request")
+        if not request:
+            return None
+
+        page_slug = request.query_params.get("page_slug")
+        if not page_slug:
+            return None
+
+        try:
+            association = obj.page_associations.get(page_slug=page_slug)
+            return association.appropriateness_upvotes
+        except ResourcePageAssociation.DoesNotExist:
+            return None
+
+    def get_appropriateness_downvotes(self, obj):
+        """Return the appropriateness downvotes for the association when filtering by page_slug"""
+        request = self.context.get("request")
+        if not request:
+            return None
+
+        page_slug = request.query_params.get("page_slug")
+        if not page_slug:
+            return None
+
+        try:
+            association = obj.page_associations.get(page_slug=page_slug)
+            return association.appropriateness_downvotes
+        except ResourcePageAssociation.DoesNotExist:
+            return None
+
+    def get_user_vote(self, obj):
+        """Return the current user's appropriateness vote on the association when filtering by page_slug"""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return None
+
+        page_slug = request.query_params.get("page_slug")
+        if not page_slug:
+            return None
+
+        try:
+            association = obj.page_associations.get(page_slug=page_slug)
+            vote = association.appropriateness_votes.get(user=request.user)
+            return vote.vote_type
+        except (ResourcePageAssociation.DoesNotExist, AppropriatenessVote.DoesNotExist):
+            return None
+
+    def get_page_slug(self, obj):
+        """Return the page_slug when filtering by page_slug"""
+        request = self.context.get("request")
+        if not request:
+            return None
+
+        return request.query_params.get("page_slug")
 
     def create(self, validated_data):
         # Extract URLs if included

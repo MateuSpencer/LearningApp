@@ -67,6 +67,11 @@ export function useLearningResources({
   const buildQueryString = useCallback(() => {
     const queryParams = new URLSearchParams();
     
+    // Add page_slug parameter for wiki page context
+    if (!showAll && pageSlug) {
+      queryParams.append('page_slug', pageSlug);
+    }
+    
     // Add fixed filters (these don't change during component lifecycle)
     Object.entries(fixedFilters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '' && value !== 'all') {
@@ -77,19 +82,19 @@ export function useLearningResources({
     // Add user-controlled filters
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '' && value !== 'all') {
-        // Special handling for certain filter types
-        if (key === 'type' && value === 'all') {
-          // Skip 'all' values as they mean no filtering
-          return;
+        // Map frontend filter names to backend field names if needed
+        let backendKey = key;
+        
+        // Handle special filter mappings
+        if (key === 'type') {
+          backendKey = 'resource_type';
+        } else if (key === 'difficulty') {
+          backendKey = 'difficulty';
+        } else if (key === 'search') {
+          backendKey = 'search';
         }
         
-        if (key === 'difficulty' && value === 'all') {
-          // Skip 'all' values as they mean no filtering
-          return;
-        }
-        
-        // For all other cases, add the filter
-        queryParams.append(key, value);
+        queryParams.append(backendKey, value);
       }
     });
     
@@ -97,22 +102,18 @@ export function useLearningResources({
     queryParams.append('page', currentPage.toString());
     queryParams.append('page_size', pageSize.toString());
     
-    // Add sorting params
+    // Add sorting params using Django's ordering format
     const orderingValue = (sortDirection === 'desc' ? '-' : '') + sortBy;
     queryParams.append('ordering', orderingValue);
     
     return queryParams.toString();
-  }, [fixedFilters, filters, currentPage, pageSize, sortBy, sortDirection]);
+  }, [showAll, pageSlug, fixedFilters, filters, currentPage, pageSize, sortBy, sortDirection]);
   
-  // Cache key for the current request
+  // Cache key for the current request - use consistent format for all contexts
   const getCacheKey = useCallback(() => {
-    if (showAll) {
-      const queryString = buildQueryString();
-      return `all-resources-${queryString}`;
-    } else {
-      return `resources-for-page-${pageSlug}`;
-    }
-  }, [pageSlug, showAll, buildQueryString]);
+    const queryString = buildQueryString();
+    return `learning-resources-${queryString}`;
+  }, [buildQueryString]);
   
   // Main fetch function
   const fetchResources = useCallback(async (options = {}) => {
@@ -139,16 +140,10 @@ export function useLearningResources({
       
       setLoading(true);
       
-      let response;
-      
-      if (showAll) {
-        // Fetch all resources with filters and pagination
-        const queryString = buildQueryString();
-        response = await learningResources.getAllResources(queryString);
-      } else {
-        // Fetch resources for a specific page
-        response = await learningResources.getAssociationsForPage(pageSlug);
-      }
+      // Always use the same endpoint for consistency
+      // Build query string with all filters, sorting, and pagination
+      const queryString = buildQueryString();
+      const response = await learningResources.getAllResources(queryString);
       
       // Update state with the fetched data
       setResources(response.results || []);
@@ -161,12 +156,13 @@ export function useLearningResources({
         timestamp: Date.now()
       };
     } catch (err) {
-      setError(err.message || 'Failed to fetch learning resources');
+      const enhancedError = handleAuthError(err);
+      setError(enhancedError.message || 'Failed to fetch learning resources');
       console.error('Error fetching learning resources:', err);
     } finally {
       setLoading(false);
     }
-  }, [pageSlug, showAll, getCacheKey, buildQueryString]);
+  }, [showAll, pageSlug, getCacheKey, buildQueryString, handleAuthError]);
   
   // Create new association
   const createAssociation = useCallback(async (resourceId) => {
@@ -287,13 +283,43 @@ export function useLearningResources({
     setCurrentPage(page);
   }, []);
   
-  // Fetch resources when dependencies change
+  // Track previous dependencies to detect changes
+  const prevDepsRef = useRef({
+    pageSlug: null,
+    showAll: false,
+    filters: {},
+    currentPage: 1,
+    sortBy: null,
+    sortDirection: null
+  });
+
+  // Fetch resources when dependencies change  
   useEffect(() => {
     if (autoRefetch) {
-      // Force refresh to ensure we get the latest resources
-      fetchResources({ force: false });
+      const prevDeps = prevDepsRef.current;
+      const hasChanged = 
+        prevDeps.pageSlug !== pageSlug ||
+        prevDeps.showAll !== showAll ||
+        JSON.stringify(prevDeps.filters) !== JSON.stringify(filters) ||
+        prevDeps.currentPage !== currentPage ||
+        prevDeps.sortBy !== sortBy ||
+        prevDeps.sortDirection !== sortDirection;
+
+      if (hasChanged) {
+        fetchResources({ force: true });
+      }
+
+      // Update previous dependencies
+      prevDepsRef.current = {
+        pageSlug,
+        showAll,
+        filters: { ...filters },
+        currentPage,
+        sortBy,
+        sortDirection
+      };
     }
-  }, [fetchResources, autoRefetch, currentPage, sortBy, sortDirection]);
+  }, [fetchResources, autoRefetch, pageSlug, showAll, filters, currentPage, sortBy, sortDirection]);
   
   // Clear specific cache entries older than 5 minutes
   useEffect(() => {
