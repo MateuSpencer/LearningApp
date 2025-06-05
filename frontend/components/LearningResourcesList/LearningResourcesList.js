@@ -34,6 +34,7 @@ const LearningResourcesList = ({
   const router = useRouter();
   const LOGIN_URL = '/accounts/login/';
   const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({}); // State for pre-filled form data
   
   // Track changes to dependencies for proper refetching
   const prevDepsRef = useRef({ 
@@ -158,8 +159,17 @@ const LearningResourcesList = ({
     if (onAddResource) {
       onAddResource();
     } else {
+      setFormData({}); // Clear any pre-filled data for manual add
       setShowForm(true);
     }
+  };
+  
+  // Handle showing the add form with pre-filled data from AI resources
+  const handleShowAddForm = (data) => {
+    if (!requireAuth()) return;
+    
+    setFormData(data); // Set pre-filled data
+    setShowForm(true);
   };
   
   // Handle AI resources found
@@ -183,6 +193,7 @@ const LearningResourcesList = ({
   // Handle form submission success
   const handleResourceAdded = () => {
     setShowForm(false);
+    setFormData({}); // Clear form data
     // Refresh the list with the newly added resource
     stableFetchResources({ force: true });
   };
@@ -190,6 +201,7 @@ const LearningResourcesList = ({
   // Handle form cancellation
   const handleCancelForm = () => {
     setShowForm(false);
+    setFormData({}); // Clear form data
   };
   
   // Handle voting on resources
@@ -420,6 +432,10 @@ const LearningResourcesList = ({
           pageSlug={pageSlug}
           onSuccess={handleResourceAdded}
           onCancel={handleCancelForm}
+          initialUrl={formData.url || ''}
+          initialTitle={formData.title || ''}
+          initialResourceType={formData.resourceType || 'website'}
+          initialDescription={formData.description || ''}
         />
       )}
       
@@ -446,6 +462,7 @@ const LearningResourcesList = ({
             <AIResourcesDisplay 
               resources={aiResources} 
               onAddResource={handleResourceAdded} 
+              onShowAddForm={handleShowAddForm}
               onClose={() => setShowAiResources(false)}
               pageSlug={pageSlug}
             />

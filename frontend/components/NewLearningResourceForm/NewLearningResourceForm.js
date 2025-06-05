@@ -4,13 +4,22 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import learningResources from '../../api/learningResources';
 import { normalizeUrl, validateUrl } from '../../utils/urlUtils';
+import urlValidationService from '../../services/urlValidationService';
 import s from './NewLearningResourceForm.module.css';
 
-const NewLearningResourceForm = ({ pageSlug, onSuccess, onCancel }) => {
+const NewLearningResourceForm = ({ 
+  pageSlug, 
+  onSuccess, 
+  onCancel, 
+  initialUrl = '', 
+  initialTitle = '', 
+  initialResourceType = 'website',
+  initialDescription = ''
+}) => {
   // Form state
-  const [url, setUrl] = useState('');
-  const [title, setTitle] = useState('');
-  const [resourceType, setResourceType] = useState('website');
+  const [url, setUrl] = useState(initialUrl);
+  const [title, setTitle] = useState(initialTitle);
+  const [resourceType, setResourceType] = useState(initialResourceType);
   
   // Status states
   const [submitting, setSubmitting] = useState(false);
@@ -28,6 +37,16 @@ const NewLearningResourceForm = ({ pageSlug, onSuccess, onCancel }) => {
   // Get router and auth context
   const router = useRouter();
   const { isAuthenticated, refreshAuth } = useAuth();
+
+  // Auto-validate URL if provided as initial value
+  useEffect(() => {
+    if (initialUrl && !lastValidatedUrl) {
+      // Small delay to allow component to fully mount
+      setTimeout(() => {
+        handleValidateUrl();
+      }, 100);
+    }
+  }, [initialUrl]); // Only run on mount or when initialUrl changes
 
   // Reset URL validation state when URL changes
   useEffect(() => {
@@ -47,11 +66,7 @@ const NewLearningResourceForm = ({ pageSlug, onSuccess, onCancel }) => {
 
   // Basic URL validation
   const isValidUrlFormat = (url) => {
-    if (!url) return false;
-    
-    // Basic URL validation pattern
-    const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
-    return urlPattern.test(url);
+    return urlValidationService.isValidUrlFormat(url);
   };
 
   // Handler for URL input changes
@@ -89,109 +104,42 @@ const NewLearningResourceForm = ({ pageSlug, onSuccess, onCancel }) => {
       setUrlSuccess(false);
       setSuggestedUrl('');
       
-      // First normalize the URL client-side to handle basic formatting
-      let processedUrl = url;
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        processedUrl = `https://${url}`;
-      }
+      // Use the URL validation service for full validation
+      const validationResult = await urlValidationService.validateUrlFull(url);
       
-      // For YouTube URLs, ensure we have a valid video ID (exactly 11 characters)
-      const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-      const match = processedUrl.match(youtubeRegex);
-      
-      // Pre-validate YouTube URLs client-side
-      let isYoutubeUrl = processedUrl.includes('youtube.com') || processedUrl.includes('youtu.be');
-      
-      if (isYoutubeUrl && (!match || !match[1])) {
-        // It looks like a YouTube URL but doesn't have a valid video ID
-        setUrlError('Invalid YouTube URL: Missing or malformed video ID. YouTube video IDs are 11 characters long.');
-        setValidating(false);
-        return;
-      }
-      
-      if (match && match[1]) {
-        // It's a YouTube URL with valid format, set resource type
-        setResourceType('youtube');
-        const videoId = match[1];
-        // Keep the video ID parameter but remove all other parameters
-        processedUrl = `https://www.youtube.com/watch?v=${videoId}`;
-      }
-      
-      // Validate URL with backend
-      const validationResult = await learningResources.validateUrl(processedUrl);
-      
-      if (validationResult.status === 'success') {
-        // For YouTube URLs, ensure we have metadata before marking as success
-        if (validationResult.url_type === 'youtube') {
-          // Check if we have a valid YouTube video ID and metadata
-          const videoId = validationResult.youtube_video_id;
-          
-          if (!videoId || videoId.length !== 11) {
-            setUrlError('Invalid YouTube video ID. YouTube video IDs must be 11 characters long.');
-            setUrlSuccess(false);
-            setTitleLocked(false);
-            setResourceTypeLocked(false);
-            setValidating(false);
-            return;
-          }
-          
-          // Try to get metadata to verify it's a valid video
-          try {
-            const youtubeData = await learningResources.getYoutubeMetadata(videoId);
-            
-            if (youtubeData.status === 'error' || !youtubeData.title) {
-              setUrlError(`Invalid YouTube video: ${youtubeData.message}`);
-              setUrlSuccess(false);
-              setTitleLocked(false);
-              setResourceTypeLocked(false);
-              setValidating(false);
-              return;
-            }
-            
-            // We have valid metadata, update title and lock it
-            setTitle(youtubeData.title);
-            setTitleLocked(true);
-            
-            // Set resource type and lock it since we confirmed it's a valid YouTube video
-            setResourceType('youtube');
-            setResourceTypeLocked(true);
-          } catch (metadataErr) {
-            // Handle error quietly without displaying in console
-            setUrlError('Invalid YouTube video: Could not verify this video exists.');
-            setUrlSuccess(false);
-            setTitleLocked(false);
-            setResourceTypeLocked(false);
-            setValidating(false);
-            return;
-          }
-        }
-        
+      if (validationResult.isValid) {
         // URL is valid, update state
         setUrlSuccess(true);
         
         // Save the last validated URL to track changes
-        setLastValidatedUrl(validationResult.normalized_url || processedUrl);
+        setLastValidatedUrl(validationResult.normalizedUrl);
         
-        // If URL was modified, show the normalized version
-        if (validationResult.normalized_url && validationResult.normalized_url !== url) {
-          setUrl(validationResult.normalized_url);
+        // If URL was normalized, update the form URL
+        if (validationResult.normalizedUrl !== url) {
+          setUrl(validationResult.normalizedUrl);
         }
         
-        // If a different URL is recommended (e.g., HTTP to HTTPS), show it
-        if (validationResult.recommended_url && 
-            validationResult.recommended_url !== validationResult.normalized_url) {
-          setSuggestedUrl(validationResult.recommended_url);
+        // If a different URL is recommended, show it
+        if (validationResult.suggestedUrl && 
+            validationResult.suggestedUrl !== validationResult.normalizedUrl) {
+          setSuggestedUrl(validationResult.suggestedUrl);
         }
-      } else if (validationResult.status === 'duplicate') {
-        // URL already exists in the system
-        setUrlError(`${validationResult.message || 'This URL already exists in the system'}`);
-        if (validationResult.existing_resource) {
-          setUrlError(prev => `${prev} (Resource: ${validationResult.existing_resource.title})`);
+        
+        // Handle YouTube-specific logic
+        if (validationResult.resourceType === 'youtube' && validationResult.metadata) {
+          // Set resource type and lock it since we confirmed it's a valid YouTube video
+          setResourceType('youtube');
+          setResourceTypeLocked(true);
+          
+          // If we have a title from metadata, use it and lock the title field
+          if (validationResult.metadata.title) {
+            setTitle(validationResult.metadata.title);
+            setTitleLocked(true);
+          }
         }
-        setUrlSuccess(false);
       } else {
-        // Other validation error
-        setUrlError(validationResult.message || 'URL validation failed');
+        // Validation failed
+        setUrlError(validationResult.error);
         setUrlSuccess(false);
         
         // Unlock title and resource type since validation failed
@@ -199,8 +147,8 @@ const NewLearningResourceForm = ({ pageSlug, onSuccess, onCancel }) => {
         setResourceTypeLocked(false);
         
         // If there's a suggested URL, show it
-        if (validationResult.recommended_url) {
-          setSuggestedUrl(validationResult.recommended_url);
+        if (validationResult.suggestedUrl) {
+          setSuggestedUrl(validationResult.suggestedUrl);
         }
       }
     } catch (err) {
@@ -466,7 +414,11 @@ const NewLearningResourceForm = ({ pageSlug, onSuccess, onCancel }) => {
 NewLearningResourceForm.propTypes = {
   pageSlug: PropTypes.string.isRequired,
   onSuccess: PropTypes.func,
-  onCancel: PropTypes.func
+  onCancel: PropTypes.func,
+  initialUrl: PropTypes.string,
+  initialTitle: PropTypes.string,
+  initialResourceType: PropTypes.string,
+  initialDescription: PropTypes.string
 };
 
 export default NewLearningResourceForm;

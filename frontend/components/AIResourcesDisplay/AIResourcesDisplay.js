@@ -11,11 +11,19 @@ import s from './AIResourcesDisplay.module.css';
  * @param {Object} props Component props
  * @param {Array} props.resources Array of resources found by AI
  * @param {Function} props.onAddResource Callback when user adds a resource
+ * @param {Function} props.onShowAddForm Callback when user wants to show the add form with pre-filled data
  * @param {Function} props.onClose Callback when user closes the display
  * @param {string} props.pageSlug Current page slug for associating resources
  * @param {Array} props.existingResources Array of existing resources (optional)
  */
-const AIResourcesDisplay = ({ resources, onAddResource, onClose, pageSlug, existingResources = [] }) => {
+const AIResourcesDisplay = ({ 
+  resources, 
+  onAddResource, 
+  onShowAddForm, 
+  onClose, 
+  pageSlug, 
+  existingResources = [] 
+}) => {
   // Track which resources are being added (for UI feedback)
   const [addingResources, setAddingResources] = useState({});
   // Track which resources have been added successfully
@@ -68,59 +76,27 @@ const AIResourcesDisplay = ({ resources, onAddResource, onClose, pageSlug, exist
     fetchExistingResources();
   }, [pageSlug, existingResources]);
 
-  // Handle adding a resource
+  // Handle adding a resource - now shows the form instead of directly adding
   const handleAddResource = async (resource) => {
     // If already added, don't do anything
     if (addedResources[resource.url]) {
       return;
     }
     
-    // Mark resource as being added (show loading state)
-    setAddingResources(prev => ({ ...prev, [resource.url]: true }));
-    
-    try {
-      // Format the resource data for API
-      const resourceData = {
-        title: resource.title,
-        resource_type: resource.resourceType || 'website', // Ensure resourceType is properly formatted
+    // Call the callback to show the add form with pre-filled data
+    if (onShowAddForm) {
+      onShowAddForm({
         url: resource.url,
-        description: resource.description || '',
-        page_slug: pageSlug
-      };
-      
-      // Call the API to add the resource
-      const result = await addAIResource(resourceData);
-      
-      // Check if the operation was successful
-      if (result.success === false) {
-        // Still mark as added even if it already exists
-        setAddedResources(prev => ({ ...prev, [resource.url]: true }));
-      } else {
-        // Mark as successfully added
-        setAddedResources(prev => ({ ...prev, [resource.url]: true }));
-        
-        // Also call the callback if provided (for list refresh)
-        if (onAddResource && result.resource) {
-          onAddResource(result.resource);
-        }
-      }
-    } catch (error) {
-      console.error('Error adding resource:', error);
-    } finally {
-      // Clear the adding state
-      setAddingResources(prev => {
-        const newState = { ...prev };
-        delete newState[resource.url];
-        return newState;
+        title: resource.title,
+        resourceType: resource.resourceType || 'website',
+        description: resource.description || ''
       });
     }
   };
 
   // Get the appropriate icon for a resource's state
   const getActionIcon = (resource) => {
-    if (addingResources[resource.url]) {
-      return <span className={s.Loading}></span>;
-    } else if (addedResources[resource.url]) {
+    if (addedResources[resource.url]) {
       return <><FaCheck className={s.AddedIcon} /> Added</>;
     } else {
       return <><FaPlus /> Add</>;
@@ -201,6 +177,7 @@ AIResourcesDisplay.propTypes = {
     })
   ).isRequired,
   onAddResource: PropTypes.func.isRequired,
+  onShowAddForm: PropTypes.func,
   onClose: PropTypes.func.isRequired,
   pageSlug: PropTypes.string.isRequired,
   existingResources: PropTypes.array,
