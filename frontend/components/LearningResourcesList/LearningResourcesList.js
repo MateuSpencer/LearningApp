@@ -8,6 +8,7 @@ import NewLearningResourceForm from '../NewLearningResourceForm/NewLearningResou
 import { LearningResourcesFilter, LearningResourcesSort, LearningResourcesPagination } from '../LearningResourcesControls';
 import AIResourceFinderButton from '../AIResourceFinderButton/AIResourceFinderButton';
 import AIResourcesDisplay from '../AIResourcesDisplay/AIResourcesDisplay';
+import { getPersistentSuggestionsForPage, addSuggestionToResources, deletePersistentSuggestion } from '../../api/aiResources';
 import s from './LearningResourcesList.module.css';
 
 /**
@@ -48,6 +49,9 @@ const LearningResourcesList = ({
   const [aiResources, setAiResources] = useState(null);
   const [showAiResources, setShowAiResources] = useState(true); // Default to showing when available
   const [aiResourcesCollapsed, setAiResourcesCollapsed] = useState(false);
+  const [loadingPersistentSuggestions, setLoadingPersistentSuggestions] = useState(false);
+  const [persistentSuggestions, setPersistentSuggestions] = useState([]);
+  const [persistentSuggestionsError, setPersistentSuggestionsError] = useState(null);
   
   // State for filter and sort toggles
   const [showFilters, setShowFilters] = useState(false);
@@ -113,6 +117,45 @@ const LearningResourcesList = ({
     return fetchResourcesRef.current(options);
   }, []);
   
+  // Load persistent AI suggestions for this page
+  const loadPersistentSuggestions = useCallback(async () => {
+    if (!pageSlug || showAll) return; // Only load for specific pages
+    
+    try {
+      setLoadingPersistentSuggestions(true);
+      setPersistentSuggestionsError(null);
+      
+      const suggestions = await getPersistentSuggestionsForPage(pageSlug, {
+        filterExisting: true,
+        onlyNotAdded: true
+      });
+      
+      setPersistentSuggestions(suggestions || []);
+      
+      // Show AI resources if we have persistent suggestions
+      if (suggestions && suggestions.length > 0) {
+        // Transform suggestions to match the expected format
+        const transformedSuggestions = suggestions.map(suggestion => ({
+          id: suggestion.id,
+          title: suggestion.title,
+          url: suggestion.url,
+          description: suggestion.description,
+          resourceType: suggestion.resource_type,
+          isPersistent: true
+        }));
+        
+        setAiResources(transformedSuggestions);
+        setShowAiResources(true);
+        setAiResourcesCollapsed(false);
+      }
+    } catch (error) {
+      console.error('Error loading persistent suggestions:', error);
+      setPersistentSuggestionsError('Failed to load AI suggestions');
+    } finally {
+      setLoadingPersistentSuggestions(false);
+    }
+  }, [pageSlug, showAll]);
+  
   // Store previous dependencies for comparison
   useEffect(() => {
     prevDepsRef.current = { 
@@ -122,7 +165,14 @@ const LearningResourcesList = ({
       isAuthenticated
     };
   }, [pageSlug, showAll, user?.username, isAuthenticated]);
-  
+
+  // Load persistent suggestions when component mounts or pageSlug changes
+  useEffect(() => {
+    if (isAuthenticated && pageSlug && !showAll) {
+      loadPersistentSuggestions();
+    }
+  }, [isAuthenticated, pageSlug, showAll, loadPersistentSuggestions]);
+
   // Refetch resources when key dependencies change
   useEffect(() => {
     const prevDeps = prevDepsRef.current;
@@ -172,22 +222,77 @@ const LearningResourcesList = ({
     setShowForm(true);
   };
   
-  // Handle AI resources found
+  // Handler for toggling AI resources collapsed state
+  const toggleAiResourcesCollapsed = () => {
+    setAiResourcesCollapsed(!aiResourcesCollapsed);
+  };
+
+  // Handler for when AI resources are found
   const handleAiResourcesFound = (resources) => {
     setAiResources(resources);
     setShowAiResources(true);
     setAiResourcesCollapsed(false); // Expand when new resources are found
   };
   
-  // Handle AI resource find button click
-  const handleAiFindClick = () => {
-    if (!requireAuth()) return;
-    // Continue with the normal flow if user is authenticated
+  // Handler for when a persistent suggestion is added to resources
+  const handleSuggestionAdded = async (suggestion, result) => {
+    try {
+      // Refresh resources list
+      await stableFetchResources({ force: true });
+      
+      // Remove the suggestion from the list
+      if (persistentSuggestions && persistentSuggestions.length > 0) {
+        setPersistentSuggestions(prev => 
+          prev.filter(s => s.id !== suggestion.id)
+        );
+        
+        // Update the displayed AI resources
+        if (aiResources && aiResources.length > 0) {
+          setAiResources(prev => 
+            prev.filter(r => r.id !== suggestion.id)
+          );
+          
+          // Hide AI resources section if no more resources to display
+          if (aiResources.length <= 1) {
+            setShowAiResources(false);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error after adding suggestion:', error);
+    }
   };
-  
-  // Toggle AI resources collapsed state
-  const toggleAiResourcesCollapsed = () => {
-    setAiResourcesCollapsed(!aiResourcesCollapsed);
+
+  // Handler for when a persistent suggestion is dismissed
+  const handleSuggestionDismissed = async (suggestion) => {
+    try {
+      // Remove the suggestion from the list
+      if (persistentSuggestions && persistentSuggestions.length > 0) {
+        setPersistentSuggestions(prev => 
+          prev.filter(s => s.id !== suggestion.id)
+        );
+        
+        // Update the displayed AI resources
+        if (aiResources && aiResources.length > 0) {
+          setAiResources(prev => 
+            prev.filter(r => r.id !== suggestion.id)
+          );
+          
+          // Hide AI resources section if no more resources to display
+          if (aiResources.length <= 1) {
+            setShowAiResources(false);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error after dismissing suggestion:', error);
+    }
+  };
+
+  // Handler for showing existing AI suggestions
+  const handleShowAiSuggestions = () => {
+    setShowAiResources(true);
+    setAiResourcesCollapsed(false);
   };
   
   // Handle form submission success
@@ -397,6 +502,16 @@ const LearningResourcesList = ({
     </svg>
   );
 
+  // Determine if we have AI suggestions to show
+  const hasSuggestions = useMemo(() => {
+    return aiResources && aiResources.length > 0;
+  }, [aiResources]);
+  
+  // Determine if we have persistent suggestions that could be shown
+  const hasPersistentSuggestions = useMemo(() => {
+    return persistentSuggestions && persistentSuggestions.length > 0;
+  }, [persistentSuggestions]);
+
   return (
     <div className={s.container}>
       {/* Header with title and top action buttons */}
@@ -419,8 +534,22 @@ const LearningResourcesList = ({
           {pageSlug && !showAll && isAuthenticated && (
             <AIResourceFinderButton 
               title={pageSlug}
+              pageSlug={pageSlug}
               onResourcesFound={handleAiResourcesFound}
+              onShowSuggestions={handleShowAiSuggestions}
               compact={true}
+              hasPersistentSuggestions={hasPersistentSuggestions}
+              buttonMode={
+                // Show 'show' mode if we have persistent suggestions but they're not visible
+                (hasPersistentSuggestions && (!showAiResources || aiResourcesCollapsed)) 
+                  ? 'show' 
+                  // Show 'more' mode if we already have suggestions and they're visible
+                  : (showAiResources && !aiResourcesCollapsed && hasSuggestions) 
+                    ? 'more' 
+                    // Default to 'find' mode
+                    : 'find'
+              }
+              onClick={requireAuth}
             />
           )}
         </div>
@@ -440,7 +569,7 @@ const LearningResourcesList = ({
       )}
       
       {/* Show AI-generated resources if available */}
-      {showAiResources && aiResources && aiResources.length > 0 && (
+      {showAiResources && hasSuggestions && (
         <div className={s.resourcesList}>
           <div className={s.aiResourcesHeader} onClick={toggleAiResourcesCollapsed}>
             <h3 className={s.aiResourcesTitle}>
@@ -464,7 +593,10 @@ const LearningResourcesList = ({
               onAddResource={handleResourceAdded} 
               onShowAddForm={handleShowAddForm}
               onClose={() => setShowAiResources(false)}
+              onSuggestionAdded={handleSuggestionAdded}
+              onSuggestionDismissed={handleSuggestionDismissed}
               pageSlug={pageSlug}
+              existingResources={resources}
             />
           )}
         </div>
@@ -667,5 +799,23 @@ LearningResourcesList.defaultProps = {
   allowedSortFields: ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   fixedFilters: {}
 };
+
+/**
+ * AI Learning Resources Persistence Feature
+ * 
+ * This implementation allows AI-suggested learning resources to be stored persistently
+ * in the database and displayed to users on wiki article pages. The feature includes:
+ * 
+ * 1. Loading persistent suggestions from the backend when a page loads
+ * 2. Showing suggestions with different button states:
+ *    - 'find': No suggestions yet, clicking will find new ones
+ *    - 'show': Has suggestions but they're not visible, clicking will show them
+ *    - 'more': Already showing suggestions, clicking will find more
+ * 3. Adding persistent suggestions to real resources
+ * 4. Dismissing suggestions that aren't relevant
+ * 
+ * The feature helps improve content quality by saving valuable AI suggestions
+ * and making them available to users without requiring repeated API calls.
+ */
 
 export default LearningResourcesList;

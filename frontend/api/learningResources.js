@@ -149,6 +149,38 @@ export const learningResources = {
         try {
             // Call the backend validation endpoint - use the correct endpoint path 
             const response = await httpPost(`${API_BASE}/validate_url/`, { url });
+            
+            // Check if the response contains error indicators that should be surfaced
+            if (response.status === 'success' && response.content_status === 'error') {
+                return {
+                    status: 'error',
+                    error_type: 'content_error',
+                    message: response.content_message || 'Error page detected',
+                    normalized_url: response.normalized_url,
+                    original_url: url
+                };
+            }
+            
+            // Check for 404-specific patterns in content
+            if (response.status === 'success' && response.html_content) {
+                // Check for common 404 indicators in title or content
+                const lowerContent = response.html_content.toLowerCase();
+                const hasTitle = response.html_content.match(/<title[^>]*>(.*?)<\/title>/i);
+                const title = hasTitle ? hasTitle[1].toLowerCase() : '';
+                
+                if (title.includes('404') || 
+                    title.includes('not found') || 
+                    (lowerContent.includes('not found') && lowerContent.includes('404'))) {
+                    return {
+                        status: 'error',
+                        error_type: 'not_found',
+                        message: 'This appears to be a 404 error page',
+                        normalized_url: response.normalized_url,
+                        original_url: url
+                    };
+                }
+            }
+            
             return response;
         } catch (error) {
             // Handle specific error cases
@@ -172,6 +204,17 @@ export const learningResources = {
                     };
                 }
             }
+            
+            // For HTTP error codes like 404, 403, etc. from the target URL
+            if (error.status && error.status >= 400) {
+                return {
+                    status: 'error',
+                    error_type: error.status === 404 ? 'not_found' : 'http_error',
+                    message: `URL validation failed: Server responded with ${error.status} ${error.statusText || ''}`,
+                    http_status: error.status
+                };
+            }
+            
             throw error;
         }
     },

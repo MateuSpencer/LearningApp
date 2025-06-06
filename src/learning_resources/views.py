@@ -30,6 +30,7 @@ from .models import (
     DifficultyVote,
     AppropriatenessVote,
 )
+from .models_ai_suggestions import AISuggestedResource
 from .serializers import (
     LearningResourceSerializer,
     ResourceURLSerializer,
@@ -38,6 +39,7 @@ from .serializers import (
     DifficultyVoteSerializer,
     AppropriatenessVoteSerializer,
 )
+from .serializers_ai_suggestions import AISuggestedResourceSerializer
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):

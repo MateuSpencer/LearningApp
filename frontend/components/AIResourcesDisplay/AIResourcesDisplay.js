@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FaTimes, FaCheck, FaExternalLinkAlt, FaPlus } from 'react-icons/fa';
-import { addAIResource } from '../../api/aiResources';
+import { addAIResource, addSuggestionToResources } from '../../api/aiResources';
 import { httpGet } from '../../utils/Http';
 import s from './AIResourcesDisplay.module.css';
 
@@ -13,16 +13,22 @@ import s from './AIResourcesDisplay.module.css';
  * @param {Function} props.onAddResource Callback when user adds a resource
  * @param {Function} props.onShowAddForm Callback when user wants to show the add form with pre-filled data
  * @param {Function} props.onClose Callback when user closes the display
+ * @param {Function} props.onDismiss Callback when user dismisses a suggestion
  * @param {string} props.pageSlug Current page slug for associating resources
  * @param {Array} props.existingResources Array of existing resources (optional)
+ * @param {Function} props.onSuggestionAdded Callback when a suggestion is added to resources
+ * @param {Function} props.onSuggestionDismissed Callback when a suggestion is dismissed
  */
 const AIResourcesDisplay = ({ 
   resources, 
   onAddResource, 
   onShowAddForm, 
-  onClose, 
+  onClose,
+  onDismiss, 
   pageSlug, 
-  existingResources = [] 
+  existingResources = [],
+  onSuggestionAdded,
+  onSuggestionDismissed
 }) => {
   // Track which resources are being added (for UI feedback)
   const [addingResources, setAddingResources] = useState({});
@@ -76,21 +82,44 @@ const AIResourcesDisplay = ({
     fetchExistingResources();
   }, [pageSlug, existingResources]);
 
-  // Handle adding a resource - now shows the form instead of directly adding
+  // Handle adding a resource using different approaches based on if it's persistent
   const handleAddResource = async (resource) => {
     // If already added, don't do anything
     if (addedResources[resource.url]) {
       return;
     }
     
-    // Call the callback to show the add form with pre-filled data
-    if (onShowAddForm) {
-      onShowAddForm({
-        url: resource.url,
-        title: resource.title,
-        resourceType: resource.resourceType || 'website',
-        description: resource.description || ''
-      });
+    // For persistent suggestions, use the dedicated API
+    if (resource.isPersistent && resource.id) {
+      try {
+        setAddingResources(prev => ({ ...prev, [resource.url]: true }));
+        
+        // Call the API to add the suggestion directly to resources
+        const result = await addSuggestionToResources(resource.id);
+        
+        // Mark as added
+        setAddedResources(prev => ({ ...prev, [resource.url]: true }));
+        
+        // Notify parent component
+        if (onSuggestionAdded) {
+          onSuggestionAdded(resource, result);
+        }
+        
+      } catch (error) {
+        console.error('Failed to add suggestion to resources:', error);
+      } finally {
+        setAddingResources(prev => ({ ...prev, [resource.url]: false }));
+      }
+    } else {
+      // For temporary suggestions, show the form
+      if (onShowAddForm) {
+        onShowAddForm({
+          url: resource.url,
+          title: resource.title,
+          resourceType: resource.resourceType || 'website',
+          description: resource.description || ''
+        });
+      }
     }
   };
 
@@ -174,6 +203,8 @@ AIResourcesDisplay.propTypes = {
       url: PropTypes.string.isRequired,
       description: PropTypes.string,
       resourceType: PropTypes.string,
+      isPersistent: PropTypes.bool,
+      id: PropTypes.string, // Required for persistent suggestions
     })
   ).isRequired,
   onAddResource: PropTypes.func.isRequired,
@@ -181,6 +212,8 @@ AIResourcesDisplay.propTypes = {
   onClose: PropTypes.func.isRequired,
   pageSlug: PropTypes.string.isRequired,
   existingResources: PropTypes.array,
+  onSuggestionAdded: PropTypes.func,
+  onSuggestionDismissed: PropTypes.func,
 };
 
 export default AIResourcesDisplay;

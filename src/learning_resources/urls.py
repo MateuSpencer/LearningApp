@@ -5,6 +5,7 @@ from .views import (
     ResourceURLViewSet,
     ResourcePageAssociationViewSet,
 )
+from .views_ai_suggestions import AISuggestedResourceViewSet
 
 # Create a router for our viewsets
 router = DefaultRouter()
@@ -16,6 +17,9 @@ router.register(
     r"resource-associations",
     ResourcePageAssociationViewSet,
     basename="resource-association",
+)
+router.register(
+    r"ai-suggestions", AISuggestedResourceViewSet, basename="ai-suggestions"
 )
 
 urlpatterns = [

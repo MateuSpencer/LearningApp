@@ -7,6 +7,8 @@ from .models import (
     DifficultyVote,
     AppropriatenessVote,
 )
+from .models_ai_suggestions import AISuggestedResource
+from .serializers_ai_suggestions import AISuggestedResourceSerializer
 
 
 class ResourceURLSerializer(serializers.ModelSerializer):
