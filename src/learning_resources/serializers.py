@@ -42,6 +42,7 @@ class LearningResourceSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "resource_type",
+            "language",
             "created_at",
             "updated_at",
             "quality_vote_count",

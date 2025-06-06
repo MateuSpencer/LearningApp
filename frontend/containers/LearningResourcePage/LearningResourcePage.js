@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from '../../hooks/useTranslation';
 import learningResources from '../../api/learningResources';
 import LearningResourceSummary from '../../components/LearningResourceSummary/LearningResourceSummary';
+import LanguageBadge from '../../components/LanguageBadge/LanguageBadge';
 import s from './LearningResourcePage.module.css';
 
 // Helper function to check if URL is from YouTube
@@ -260,6 +261,11 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
       
       <div className={s.headerSection}>
         <div className={s.typeLabel}>{resource.resource_type}</div>
+        {resource.language && (
+          <div className={s.languageInfo}>
+            <LanguageBadge language={resource.language} size="medium" />
+          </div>
+        )}
       </div>
       
       {/* Associated Pages section above the video - styled like resource index page */}

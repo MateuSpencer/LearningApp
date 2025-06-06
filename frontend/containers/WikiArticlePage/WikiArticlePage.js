@@ -180,7 +180,7 @@ const WikiArticlePage = ({ title, articleSlug }) => {
                 pageSlug={articleSlug}
                 onNewPost={() => setShowNewPostForm(true)}
                 key={`posts-list-${refreshPosts}`}
-                allowedFilters={['timeframe', 'search']}
+                allowedFilters={['status', 'author', 'timeframe', 'search', 'language']}
               />
             </div>
           </>

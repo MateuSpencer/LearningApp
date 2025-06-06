@@ -378,13 +378,9 @@
 /* Filter and sort panels */
 .filterPanel, 
 .sortPanel {
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
   animation: slideDown 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Link from 'next/link';
 import s from './Post.module.css';
 import { formatPageSlug } from '../../utils/stringUtils'; // Import from new utility file
+import LanguageBadge from '../LanguageBadge/LanguageBadge';
 
 const Post = ({ 
   id, 
@@ -19,6 +20,7 @@ const Post = ({
   appropriateness_downvotes,
   appropriateness_score,
   user_vote,
+  language,
   onEdit, 
   onDelete,
   onUpvote,
@@ -128,6 +130,8 @@ const Post = ({
                         <span className={s.author}>By: {author}</span>
                         <span className={s.date}>{new Date(createdAt).toLocaleDateString()}</span>
                         
+                        {language && <LanguageBadge language={language} size="small" />}
+                        
                         {page_associations && page_associations.length > 0 && (
                             <span className={s.topic}>
                                 {page_associations.length === 1 ? 'Page: ' : 'Pages: '}
@@ -191,6 +195,7 @@ Post.propTypes = {
     appropriateness_downvotes: PropTypes.number,
     appropriateness_score: PropTypes.number,
     user_vote: PropTypes.string,
+    language: PropTypes.string,
     onEdit: PropTypes.func,
     onDelete: PropTypes.func,
     onUpvote: PropTypes.func,

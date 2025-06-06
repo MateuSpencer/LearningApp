@@ -92,6 +92,9 @@ class PostFilter(FilterSet):
     # Status filter
     status = CharFilter(field_name="status")
 
+    # Language filter
+    language = CharFilter(field_name="language")
+
     class Meta:
         model = Post
         fields = [
@@ -99,6 +102,7 @@ class PostFilter(FilterSet):
             "author_id",
             "page_slug",
             "status",
+            "language",
             "created_after",
             "created_before",
             "updated_after",
@@ -189,6 +193,7 @@ class PostViewSet(viewsets.ModelViewSet):
     - author_id: Filter by author UUID (e.g., ?author_id=123e4567-e89b-12d3-a456-426614174000)
     - page_slug: Filter by page slug (e.g., ?page_slug=my-page)
     - status: Filter by status (e.g., ?status=published)
+    - language: Filter by language code (e.g., ?language=en, ?language=es)
     - created_after: Filter by creation date greater than (e.g., ?created_after=2023-01-01T00:00:00Z)
     - created_before: Filter by creation date less than (e.g., ?created_before=2023-12-31T23:59:59Z)
     - updated_after: Filter by update date greater than (e.g., ?updated_after=2023-01-01T00:00:00Z)

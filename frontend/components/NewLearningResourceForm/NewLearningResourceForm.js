@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import learningResources from '../../api/learningResources';
 import { normalizeUrl, validateUrl } from '../../utils/urlUtils';
 import urlValidationService from '../../services/urlValidationService';
+import ContentLanguageSelector from '../ContentLanguageSelector';
 import s from './NewLearningResourceForm.module.css';
 
 const NewLearningResourceForm = ({ 
@@ -20,6 +21,7 @@ const NewLearningResourceForm = ({
   const [url, setUrl] = useState(initialUrl);
   const [title, setTitle] = useState(initialTitle);
   const [resourceType, setResourceType] = useState(initialResourceType);
+  const [language, setLanguage] = useState('en');
   
   // Status states
   const [submitting, setSubmitting] = useState(false);
@@ -211,7 +213,8 @@ const NewLearningResourceForm = ({
         url: finalUrl,
         title,
         pageSlug,
-        resourceType
+        resourceType,
+        language
       });
       
       // Check if the operation was successful
@@ -233,6 +236,7 @@ const NewLearningResourceForm = ({
       setUrl('');
       setTitle('');
       setResourceType('website');
+      setLanguage('en');
       setUrlSuccess(false);
       
       // Call success callback
@@ -376,12 +380,26 @@ const NewLearningResourceForm = ({
             <option value="article">Article</option>
             <option value="book">Book</option>
             <option value="course">Course</option>
+            <option value="documentation">Documentation</option>
+            <option value="tutorial">Tutorial</option>
             <option value="image">Image</option>
             <option value="tool">Tool</option>
           </select>
           {resourceTypeLocked && (
             <small className={s.hint}>Resource type is fixed for this URL. Edit URL and validate again to change.</small>
           )}
+        </div>
+        
+        <div className={s.formGroup}>
+          <label htmlFor="language" className={s.label}>Language</label>
+          <ContentLanguageSelector
+            id="language"
+            name="language"
+            value={language}
+            onChange={setLanguage}
+            disabled={submitting || validating}
+            required
+          />
         </div>
         
         <div className={s.buttonGroup}>

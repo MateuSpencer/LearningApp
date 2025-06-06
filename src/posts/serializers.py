@@ -34,6 +34,7 @@ class PostSerializer(serializers.ModelSerializer):
             "created_date",
             "updated_date",
             "status",
+            "language",
             "metadata",
             "page_associations",
             "page_slugs",

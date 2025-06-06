@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from '../../hooks/useTranslation';
 import learningResources from '../../api/learningResources';
+import LanguageBadge from '../LanguageBadge/LanguageBadge';
 import s from './LearningResourceItem.module.css';
 
 const LearningResourceItem = ({ 
@@ -33,7 +34,8 @@ const LearningResourceItem = ({
     quality_vote_sum = 0,
     quality_vote_count = 0,
     dominant_difficulty_level,
-    average_quality_rating
+    average_quality_rating,
+    language
   } = resource || {};
   
   const { id: associationId, appropriateness_upvotes, appropriateness_downvotes, user_vote, page_slug } = association || {};
@@ -294,6 +296,12 @@ const LearningResourceItem = ({
                 {formatDifficultyLevel(dominant_difficulty_level)}
               </span>
             </div>
+            
+            {language && (
+              <div className={s.metaItem}>
+                <LanguageBadge language={language} size="small" />
+              </div>
+            )}
           </div>
           
           {/* Display associated pages if showing all resources */}

@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import ContentLanguageSelector from '../ContentLanguageSelector';
 import styles from './PostsFilter.module.css';
 
 /**
  * Filter component for PostsList
- * Provides UI for filtering posts based on status
+ * Provides UI for filtering posts based on status, language, etc.
  */
 const PostsFilter = ({ 
   filters, 
@@ -70,6 +73,20 @@ const PostsFilter = ({
         </div>
       )}
 
+      {allowedFilters.includes('language') && (
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Language:</label>
+          <ContentLanguageSelector
+            value={filters.language || ''}
+            onChange={(value) => handleFilterChange('language', value)}
+            disabled={disabled}
+            showAllOption={true}
+            allOptionLabel="All Languages"
+            className={styles.filterSelect}
+          />
+        </div>
+      )}
+
       {allowedFilters.includes('search') && (
         <div className={styles.filterGroup}>
           <input
@@ -80,6 +97,52 @@ const PostsFilter = ({
             onChange={handleSearchChange}
             disabled={disabled}
           />
+        </div>
+      )}
+
+      {allowedFilters.includes('author') && (
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Author:</label>
+          <input
+            type="text"
+            className={styles.filterInput}
+            placeholder="Enter author username..."
+            value={filters.author || ''}
+            onChange={(e) => handleFilterChange('author', e.target.value)}
+            disabled={disabled}
+          />
+        </div>
+      )}
+
+      {allowedFilters.includes('timeframe') && (
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Date Range:</label>
+          <div className={styles.dateRangeContainer}>
+            <div className={styles.dateInputWrapper}>
+              <label className={styles.dateLabel}>From:</label>
+              <DatePicker
+                selected={filters.created_after ? new Date(filters.created_after) : null}
+                onChange={(date) => handleFilterChange('created_after_date', date)}
+                className={styles.dateInput}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Select start date"
+                disabled={disabled}
+                isClearable
+              />
+            </div>
+            <div className={styles.dateInputWrapper}>
+              <label className={styles.dateLabel}>To:</label>
+              <DatePicker
+                selected={filters.created_before ? new Date(filters.created_before) : null}
+                onChange={(date) => handleFilterChange('created_before_date', date)}
+                className={styles.dateInput}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Select end date"
+                disabled={disabled}
+                isClearable
+              />
+            </div>
+          </div>
         </div>
       )}
       

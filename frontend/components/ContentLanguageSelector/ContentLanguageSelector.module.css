@@ -1,0 +1,27 @@
+.languageSelect {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+             background-color var(--theme-transition-speed) var(--theme-transition-timing),
+             color var(--theme-transition-speed) var(--theme-transition-timing);
+  cursor: pointer;
+  min-width: 120px;
+}
+
+.languageSelect:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+}
+
+.languageSelect:disabled {
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}

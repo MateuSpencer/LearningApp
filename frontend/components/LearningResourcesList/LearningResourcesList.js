@@ -29,7 +29,7 @@ const LearningResourcesList = ({
   showAll = false,
   onAddResource,
   showAddButton = true,
-  allowedFilters = ['type', 'difficulty', 'search'],
+  allowedFilters = ['type', 'difficulty', 'search', 'language'],
   allowedSortFields = ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   fixedFilters = {}
 }) => {
@@ -741,7 +741,8 @@ const LearningResourcesList = ({
               quality_vote_sum: item.quality_vote_sum,
               quality_vote_count: item.quality_vote_count,
               average_quality_rating: item.average_quality_rating,
-              dominant_difficulty_level: item.dominant_difficulty_level
+              dominant_difficulty_level: item.dominant_difficulty_level,
+              language: item.language
             };
             
             // All other properties belong to the association
@@ -797,7 +798,7 @@ LearningResourcesList.defaultProps = {
   showAll: false,
   onAddResource: null,
   showAddButton: true,
-  allowedFilters: ['type', 'difficulty', 'search'],
+  allowedFilters: ['type', 'difficulty', 'search', 'language'],
   allowedSortFields: ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   fixedFilters: {}
 };

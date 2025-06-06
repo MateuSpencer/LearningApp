@@ -141,10 +141,16 @@ const AIResourcesDisplay = ({
   const getResourceTypeIcon = (type) => {
     switch (type) {
       case 'video': return '🎬';
+      case 'youtube': return '📺';
       case 'article': return '📝';
       case 'website': return '🌐';
       case 'pdf': return '📄';
       case 'image': return '🖼️';
+      case 'book': return '📚';
+      case 'course': return '🎓';
+      case 'documentation': return '📋';
+      case 'tutorial': return '🧑‍🏫';
+      case 'tool': return '🔧';
       default: return '📚';
     }
   };

@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import posts from '../../api/posts';
 import { formatPageSlug } from '../../utils/stringUtils';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
+import LanguageBadge from '../../components/LanguageBadge/LanguageBadge';
 import s from './PostPage.module.css';
 
 const PostPage = ({ postId, initialPostData }) => {
@@ -270,6 +271,12 @@ const PostPage = ({ postId, initialPostData }) => {
               <span className={s.postedDate}>Posted: {new Date(post.created_at).toLocaleDateString()}</span>
               {post.updated_at !== post.created_at && (
                 <span className={s.updatedDate}>Updated: {new Date(post.updated_at).toLocaleDateString()}</span>
+              )}
+              {post.language && (
+                <div className={s.languageInfo}>
+                  <span className={s.languageLabel}>Language: </span>
+                  <LanguageBadge language={post.language} size="medium" />
+                </div>
               )}
               {pageAssociations && pageAssociations.length > 0 && (
                 <span className={s.associatedPages}>

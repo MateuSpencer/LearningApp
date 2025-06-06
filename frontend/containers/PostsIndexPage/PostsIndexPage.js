@@ -25,7 +25,7 @@ const PostsIndexPage = ({ title, description }) => {
                 <PostsList 
                     showOnlyMyPosts={false}
                     onNewPost={isAuthenticated ? handleNewPost : null}
-                    allowedFilters={['status', 'timeframe', 'search', 'author']}
+                    allowedFilters={['status', 'timeframe', 'search', 'author', 'language']}
                     allowedSortFields={['votes_score', 'created_at', 'updated_at', 'title', 'status']}
                 />
             </div>

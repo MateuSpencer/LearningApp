@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import { httpPut } from '../../utils/Http';
+import ContentLanguageSelector from '../ContentLanguageSelector';
 import s from './EditPostForm.module.css';
 
 const EditPostForm = ({ post, onSave, onCancel }) => {
@@ -11,6 +12,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
   const [title, setTitle] = useState(post?.title || '');
   const [content, setContent] = useState(post?.content || '');
   const [status, setStatus] = useState(post?.status || 'published');
+  const [language, setLanguage] = useState(post?.language || 'en');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
@@ -53,6 +55,7 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
           title,
           content,
           status,
+          language,
           page_slug: post.page_slug // Explicitly include the page_slug
         }
       );
@@ -115,6 +118,18 @@ const EditPostForm = ({ post, onSave, onCancel }) => {
         </div>
         
         <div className={s.formGroup}>
+          <label htmlFor="language" className={s.label}>Language</label>
+          <ContentLanguageSelector
+            id="language"
+            name="language"
+            value={language}
+            onChange={setLanguage}
+            disabled={submitting || !isAuthenticated}
+            required
+          />
+        </div>
+        
+        <div className={s.formGroup}>
           <label htmlFor="status" className={s.label}>Status</label>
           <select
             id="status"
@@ -157,6 +172,7 @@ EditPostForm.propTypes = {
     title: PropTypes.string,
     content: PropTypes.string,
     status: PropTypes.string,
+    language: PropTypes.string,
     page_slug: PropTypes.string
   }),
   onSave: PropTypes.func,
@@ -164,7 +180,7 @@ EditPostForm.propTypes = {
 };
 
 EditPostForm.defaultProps = {
-  post: { content: '', status: 'published' },
+  post: { content: '', status: 'published', language: 'en' },
   onSave: () => {},
   onCancel: () => {},
 };

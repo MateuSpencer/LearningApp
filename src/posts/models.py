@@ -16,6 +16,19 @@ class Post(TimestampMixin, models.Model):
         ("archived", "Archived"),
     )
 
+    LANGUAGE_CHOICES = (
+        ("en", "English"),
+        ("es", "Spanish"),
+        ("fr", "French"),
+        ("de", "German"),
+        ("pt", "Portuguese"),
+        ("it", "Italian"),
+        ("ru", "Russian"),
+        ("zh", "Chinese"),
+        ("ja", "Japanese"),
+        ("ko", "Korean"),
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255, verbose_name="Title")
     content = models.TextField(verbose_name="Content")
@@ -24,6 +37,14 @@ class Post(TimestampMixin, models.Model):
     )
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default="draft", db_index=True
+    )
+    language = models.CharField(
+        max_length=2,
+        choices=LANGUAGE_CHOICES,
+        default="en",
+        db_index=True,
+        verbose_name="Language",
+        help_text="The language in which this post is written",
     )
     metadata = models.JSONField(default=dict, blank=True)
 
@@ -35,6 +56,7 @@ class Post(TimestampMixin, models.Model):
             models.Index(fields=["-created_at"]),
             models.Index(fields=["status", "-created_at"]),
             models.Index(fields=["author", "-created_at"]),
+            models.Index(fields=["language", "-created_at"]),
         ]
 
     def __str__(self):

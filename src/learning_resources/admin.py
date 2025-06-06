@@ -14,12 +14,13 @@ class LearningResourceAdmin(admin.ModelAdmin):
     list_display = (
         "title",
         "resource_type",
+        "language",
         "created_at",
         "quality_vote_count",
         "average_quality_rating_display",
     )
-    list_filter = ("resource_type", "created_at")
-    search_fields = ("title",)
+    list_filter = ("resource_type", "language", "created_at")
+    search_fields = ("title", "ai_summary")
     readonly_fields = (
         "quality_vote_count",
         "quality_vote_sum",

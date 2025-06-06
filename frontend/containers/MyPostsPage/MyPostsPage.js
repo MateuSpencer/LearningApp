@@ -11,7 +11,7 @@ const MyPostsPage = () => {
       <div className={s.postsListContainer}>
         <PostsList 
           showOnlyMyPosts={true}
-          allowedFilters={['status', 'timeframe', 'search']}
+          allowedFilters={['status', 'timeframe', 'search', 'language']}
           allowedSortFields={['votes_score', 'created_at', 'updated_at', 'title', 'status']}
         />
       </div>

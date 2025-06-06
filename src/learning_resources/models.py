@@ -12,19 +12,42 @@ class LearningResource(TimestampMixin, models.Model):
 
     RESOURCE_TYPE_CHOICES = (
         ("video", "Video"),
-        ("youtube", "YouTube"),  # Added for explicit YouTube categorization
+        ("youtube", "YouTube"),
         ("pdf", "PDF"),
         ("image", "Image"),
         ("website", "Website"),
         ("article", "Article"),
-        ("book", "Book"),  # Added for completeness
-        ("course", "Course"),  # Added for completeness
-        ("tool", "Tool"),  # Added for completeness
+        ("book", "Book"),
+        ("course", "Course"),
+        ("documentation", "Documentation"),
+        ("tutorial", "Tutorial"),
+        ("tool", "Tool"),
+    )
+
+    LANGUAGE_CHOICES = (
+        ("en", "English"),
+        ("es", "Spanish"),
+        ("fr", "French"),
+        ("de", "German"),
+        ("pt", "Portuguese"),
+        ("it", "Italian"),
+        ("ru", "Russian"),
+        ("zh", "Chinese"),
+        ("ja", "Japanese"),
+        ("ko", "Korean"),
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
     resource_type = models.CharField(max_length=20, choices=RESOURCE_TYPE_CHOICES)
+    language = models.CharField(
+        max_length=2,
+        choices=LANGUAGE_CHOICES,
+        default="en",
+        db_index=True,
+        verbose_name="Language",
+        help_text="The language of this learning resource",
+    )
 
     # Fields for aggregating votes
     quality_vote_count = models.IntegerField(default=0)
@@ -52,6 +75,7 @@ class LearningResource(TimestampMixin, models.Model):
             models.Index(fields=["-created_at"]),
             # Index for quality rating sorting
             models.Index(fields=["-quality_vote_sum", "-quality_vote_count"]),
+            models.Index(fields=["language", "-created_at"]),
         ]
 
     def __str__(self):

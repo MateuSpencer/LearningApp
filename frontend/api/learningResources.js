@@ -59,7 +59,7 @@ export const learningResources = {
     },
     
     // New method: Create a resource from URL
-    createFromUrl: async ({ url, title, pageSlug, resourceType = 'website' }) => {
+    createFromUrl: async ({ url, title, pageSlug, resourceType = 'website', language = 'en' }) => {
         try {
             // Ensure we're using the normalized URL from backend validation
             // The validation should have already occurred before submitting
@@ -67,7 +67,8 @@ export const learningResources = {
                 url,
                 title,
                 page_slug: pageSlug,
-                resource_type: resourceType
+                resource_type: resourceType,
+                language
             };
             
             const response = await httpPost(`${RESOURCES_ENDPOINT}/`, payload);

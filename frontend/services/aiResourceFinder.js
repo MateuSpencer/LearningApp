@@ -168,7 +168,7 @@ You MUST respond with a JSON object that conforms to the following schema:
       "title": "Resource Title",
       "url": "https://resource-url.com",
       "description": "Short description of the resource",
-      "resourceType": "video|article|pdf|website|image"
+      "resourceType": "video|youtube|pdf|image|website|article|book|course|documentation|tutorial|tool"
     }},
     // Additional resources...
   ]
@@ -177,7 +177,7 @@ You MUST respond with a JSON object that conforms to the following schema:
 
 The response must be a valid JSON object with a "resources" array. 
 Each resource must have all four fields: title, url, description, and resourceType.
-The resourceType must be one of: "video", "article", "pdf", "website", or "image".
+The resourceType must be one of: "video", "youtube", "pdf", "image", "website", "article", "book", "course", "documentation", "tutorial", or "tool".
 DO NOT include any explanation or text outside of the JSON structure.
 `;
 
@@ -242,7 +242,7 @@ IMPORTANT: You MUST respond with ONLY a valid JSON object in the exact format:
   ]
 }}
 
-The resourceType must be one of: "video", "article", "pdf", "website", or "image".
+The resourceType must be one of: "video", "youtube", "pdf", "image", "website", "article", "book", "course", "documentation", "tutorial", or "tool".
 DO NOT include ANY explanatory text, markdown formatting, or code blocks outside the JSON.`],
               ["human", `Find the top 5 learning resources for ${topic}. Respond ONLY with the JSON structure.`]
             ]);
@@ -353,7 +353,7 @@ export const findResourcesWithFunctionCalling = async (topic, apiConfig) => {
                 },
                 resourceType: {
                   type: "string",
-                  enum: ["video", "article", "pdf", "website", "image"],
+                  enum: ["video", "youtube", "pdf", "image", "website", "article", "book", "course", "documentation", "tutorial", "tool"],
                   description: "Type of resource"
                 }
               },
@@ -433,8 +433,9 @@ export const findLearningResourcesWithTavily = async (topic, apiConfig) => {
       let resourceType = "website"; // Default type
 
       // Determine resource type based on URL or content
-      if (result.url.includes("youtube.com") || result.url.includes("youtu.be") || 
-          result.url.includes("vimeo.com") || result.url.includes("dailymotion.com")) {
+      if (result.url.includes("youtube.com") || result.url.includes("youtu.be")) {
+        resourceType = "youtube";
+      } else if (result.url.includes("vimeo.com") || result.url.includes("dailymotion.com")) {
         resourceType = "video";
       } else if (result.url.endsWith(".pdf")) {
         resourceType = "pdf";
@@ -446,6 +447,15 @@ export const findLearningResourcesWithTavily = async (topic, apiConfig) => {
                 result.url.includes("tutorial") ||
                 result.content.length > 100) {
         resourceType = "article";
+      } else if (result.url.includes("course") || result.url.includes("udemy") ||
+                result.url.includes("coursera") || result.url.includes("edx")) {
+        resourceType = "course";
+      } else if (result.url.includes("docs") || result.url.includes("documentation")) {
+        resourceType = "documentation";
+      } else if (result.url.includes("book") || result.url.includes("ebook")) {
+        resourceType = "book";
+      } else if (result.url.includes("tool") || result.url.includes("software")) {
+        resourceType = "tool";
       }
 
       return {

@@ -24,7 +24,7 @@ const PostsList = ({
   pageSlug, 
   onNewPost, 
   showOnlyMyPosts = false,
-  allowedFilters = ['status', 'search'],
+  allowedFilters = ['status', 'search', 'language'],
   fixedFilters = {}
 }) => {
   const router = useRouter();
@@ -549,6 +549,7 @@ const PostsList = ({
               page_slug={post.page_slug}
               status={post.status}
               page_associations={post.page_associations}
+              language={post.language}
               // Appropriateness vote props - only pass if we have a valid association
               appropriateness_upvotes={association?.appropriateness_upvotes}
               appropriateness_downvotes={association?.appropriateness_downvotes}
@@ -589,7 +590,7 @@ PostsList.defaultProps = {
   pageSlug: '',
   onNewPost: null,
   showOnlyMyPosts: false,
-  allowedFilters: ['status', 'search'],
+  allowedFilters: ['status', 'search', 'language'],
   fixedFilters: {}
 };
 

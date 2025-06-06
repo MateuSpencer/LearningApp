@@ -22,13 +22,16 @@ class AISuggestedResource(TimestampMixin, models.Model):
         max_length=20,
         choices=(
             ("video", "Video"),
-            ("article", "Article"),
+            ("youtube", "YouTube"),
+            ("pdf", "PDF"),
+            ("image", "Image"),
             ("website", "Website"),
+            ("article", "Article"),
             ("book", "Book"),
             ("course", "Course"),
             ("documentation", "Documentation"),
             ("tutorial", "Tutorial"),
-            ("github", "GitHub Repository"),
+            ("tool", "Tool"),
         ),
         default="website",
     )

@@ -83,10 +83,14 @@ class ResourceFilter(FilterSet):
     # Add filter for page associations
     page_slug = CharFilter(method="filter_by_page_slug")
 
+    # Add filter for language
+    language = CharFilter(field_name="language")
+
     class Meta:
         model = LearningResource
         fields = {
             "resource_type": ["exact"],
+            "language": ["exact"],
             "created_at": ["gt", "lt"],
             "updated_at": ["gt", "lt"],
         }
@@ -189,6 +193,7 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
     - resource_type: Filter by specific resource type (e.g., ?resource_type=video)
     - resource_category: Filter by grouped category (e.g., ?resource_category=document)
     - difficulty: Filter by difficulty level (e.g., ?difficulty=beginner)
+    - language: Filter by language code (e.g., ?language=en, ?language=es)
     - created_at: Filter by creation date (e.g., ?created_at__gt=2023-01-01T00:00:00Z)
     - updated_at: Filter by update date (e.g., ?updated_at__lt=2023-12-31T23:59:59Z)
 
@@ -274,6 +279,7 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
         resource_type = request.data.get(
             "resource_type", "website"
         )  # Default to website
+        language = request.data.get("language", "en")  # Default to English
 
         if not url:
             return Response(
@@ -337,7 +343,7 @@ class LearningResourceViewSet(viewsets.ModelViewSet):
 
         # Create resource and URL in a transaction
         serializer = self.get_serializer(
-            data={"title": title, "resource_type": resource_type}
+            data={"title": title, "resource_type": resource_type, "language": language}
         )
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

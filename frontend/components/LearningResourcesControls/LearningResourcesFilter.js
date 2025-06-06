@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import ContentLanguageSelector from '../ContentLanguageSelector';
 import styles from './LearningResourcesFilter.module.css';
 
 /**
  * Filter component for LearningResourcesList
- * Provides UI for filtering learning resources based on type, date range, or other criteria
+ * Provides UI for filtering learning resources based on type, difficulty, language, date range, or other criteria
  */
 const LearningResourcesFilter = ({ 
   filters, 
@@ -64,16 +65,18 @@ const LearningResourcesFilter = ({
             onChange={(e) => handleFilterChange('type', e.target.value)}
             disabled={disabled}
           >
-            <option value="all">All Types</option>
-            <option value="youtube">YouTube</option>
-            <option value="video">Video</option>
-            <option value="pdf">PDF</option>
-            <option value="image">Image</option>
-            <option value="website">Website</option>
-            <option value="article">Article</option>
-            <option value="book">Book</option>
-            <option value="course">Course</option>
-            <option value="tool">Tool</option>
+      <option value="all">All Types</option>
+      <option value="youtube">YouTube</option>
+      <option value="video">Video</option>
+      <option value="pdf">PDF</option>
+      <option value="image">Image</option>
+      <option value="website">Website</option>
+      <option value="article">Article</option>
+      <option value="book">Book</option>
+      <option value="course">Course</option>
+      <option value="documentation">Documentation</option>
+      <option value="tutorial">Tutorial</option>
+      <option value="tool">Tool</option>
           </select>
         </div>
       )}
@@ -92,6 +95,20 @@ const LearningResourcesFilter = ({
             <option value="moderate">Moderate</option>
             <option value="advanced">Advanced</option>
           </select>
+        </div>
+      )}
+
+      {allowedFilters.includes('language') && (
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Language:</label>
+          <ContentLanguageSelector
+            value={filters.language || ''}
+            onChange={(value) => handleFilterChange('language', value)}
+            disabled={disabled}
+            showAllOption={true}
+            allOptionLabel="All Languages"
+            className={styles.filterSelect}
+          />
         </div>
       )}
 

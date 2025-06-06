@@ -3,12 +3,14 @@ import PropTypes from 'prop-types';
 import { httpPost } from '../../utils/Http';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
+import ContentLanguageSelector from '../ContentLanguageSelector';
 import s from './NewPostForm.module.css';
 
 const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('published');
+  const [language, setLanguage] = useState('en');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [actualPageSlug, setActualPageSlug] = useState(pageSlug);
@@ -78,6 +80,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
           title,
           content,
           status,
+          language,
           page_slug: actualPageSlug
         }
       );
@@ -85,6 +88,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       setTitle('');
       setContent('');
       setStatus('published');
+      setLanguage('en');
       onSubmit(newPost);
       
     } catch (err) {
@@ -152,6 +156,18 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             rows={5}
             required
             placeholder="Share your knowledge, ideas, or questions..."
+          />
+        </div>
+        
+        <div className={s.formGroup}>
+          <label htmlFor="language" className={s.label}>Language</label>
+          <ContentLanguageSelector
+            id="language"
+            name="language"
+            value={language}
+            onChange={setLanguage}
+            disabled={submitting || !isAuthenticated}
+            required
           />
         </div>
         
