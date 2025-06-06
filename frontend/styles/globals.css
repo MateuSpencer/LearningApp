@@ -25,24 +25,67 @@ body {
     overflow-x: hidden; /* Prevent horizontal scrolling */
     position: relative; /* For potential absolute positioned elements */
     
-    /* Modern Animated Gradient Background - Less aggressive with reduced blue dominance */
+    /* Ensure background extends beyond scroll limits */
+    overscroll-behavior: none; /* Prevents bounce effects that might show white space */
+    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Create background layers that can transition smoothly */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    /* Light theme gradient */
     background: radial-gradient(
         ellipse at bottom,
-        var(--gradient-start) 0%,
-        var(--gradient-middle) 20%,
-        var(--gradient-end) 60%,
-        var(--gradient-edge) 100%
+        #F58A28 0%,
+        #80E5E5 20%,
+        #F0FFFF 60%,
+        #FFFFFF 100%
     );
     background-attachment: fixed;
     background-repeat: no-repeat;
-    background-size: 300% 300%; /* Larger size for smoother gradients */
-    animation: gradientAnimation 40s ease infinite; /* Slower animation */
-    transition: color var(--theme-transition-speed) var(--theme-transition-timing), 
-                background-color var(--theme-transition-speed) var(--theme-transition-timing),
-                margin-left var(--theme-transition-speed) var(--theme-transition-timing);
-                
-    /* Ensure background extends beyond scroll limits */
-    overscroll-behavior: none; /* Prevents bounce effects that might show white space */
+    background-size: 300% 300%;
+    animation: gradientAnimation 40s ease infinite;
+    opacity: 1;
+    transition: opacity var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    /* Dark theme gradient */
+    background: radial-gradient(
+        ellipse at bottom,
+        #001515 0%,
+        #003333 20%,
+        #001515 60%,
+        #000909 100%
+    );
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: 300% 300%;
+    animation: gradientAnimation 40s ease infinite;
+    opacity: 0;
+    transition: opacity var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* When dark theme is active, fade in the dark background */
+[data-theme="dark"] body::before {
+    opacity: 0;
+}
+
+[data-theme="dark"] body::after {
+    opacity: 1;
 }
 
 a {
@@ -111,6 +154,8 @@ html {
     background: var(--gradient-end); /* Fallback background */
     overscroll-behavior: none; /* Prevents bounce/overscroll showing white space */
     background-size: 200% 200%; /* Enlarge to avoid white edges during scroll */
+    transition: background var(--theme-transition-speed) var(--theme-transition-timing),
+                background-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 body {

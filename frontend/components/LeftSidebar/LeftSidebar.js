@@ -58,7 +58,7 @@ const LeftSidebar = () => {
               <div className={s.LogoWrapper}>
                 <Logo size="medium" />
                 <div className={s.SiteNameWrapper}>
-                  <SiteName size="medium" />
+                  <SiteName size="medium" linkToHome={true} />
                 </div>
               </div>
             </div>

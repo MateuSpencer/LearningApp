@@ -44,10 +44,11 @@
 }
 
 .Header {
-    padding: 20px 15px;
+    padding: 20px 10px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: center;
+    overflow: visible; /* Allow content to overflow if needed */
 }
 
 .LogoWrapper {
@@ -55,11 +56,13 @@
     flex-direction: row;
     align-items: center;
     gap: 10px;
+    overflow: visible; /* Allow content to overflow if needed */
+    max-width: none; /* Remove width constraints */
 }
 
 .SiteNameWrapper {
-    max-width: 180px;
-    overflow: hidden;
+    max-width: 200px;
+    overflow: visible; /* Changed from hidden to visible */
     opacity: 1;
     transition: 
                 max-width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1),
@@ -67,6 +70,11 @@
                 margin-left 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
     white-space: nowrap;
     will-change: max-width, opacity, margin-left; /* Optimize transitions */
+    text-decoration: none; /* Remove link underline */
+    color: inherit; /* Inherit color from parent */
+    display: inline-block; /* Ensure proper layout */
+    /* Add padding to prevent text cutoff */
+    padding-right: 5px;
   }
   
 .Collapsed .SiteNameWrapper {

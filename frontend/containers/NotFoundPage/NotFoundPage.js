@@ -18,9 +18,6 @@ const NotFoundPage = ({ exception }) => {
                     <Link href="/" className={s.PrimaryButton}>
                         ← Back to Homepage
                     </Link>
-                    <Link href="/wiki" className={s.SecondaryButton}>
-                        Browse Wiki
-                    </Link>
                 </div>
             </div>
         </div>
