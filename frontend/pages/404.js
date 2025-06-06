@@ -1,33 +1,60 @@
 import { useState, useEffect } from 'react';
-import { getViewData, getPublicViewData } from '../api/wagtail';
+import { getPublicViewData } from '../api/wagtail';
 import LazyContainers from '../containers/LazyContainers';
+import { basePageWrap } from '../containers/BasePage';
+import NotFoundPage from '../containers/NotFoundPage';
 
-export default function DynamicNotFoundPage() {
+function DynamicNotFoundPage() {
     // 404 does not support getServerSideProps, must fetch client side data
     // https://github.com/vercel/next.js/blob/master/errors/404-get-initial-props.md
     const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    
     useEffect(() => {
         async function fetchData() {
-            const { json: pageData } = await getPublicViewData('404');
-            setData(pageData);
+            try {
+                const { json: pageData } = await getPublicViewData('404');
+                setData(pageData);
+            } catch (error) {
+                console.error('Failed to load 404 page data:', error);
+                // If we can't load the dynamic data, we'll show the fallback UI
+                setData(null);
+            } finally {
+                setLoading(false);
+            }
         }
         fetchData();
     }, []);
 
-    if (!data) {
-        return null;
+    // Show loading state briefly
+    if (loading) {
+        return (
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                minHeight: '50vh',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+            }}>
+                <div>Loading...</div>
+            </div>
+        );
     }
 
-    return <NotFoundPage {...data} />;
+    // If we have dynamic data, use it
+    if (data) {
+        const Component = LazyContainers[data.componentName];
+        if (Component) {
+            return <Component {...data.componentProps} />;
+        }
+    }
+
+    // Fallback to our NotFoundPage component
+    return <NotFoundPage />;
 }
 
-function NotFoundPage({ componentName, componentProps }) {
-    const Component = LazyContainers[componentName];
-    if (!Component) {
-        return <h1>Component {componentName} not found</h1>;
-    }
-    return <Component {...componentProps} />;
-}
+// Wrap the component with basePageWrap to inherit the base page structure
+export default basePageWrap(DynamicNotFoundPage);
 
 /*
 // For static routing

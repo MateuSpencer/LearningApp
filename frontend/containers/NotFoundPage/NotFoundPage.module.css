@@ -1,2 +1,171 @@
 .Container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 2rem;
+}
+
+.Content {
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+.ErrorCode {
+    font-size: 6rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+.Title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.Description {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2.5rem;
+}
+
+.Actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.PrimaryButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all var(--theme-transition-speed) var(--theme-transition-timing);
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(var(--color-primary-rgb), 0.25);
+}
+
+.PrimaryButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(var(--color-primary-rgb), 0.35);
+}
+
+.PrimaryButton:active {
+    transform: translateY(0);
+}
+
+.SecondaryButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all var(--theme-transition-speed) var(--theme-transition-timing);
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+
+.SecondaryButton:hover {
+    background: var(--bg-accent);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.SecondaryButton:active {
+    transform: translateY(0);
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+    .Container {
+        padding: 1rem;
+        min-height: 50vh;
+    }
+    
+    .ErrorCode {
+        font-size: 4rem;
+    }
+    
+    .Title {
+        font-size: 1.5rem;
+    }
+    
+    .Description {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .Actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .PrimaryButton,
+    .SecondaryButton {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .ErrorCode {
+        background: none;
+        -webkit-text-fill-color: initial;
+        color: var(--text-primary);
+    }
+    
+    .PrimaryButton {
+        background: var(--text-primary);
+        color: var(--bg-primary);
+    }
+    
+    .SecondaryButton {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .PrimaryButton,
+    .SecondaryButton {
+        transition: none;
+    }
+    
+    .PrimaryButton:hover,
+    .SecondaryButton:hover {
+        transform: none;
+    }
+}
+
+/* Focus states for accessibility */
+.PrimaryButton:focus,
+.SecondaryButton:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
 }

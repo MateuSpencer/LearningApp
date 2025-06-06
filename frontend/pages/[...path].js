@@ -144,17 +144,12 @@ export async function getServerSideProps({ req, params, res }) {
         if (err instanceof WagtailApiResponseError) {
             if (err.response.status === 404) {
                 // Hard 404 from API (our backend)
-                // Define paths that should be treated as Wiki article paths
-                const isLikelyWikiArticlePath =
-                    (path.startsWith('wiki/') && path !== 'wiki/index') ||
-                    // Don't treat certain paths as wiki paths
-                    (!['community-posts', 'learning-resources', 'my-posts'].includes(path) &&
-                     !path.includes('/') && path !== '' && !path.startsWith('accounts/')) || // check for top-level paths
-                    (path.length <= 5 && !path.includes('/') && path !== '' &&
-                     !['community-posts', 'learning-resources', 'my-posts'].includes(path)); // Short paths like 'cla' are likely attempts at wiki paths
+                // Only treat paths that explicitly start with 'wiki/' as wiki article paths
+                // Let all other unknown paths fall through to the 404 page
+                const isWikiArticlePath = path.startsWith('wiki/') && path !== 'wiki/index';
 
-                if (isLikelyWikiArticlePath) {
-                    const attemptedTitle = (path.startsWith('wiki/') ? path.substring(5) : path).replace(/_/g, ' ');
+                if (isWikiArticlePath) {
+                    const attemptedTitle = path.substring(5).replace(/_/g, ' '); // Remove 'wiki/' prefix
                     
                     try {
                         // Double-check with Wikipedia API if this page exists

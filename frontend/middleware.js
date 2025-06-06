@@ -17,7 +17,8 @@ export function middleware(request) {
         return NextResponse.rewrite(new URL(pathname, origin));
     }
     
-    // Handle Wiki article paths directly - ensure proper handling
+    // Only handle paths that explicitly start with /wiki/ (but not just /wiki)
+    // All other unknown paths will fall through to Next.js 404 handler
     if (pathname.startsWith('/wiki/') && pathname !== '/wiki/') {
         try {
             // Extract the slug from the path - preserve the exact path without encoding
@@ -93,12 +94,14 @@ export function middleware(request) {
         }
     }
     
+    // Set request headers for all requests (both wiki and non-wiki)
     const requestHeaders = new Headers(request.headers);
-
     requestHeaders.set('x-url', request.url);
     requestHeaders.set('x-origin', origin);
     requestHeaders.set('x-pathname', pathname);
 
+    // For all other paths (non-wiki), let Next.js handle them normally
+    // This allows unknown paths to fall through to the 404 page
     return NextResponse.next({
         request: {
             headers: requestHeaders,
