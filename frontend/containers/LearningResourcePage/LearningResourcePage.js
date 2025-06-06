@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { basePageWrap } from '../BasePage';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import learningResources from '../../api/learningResources';
 import LearningResourceSummary from '../../components/LearningResourceSummary/LearningResourceSummary';
 import s from './LearningResourcePage.module.css';
@@ -48,6 +49,7 @@ const getEmbedUrl = (url) => {
 const LearningResourcePage = ({ resourceId, initialResourceData }) => {
   const router = useRouter();
   const { isAuthenticated, refreshAuth } = useAuth();
+  const { t } = useTranslation();
   
   const [resource, setResource] = useState(initialResourceData || null);
   const [loading, setLoading] = useState(!initialResourceData);
@@ -349,35 +351,35 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
           <h3 className={s.sectionTitle}>Difficulty Level</h3>
           <div className={s.difficultyDisplay}>
             <div className={s.dominantLevel}>
-              Most users rated this resource as:
+              {t('learningResources.mostUsersRated')}
               <span className={`${s.levelBadge} ${getLevelBadgeClass(resource.dominant_difficulty_level)}`}>
-                {resource.dominant_difficulty_level ? resource.dominant_difficulty_level.charAt(0).toUpperCase() + resource.dominant_difficulty_level.slice(1) : 'Not Yet Rated'}
+                {resource.dominant_difficulty_level ? resource.dominant_difficulty_level.charAt(0).toUpperCase() + resource.dominant_difficulty_level.slice(1) : t('learningResources.notYetRated')}
               </span>
             </div>
           </div>
           <div className={s.voteSection}>
-            <h4 className={s.voteTitle}>Your Assessment</h4>
+            <h4 className={s.voteTitle}>{t('learningResources.yourAssessment')}</h4>
             <div className={s.difficultyButtons}>
               <button
                 className={`${s.levelButton} ${s.beginnerButton} ${difficultyLevel === 'beginner' ? s.active : ''}`}
                 onClick={() => handleDifficultyVote('beginner')}
                 disabled={!isAuthenticated}
               >
-                Beginner
+                {t('difficulty.beginner')}
               </button>
               <button
                 className={`${s.levelButton} ${s.moderateButton} ${difficultyLevel === 'moderate' ? s.active : ''}`}
                 onClick={() => handleDifficultyVote('moderate')}
                 disabled={!isAuthenticated}
               >
-                Moderate
+                {t('difficulty.moderate')}
               </button>
               <button
                 className={`${s.levelButton} ${s.advancedButton} ${difficultyLevel === 'advanced' ? s.active : ''}`}
                 onClick={() => handleDifficultyVote('advanced')}
                 disabled={!isAuthenticated}
               >
-                Advanced
+                {t('difficulty.advanced')}
               </button>
             </div>
           </div>

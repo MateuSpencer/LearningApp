@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import useLearningResources from '../../hooks/useLearningResources';
 import LearningResourceItem from '../LearningResourceItem/LearningResourceItem';
 import NewLearningResourceForm from '../NewLearningResourceForm/NewLearningResourceForm';
@@ -33,6 +34,7 @@ const LearningResourcesList = ({
   fixedFilters = {}
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const LOGIN_URL = '/accounts/login/';
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({}); // State for pre-filled form data
@@ -516,7 +518,7 @@ const LearningResourcesList = ({
     <div className={s.container}>
       {/* Header with title and top action buttons */}
       <div className={s.header}>
-        <h2 className={s.title}>Learning Resources</h2>
+        <h2 className={s.title}>{t('learningResources.title')}</h2>
         
         <div className={s.topActions}>
           {/* Add Resource button */}
@@ -526,7 +528,7 @@ const LearningResourcesList = ({
               onClick={handleAddResource}
               disabled={showForm || controlsDisabled}
             >
-              Add Resource
+              {t('learningResources.addResource')}
             </button>
           )}
           

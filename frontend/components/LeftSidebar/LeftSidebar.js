@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import s from './LeftSidebar.module.css';
 import ThemeToggleButton from '../ThemeToggleButton';
 import AboutButton from '../AboutButton';
@@ -13,6 +14,7 @@ const LeftSidebar = () => {
     const [collapsed, setCollapsed] = useState(true);
     const [isLanguageOptionsOpen, setIsLanguageOptionsOpen] = useState(false);
     const { language } = useLanguage();
+    const { t } = useTranslation();
     const collapseTimerRef = useRef(null);
     const sidebarRef = useRef(null);
 
@@ -36,6 +38,14 @@ const LeftSidebar = () => {
     
     const handleLanguageToggle = useCallback((isOpen) => {
         setIsLanguageOptionsOpen(isOpen);
+        // Prevent sidebar collapse when language selector is open
+        if (isOpen) {
+            setCollapsed(false);
+            if (collapseTimerRef.current) {
+                clearTimeout(collapseTimerRef.current);
+                collapseTimerRef.current = null;
+            }
+        }
     }, []);
     
     // Cleanup timer when component unmounts
@@ -71,7 +81,7 @@ const LeftSidebar = () => {
                             <Link href="/wiki" className={s.NavLink}>
                                 <span className={s.NavIcon}>🌐</span>
                                 <div className={s.NavTextWrapper}>
-                                    <span className={s.NavText}>Wiki Articles</span>
+                                    <span className={s.NavText}>{t('navigation.wikiArticles')}</span>
                                 </div>
                             </Link>
                         </li>
@@ -79,7 +89,7 @@ const LeftSidebar = () => {
                             <Link href="/learning-resources" className={s.NavLink}>
                                 <span className={s.NavIcon}>📚</span>
                                 <div className={s.NavTextWrapper}>
-                                    <span className={s.NavText}>Learning Resources</span>
+                                    <span className={s.NavText}>{t('navigation.learningResources')}</span>
                                 </div>
                             </Link>
                         </li>
@@ -87,7 +97,7 @@ const LeftSidebar = () => {
                             <Link href="/posts" className={s.NavLink}>
                                 <span className={s.NavIcon}>👥</span>
                                 <div className={s.NavTextWrapper}>
-                                    <span className={s.NavText}>Community Posts</span>
+                                    <span className={s.NavText}>{t('navigation.communityPosts')}</span>
                                 </div>
                             </Link>
                         </li>
@@ -97,7 +107,7 @@ const LeftSidebar = () => {
                                 <Link href="/posts/my-posts" className={s.NavLink}>
                                     <span className={s.NavIcon}>📝</span>
                                     <div className={s.NavTextWrapper}>
-                                        <span className={s.NavText}>My Posts</span>
+                                        <span className={s.NavText}>{t('navigation.myPosts')}</span>
                                     </div>
                                 </Link>
                             </li>

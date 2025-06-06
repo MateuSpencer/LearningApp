@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import learningResources from '../../api/learningResources';
 import s from './LearningResourceItem.module.css';
 
@@ -18,6 +19,7 @@ const LearningResourceItem = ({
 }) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const [associatedPages, setAssociatedPages] = useState([]);
   const [loading, setLoading] = useState(false);
   
@@ -186,7 +188,7 @@ const LearningResourceItem = ({
   
   // Render stars for the quality rating
   const renderStars = (rating) => {
-    if (!rating) return <span className={s.ratingText}>No ratings</span>;
+    if (!rating) return <span className={s.ratingText}>{t('learningResources.noRatings')}</span>;
     
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating - fullStars >= 0.5;
@@ -208,7 +210,7 @@ const LearningResourceItem = ({
   
   // Format difficulty level for display
   const formatDifficultyLevel = (level) => {
-    if (!level) return 'Not rated';
+    if (!level) return t('learningResources.notRated');
     return level.charAt(0).toUpperCase() + level.slice(1);
   };
   
@@ -235,8 +237,8 @@ const LearningResourceItem = ({
             className={getUpvoteClasses()}
             onClick={handleUpvote}
             disabled={!canVote}
-            aria-label="Upvote"
-            title={user_vote === 'upvote' ? 'You upvoted this resource' : 'Upvote this resource'}
+            aria-label={t('learningResources.upvote')}
+            title={user_vote === 'upvote' ? t('learningResources.alreadyUpvoted') : t('learningResources.upvoteResource')}
           >
             ▲
           </button>
@@ -245,8 +247,8 @@ const LearningResourceItem = ({
             className={getDownvoteClasses()}
             onClick={handleDownvote}
             disabled={!canVote}
-            aria-label="Downvote"
-            title={user_vote === 'downvote' ? 'You downvoted this resource' : 'Downvote this resource'}
+            aria-label={t('learningResources.downvote')}
+            title={user_vote === 'downvote' ? t('learningResources.alreadyDownvoted') : t('learningResources.downvoteResource')}
           >
             ▼
           </button>
@@ -280,14 +282,14 @@ const LearningResourceItem = ({
           {/* Display quality rating and difficulty level */}
           <div className={s.resourceMeta}>
             <div className={s.metaItem}>
-              <span className={s.metaLabel}>Quality:</span>
+              <span className={s.metaLabel}>{t('learningResources.quality')}:</span>
               <div className={s.stars}>
                 {renderStars(qualityRating)}
               </div>
             </div>
             
             <div className={s.metaItem}>
-              <span className={s.metaLabel}>Difficulty:</span>
+              <span className={s.metaLabel}>{t('learningResources.difficulty')}:</span>
               <span className={`${s.difficultyLevel} ${getDifficultyClass(dominant_difficulty_level)}`}>
                 {formatDifficultyLevel(dominant_difficulty_level)}
               </span>
@@ -297,7 +299,7 @@ const LearningResourceItem = ({
           {/* Display associated pages if showing all resources */}
           {showPageLinks && associatedPages.length > 0 && (
             <div className={s.associatedPages}>
-              <span className={s.associatedPagesLabel}>Pages:</span>
+              <span className={s.associatedPagesLabel}>{t('learningResources.pages')}:</span>
               {associatedPages.map((assoc, index) => (
                 <React.Fragment key={assoc.id}>
                   <Link href={`/wiki/${assoc.page_slug}`} className={s.pageLink}>

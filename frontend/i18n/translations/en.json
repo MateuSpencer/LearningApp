@@ -1,3 +1,107 @@
 {
-    "helloWorld": "Hello world"
+    "helloWorld": "Hello world",
+    "navigation": {
+        "wikiArticles": "Wiki Articles",
+        "learningResources": "Learning Resources",
+        "communityPosts": "Community Posts",
+        "myPosts": "My Posts",
+        "search": "Search",
+        "settings": "Settings",
+        "home": "Home",
+        "about": "About",
+        "account": "Account"
+    },
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "close": "Close",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirm": "Confirm",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous"
+    },
+    "sidebar": {
+        "theme": "Theme",
+        "language": "Language",
+        "websiteLanguage": "Website Language",
+        "collapse": "Collapse sidebar",
+        "expand": "Expand sidebar",
+        "darkMode": "Dark mode",
+        "lightMode": "Light mode"
+    },
+    "search": {
+        "placeholder": "Search...",
+        "noResults": "No results found",
+        "searching": "Searching...",
+        "resultsFor": "Results for \"{{query}}\"",
+        "showMore": "Show more results"
+    },
+    "forms": {
+        "required": "This field is required",
+        "invalidEmail": "Please enter a valid email address",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "passwordMismatch": "Passwords do not match",
+        "emailPlaceholder": "Enter your email",
+        "passwordPlaceholder": "Enter your password",
+        "confirmPasswordPlaceholder": "Confirm your password"
+    },
+    "messages": {
+        "welcomeBack": "Welcome back!",
+        "loggedOut": "You have been logged out",
+        "saveSuccess": "Changes saved successfully",
+        "saveError": "Failed to save changes",
+        "networkError": "Network error occurred",
+        "tryAgain": "Please try again"
+    },
+    "learningResources": {
+        "title": "Learning Resources",
+        "addResource": "Add Resource",
+        "noResourcesYet": "No learning resources have been added yet.",
+        "noResourcesPage": "No learning resources have been added to this page yet.",
+        "clickToAdd": "Click \"Add Resource\" to be the first!",
+        "quality": "Quality",
+        "difficulty": "Difficulty",
+        "noRatings": "No ratings",
+        "notRated": "Not rated",
+        "pages": "Pages",
+        "yourRating": "Your Rating",
+        "yourAssessment": "Your Assessment",
+        "difficultyLevel": "Difficulty Level",
+        "mostUsersRated": "Most users rated this resource as:",
+        "notYetRated": "Not Yet Rated",
+        "upvote": "Upvote",
+        "downvote": "Downvote",
+        "upvoteResource": "Upvote this resource",
+        "downvoteResource": "Downvote this resource",
+        "alreadyUpvoted": "You upvoted this resource", 
+        "alreadyDownvoted": "You downvoted this resource",
+        "resourceAdded": "Resource already added"
+    },
+    "difficulty": {
+        "beginner": "Beginner",
+        "moderate": "Moderate",
+        "advanced": "Advanced"
+    },
+    "ai": {
+        "findResources": "Find AI-Recommended Resources ✨",
+        "findResourcesCompact": "AI Find ✨",
+        "findMore": "Find More AI Resources ✨",
+        "findMoreCompact": "More AI ✨",
+        "showSuggestions": "Show AI Suggestions",
+        "showSuggestionsCompact": "Show AI",
+        "searching": "Finding resources...",
+        "searchingCompact": "Searching...",
+        "generateSummary": "Generate AI Summary",
+        "generatingSummary": "Generating Summary...",
+        "findResourcesAriaLabel": "Find AI-recommended learning resources",
+        "findMoreAriaLabel": "Find more AI-recommended learning resources",
+        "showSuggestionsAriaLabel": "Show existing AI suggestions",
+        "noTopicError": "No topic provided for search",
+        "findError": "Failed to find learning resources. Please try again later."
+    }
 }

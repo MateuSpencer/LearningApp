@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { FaBrain, FaSpinner, FaPlus, FaEye } from 'react-icons/fa';
 import { findResources } from '../../api/aiResources';
 import { getActiveProviderConfig } from '../../config/aiConfig';
+import { useTranslation } from '../../hooks/useTranslation';
 import s from './AIResourceFinderButton.module.css';
 
 /**
@@ -32,6 +33,7 @@ const AIResourceFinderButton = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { t } = useTranslation();
 
   const handleFindResources = async () => {
     // If we're just showing existing suggestions, call the callback and return
@@ -46,7 +48,7 @@ const AIResourceFinderButton = ({
       if (onClick() === false) return;
     }
     if (!title) {
-      setError('No topic provided for search');
+      setError(t('ai.noTopicError'));
       return;
     }
     
@@ -79,7 +81,7 @@ const AIResourceFinderButton = ({
       
     } catch (err) {
       console.error('Error finding resources:', err);
-      setError('Failed to find learning resources. Please try again later.');
+      setError(t('ai.findError'));
     } finally {
       setLoading(false);
     }
@@ -91,7 +93,7 @@ const AIResourceFinderButton = ({
       return (
         <>
           <FaSpinner className={s.Spinner} aria-hidden="true" />
-          <span>{compact ? 'Searching...' : 'Finding resources...'}</span>
+          <span>{compact ? t('ai.searchingCompact') : t('ai.searching')}</span>
         </>
       );
     }
@@ -101,14 +103,14 @@ const AIResourceFinderButton = ({
         return (
           <>
             <FaPlus className={s.Icon} aria-hidden="true" />
-            <span>{compact ? 'More AI ✨' : 'Find More AI Resources ✨'}</span>
+            <span>{compact ? t('ai.findMoreCompact') : t('ai.findMore')}</span>
           </>
         );
       case 'show':
         return (
           <>
             <FaEye className={s.Icon} aria-hidden="true" />
-            <span>{compact ? 'Show AI' : 'Show AI Suggestions'}</span>
+            <span>{compact ? t('ai.showSuggestionsCompact') : t('ai.showSuggestions')}</span>
           </>
         );
       case 'find':
@@ -116,7 +118,7 @@ const AIResourceFinderButton = ({
         return (
           <>
             <FaBrain className={s.Icon} aria-hidden="true" />
-            <span>{compact ? 'AI Find ✨' : 'Find AI-Recommended Resources ✨'}</span>
+            <span>{compact ? t('ai.findResourcesCompact') : t('ai.findResources')}</span>
           </>
         );
     }
@@ -125,9 +127,9 @@ const AIResourceFinderButton = ({
   // Get appropriate aria-label based on mode
   const getAriaLabel = () => {
     switch (buttonMode) {
-      case 'more': return "Find more AI-recommended learning resources";
-      case 'show': return "Show existing AI suggestions";
-      default: return "Find AI-recommended learning resources";
+      case 'more': return t('ai.findMoreAriaLabel');
+      case 'show': return t('ai.showSuggestionsAriaLabel');
+      default: return t('ai.findResourcesAriaLabel');
     }
   };
 

@@ -99,7 +99,6 @@
     contain: layout;
 }
 
-/* Remove the LanguageSelectorContainer styles since we moved the language selector to the footer */
 
 .ButtonsContainer {
     display: flex;
@@ -286,4 +285,23 @@ background-color: var(--bg-hover);
 
 .AccountButtonWrapper {
     order: 4;  /* Last icon (rightmost) */
+}
+
+/* Clean up language button wrappers since they're now consistent with other buttons */
+.ButtonWrapper.LanguageButtonWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100px;
+    width: auto;
+    opacity: 1;
+    visibility: visible;
+    white-space: nowrap;
+}
+
+/* Make sure language button is visible in expanded state */
+.Expanded .ButtonWrapper.LanguageButtonWrapper {
+    display: flex;
+    visibility: visible;
+    opacity: 1;
 }

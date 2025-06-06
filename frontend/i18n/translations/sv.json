@@ -1,3 +1,61 @@
 {
-    "helloWorld": "Hej världen"
+    "helloWorld": "Hej världen",
+    "navigation": {
+        "wikiArticles": "Wiki-artiklar",
+        "learningResources": "Lärresurser",
+        "communityPosts": "Gemenskapsinlägg",
+        "myPosts": "Mina inlägg",
+        "search": "Sök",
+        "settings": "Inställningar",
+        "home": "Hem",
+        "about": "Om oss",
+        "account": "Konto"
+    },
+    "common": {
+        "save": "Spara",
+        "cancel": "Avbryt",
+        "loading": "Laddar...",
+        "error": "Fel",
+        "success": "Framgång",
+        "close": "Stäng",
+        "edit": "Redigera",
+        "delete": "Ta bort",
+        "confirm": "Bekräfta",
+        "back": "Tillbaka",
+        "next": "Nästa",
+        "previous": "Föregående"
+    },
+    "sidebar": {
+        "theme": "Tema",
+        "language": "Språk",
+        "websiteLanguage": "Webbplatsens språk",
+        "collapse": "Dölj sidofält",
+        "expand": "Visa sidofält",
+        "darkMode": "Mörkt läge",
+        "lightMode": "Ljust läge"
+    },
+    "search": {
+        "placeholder": "Sök...",
+        "noResults": "Inga resultat hittades",
+        "searching": "Söker...",
+        "resultsFor": "Resultat för \"{{query}}\"",
+        "showMore": "Visa fler resultat"
+    },
+    "forms": {
+        "required": "Detta fält är obligatoriskt",
+        "invalidEmail": "Vänligen ange en giltig e-postadress",
+        "passwordTooShort": "Lösenordet måste vara minst 8 tecken",
+        "passwordMismatch": "Lösenorden stämmer inte överens",
+        "emailPlaceholder": "Ange din e-post",
+        "passwordPlaceholder": "Ange ditt lösenord",
+        "confirmPasswordPlaceholder": "Bekräfta ditt lösenord"
+    },
+    "messages": {
+        "welcomeBack": "Välkommen tillbaka!",
+        "loggedOut": "Du har loggats ut",
+        "saveSuccess": "Ändringar sparade framgångsrikt",
+        "saveError": "Misslyckades med att spara ändringar",
+        "networkError": "Nätverksfel inträffade",
+        "tryAgain": "Vänligen försök igen"
+    }
 }

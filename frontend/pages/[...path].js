@@ -6,15 +6,29 @@ import {
     WagtailApiResponseError,
 } from '../api/wagtail';
 import LazyContainers from '../containers/LazyContainers';
+import fetch from 'node-fetch';
 
 const isProd = process.env.NODE_ENV === 'production';
 
 export default function CatchAllPage({ componentName, componentProps }) {
+    // Add error handling around component loading
+    if (!componentName || typeof componentName !== 'string') {
+        return <h1>Invalid component name provided</h1>;
+    }
+    
     const Component = LazyContainers[componentName];
     if (!Component) {
+        console.error(`Component ${componentName} not found in LazyContainers`);
         return <h1>Component {componentName} not found</h1>;
     }
-    return <Component {...componentProps} />;
+    
+    // Wrap component rendering in try-catch for debugging
+    try {
+        return <Component {...componentProps} />;
+    } catch (error) {
+        console.error(`Error rendering component ${componentName}:`, error);
+        return <h1>Error rendering component {componentName}</h1>;
+    }
 }
 
 // For SSR

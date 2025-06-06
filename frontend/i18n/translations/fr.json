@@ -1,0 +1,107 @@
+{
+    "helloWorld": "Bonjour le monde",
+    "navigation": {
+        "wikiArticles": "Articles Wiki",
+        "learningResources": "Ressources d'Apprentissage",
+        "communityPosts": "Publications de la Communauté",
+        "myPosts": "Mes Publications",
+        "search": "Rechercher",
+        "settings": "Paramètres",
+        "home": "Accueil",
+        "about": "À propos",
+        "account": "Compte"
+    },
+    "common": {
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "success": "Succès",
+        "close": "Fermer",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "confirm": "Confirmer",
+        "back": "Retour",
+        "next": "Suivant",
+        "previous": "Précédent"
+    },
+    "sidebar": {
+        "theme": "Thème",
+        "language": "Langue",
+        "websiteLanguage": "Langue du Site Web",
+        "collapse": "Réduire la barre latérale",
+        "expand": "Étendre la barre latérale",
+        "darkMode": "Mode sombre",
+        "lightMode": "Mode clair"
+    },
+    "search": {
+        "placeholder": "Rechercher...",
+        "noResults": "Aucun résultat trouvé",
+        "searching": "Recherche en cours...",
+        "resultsFor": "Résultats pour \"{{query}}\"",
+        "showMore": "Afficher plus de résultats"
+    },
+    "forms": {
+        "required": "Ce champ est obligatoire",
+        "invalidEmail": "Veuillez saisir une adresse email valide",
+        "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "emailPlaceholder": "Saisissez votre email",
+        "passwordPlaceholder": "Saisissez votre mot de passe",
+        "confirmPasswordPlaceholder": "Confirmez votre mot de passe"
+    },
+    "messages": {
+        "welcomeBack": "Content de vous revoir !",
+        "loggedOut": "Vous avez été déconnecté",
+        "saveSuccess": "Modifications enregistrées avec succès",
+        "saveError": "Échec de l'enregistrement des modifications",
+        "networkError": "Erreur réseau survenue",
+        "tryAgain": "Veuillez réessayer"
+    },
+    "learningResources": {
+        "title": "Ressources d'Apprentissage",
+        "addResource": "Ajouter une Ressource",
+        "noResourcesYet": "Aucune ressource d'apprentissage n'a encore été ajoutée.",
+        "noResourcesPage": "Aucune ressource d'apprentissage n'a encore été ajoutée à cette page.",
+        "clickToAdd": "Cliquez sur \"Ajouter une Ressource\" pour être le premier !",
+        "quality": "Qualité",
+        "difficulty": "Difficulté",
+        "noRatings": "Aucune évaluation",
+        "notRated": "Non évalué",
+        "pages": "Pages",
+        "yourRating": "Votre Évaluation",
+        "yourAssessment": "Votre Appréciation",
+        "difficultyLevel": "Niveau de Difficulté",
+        "mostUsersRated": "La plupart des utilisateurs ont évalué cette ressource comme :",
+        "notYetRated": "Pas Encore Évalué",
+        "upvote": "Vote Positif",
+        "downvote": "Vote Négatif",
+        "upvoteResource": "Voter positivement pour cette ressource",
+        "downvoteResource": "Voter négativement pour cette ressource",
+        "alreadyUpvoted": "Vous avez voté positivement pour cette ressource",
+        "alreadyDownvoted": "Vous avez voté négativement pour cette ressource",
+        "resourceAdded": "Ressource déjà ajoutée"
+    },
+    "difficulty": {
+        "beginner": "Débutant",
+        "moderate": "Intermédiaire",
+        "advanced": "Avancé"
+    },
+    "ai": {
+        "findResources": "Trouver des Ressources Recommandées par IA ✨",
+        "findResourcesCompact": "Recherche IA ✨",
+        "findMore": "Trouver Plus de Ressources IA ✨",
+        "findMoreCompact": "Plus IA ✨",
+        "showSuggestions": "Afficher les Suggestions IA",
+        "showSuggestionsCompact": "Afficher IA",
+        "searching": "Recherche de ressources...",
+        "searchingCompact": "Recherche...",
+        "generateSummary": "Générer un Résumé IA",
+        "generatingSummary": "Génération du Résumé...",
+        "findResourcesAriaLabel": "Trouver des ressources d'apprentissage recommandées par IA",
+        "findMoreAriaLabel": "Trouver plus de ressources d'apprentissage recommandées par IA",
+        "showSuggestionsAriaLabel": "Afficher les suggestions IA existantes",
+        "noTopicError": "Aucun sujet fourni pour la recherche",
+        "findError": "Échec de la recherche de ressources d'apprentissage. Veuillez réessayer plus tard."
+    }
+}

@@ -1,0 +1,107 @@
+{
+    "helloWorld": "Hola mundo",
+    "navigation": {
+        "wikiArticles": "Artículos Wiki",
+        "learningResources": "Recursos de Aprendizaje",
+        "communityPosts": "Publicaciones de la Comunidad",
+        "myPosts": "Mis Publicaciones",
+        "search": "Buscar",
+        "settings": "Configuración",
+        "home": "Inicio",
+        "about": "Acerca de",
+        "account": "Cuenta"
+    },
+    "common": {
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "loading": "Cargando...",
+        "error": "Error",
+        "success": "Éxito",
+        "close": "Cerrar",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "confirm": "Confirmar",
+        "back": "Atrás",
+        "next": "Siguiente",
+        "previous": "Anterior"
+    },
+    "sidebar": {
+        "theme": "Tema",
+        "language": "Idioma",
+        "websiteLanguage": "Idioma del Sitio Web",
+        "collapse": "Contraer barra lateral",
+        "expand": "Expandir barra lateral",
+        "darkMode": "Modo oscuro",
+        "lightMode": "Modo claro"
+    },
+    "search": {
+        "placeholder": "Buscar...",
+        "noResults": "No se encontraron resultados",
+        "searching": "Buscando...",
+        "resultsFor": "Resultados para \"{{query}}\"",
+        "showMore": "Mostrar más resultados"
+    },
+    "forms": {
+        "required": "Este campo es obligatorio",
+        "invalidEmail": "Por favor ingrese un email válido",
+        "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+        "passwordMismatch": "Las contraseñas no coinciden",
+        "emailPlaceholder": "Ingrese su email",
+        "passwordPlaceholder": "Ingrese su contraseña",
+        "confirmPasswordPlaceholder": "Confirme su contraseña"
+    },
+    "messages": {
+        "welcomeBack": "¡Bienvenido de vuelta!",
+        "loggedOut": "Has cerrado sesión",
+        "saveSuccess": "Cambios guardados exitosamente",
+        "saveError": "Error al guardar cambios",
+        "networkError": "Ocurrió un error de red",
+        "tryAgain": "Por favor intente de nuevo"
+    },
+    "learningResources": {
+        "title": "Recursos de Aprendizaje",
+        "addResource": "Agregar Recurso",
+        "noResourcesYet": "Aún no se han agregado recursos de aprendizaje.",
+        "noResourcesPage": "Aún no se han agregado recursos de aprendizaje a esta página.",
+        "clickToAdd": "¡Haz clic en \"Agregar Recurso\" para ser el primero!",
+        "quality": "Calidad",
+        "difficulty": "Dificultad",
+        "noRatings": "Sin calificaciones",
+        "notRated": "Sin calificar",
+        "pages": "Páginas",
+        "yourRating": "Tu Calificación",
+        "yourAssessment": "Tu Evaluación",
+        "difficultyLevel": "Nivel de Dificultad",
+        "mostUsersRated": "La mayoría de usuarios calificó este recurso como:",
+        "notYetRated": "Aún Sin Calificar",
+        "upvote": "Voto Positivo",
+        "downvote": "Voto Negativo",
+        "upvoteResource": "Dar voto positivo a este recurso",
+        "downvoteResource": "Dar voto negativo a este recurso",
+        "alreadyUpvoted": "Has dado voto positivo a este recurso",
+        "alreadyDownvoted": "Has dado voto negativo a este recurso",
+        "resourceAdded": "Recurso ya agregado"
+    },
+    "difficulty": {
+        "beginner": "Principiante",
+        "moderate": "Intermedio",
+        "advanced": "Avanzado"
+    },
+    "ai": {
+        "findResources": "Encontrar Recursos Recomendados por IA ✨",
+        "findResourcesCompact": "Buscar IA ✨",
+        "findMore": "Encontrar Más Recursos de IA ✨",
+        "findMoreCompact": "Más IA ✨",
+        "showSuggestions": "Mostrar Sugerencias de IA",
+        "showSuggestionsCompact": "Mostrar IA",
+        "searching": "Encontrando recursos...",
+        "searchingCompact": "Buscando...",
+        "generateSummary": "Generar Resumen de IA",
+        "generatingSummary": "Generando Resumen...",
+        "findResourcesAriaLabel": "Encontrar recursos de aprendizaje recomendados por IA",
+        "findMoreAriaLabel": "Encontrar más recursos de aprendizaje recomendados por IA",
+        "showSuggestionsAriaLabel": "Mostrar sugerencias de IA existentes",
+        "noTopicError": "No se proporcionó tema para la búsqueda",
+        "findError": "Error al encontrar recursos de aprendizaje. Por favor intenta de nuevo más tarde."
+    }
+}

@@ -1,0 +1,106 @@
+{
+    "helloWorld": "Привет мир",
+    "navigation": {
+        "wikiArticles": "Вики-статьи",
+        "learningResources": "Учебные ресурсы",
+        "communityPosts": "Сообщения сообщества",
+        "myPosts": "Мои сообщения",
+        "search": "Поиск",
+        "settings": "Настройки",
+        "home": "Главная",
+        "about": "О нас",
+        "account": "Аккаунт"
+    },
+    "common": {
+        "save": "Сохранить",
+        "cancel": "Отмена",
+        "loading": "Загрузка...",
+        "error": "Ошибка",
+        "success": "Успех",
+        "close": "Закрыть",
+        "edit": "Редактировать",
+        "delete": "Удалить",
+        "confirm": "Подтвердить",
+        "back": "Назад",
+        "next": "Далее",
+        "previous": "Предыдущий"
+    },
+    "sidebar": {
+        "theme": "Тема",
+        "language": "Язык",
+        "websiteLanguage": "Язык сайта",
+        "collapse": "Свернуть боковую панель",
+        "expand": "Развернуть боковую панель",
+        "darkMode": "Тёмный режим",
+        "lightMode": "Светлый режим"
+    },
+    "search": {
+        "placeholder": "Поиск...",
+        "noResults": "Результаты не найдены",
+        "searching": "Поиск...",
+        "resultsFor": "Результаты для \"{{query}}\"",
+        "showMore": "Показать больше результатов"
+    },
+    "forms": {
+        "required": "Это поле обязательно",
+        "invalidEmail": "Пожалуйста, введите действительный адрес электронной почты",
+        "passwordTooShort": "Пароль должен содержать не менее 8 символов",
+        "passwordMismatch": "Пароли не совпадают",
+        "emailPlaceholder": "Введите вашу электронную почту",
+        "passwordPlaceholder": "Введите ваш пароль",
+        "confirmPasswordPlaceholder": "Подтвердите ваш пароль"
+    },
+    "learningResources": {
+        "title": "Учебные ресурсы",
+        "addResource": "Добавить ресурс",
+        "noResourcesYet": "Учебные ресурсы еще не добавлены.",
+        "noResourcesPage": "На эту страницу еще не добавлены учебные ресурсы.",
+        "clickToAdd": "Нажмите \"Добавить ресурс\", чтобы стать первым!",
+        "quality": "Качество",
+        "difficulty": "Сложность",
+        "noRatings": "Нет оценок",
+        "notRated": "Не оценено",
+        "pages": "Страницы",
+        "yourRating": "Ваша оценка",
+        "yourAssessment": "Ваша оценка",
+        "difficultyLevel": "Уровень сложности",
+        "mostUsersRated": "Большинство пользователей оценили этот ресурс как:",
+        "notYetRated": "Еще не оценено",
+        "upvote": "Положительный голос",
+        "downvote": "Отрицательный голос",
+        "upvoteResource": "Поставить положительную оценку этому ресурсу",
+        "downvoteResource": "Поставить отрицательную оценку этому ресурсу",
+        "alreadyUpvoted": "Вы поставили положительную оценку этому ресурсу",
+        "alreadyDownvoted": "Вы поставили отрицательную оценку этому ресурсу",
+        "resourceAdded": "Ресурс уже добавлен"
+    },
+    "difficulty": {
+        "beginner": "Начинающий",
+        "moderate": "Средний",
+        "advanced": "Продвинутый"
+    },
+    "ai": {
+        "findResources": "Найти ресурсы, рекомендованные ИИ ✨",
+        "findResourcesCompact": "Найти ИИ ✨",
+        "findMore": "Найти больше ресурсов ИИ ✨",
+        "findMoreCompact": "Больше ИИ ✨",
+        "showSuggestions": "Показать предложения ИИ",
+        "showSuggestionsCompact": "Показать ИИ",
+        "searching": "Поиск ресурсов...",
+        "searchingCompact": "Поиск...",
+        "generateSummary": "Создать сводку ИИ",
+        "generatingSummary": "Создание сводки...",
+        "findResourcesAriaLabel": "Найти учебные ресурсы, рекомендованные ИИ",
+        "generateSummaryAriaLabel": "Создать сводку ИИ для этого ресурса",
+        "error": "Произошла ошибка при получении предложений ИИ",
+        "noResourcesFound": "Ресурсы ИИ по этой теме не найдены"
+    },
+    "messages": {
+        "welcomeBack": "Добро пожаловать обратно!",
+        "loggedOut": "Вы вышли из системы",
+        "saveSuccess": "Изменения успешно сохранены",
+        "saveError": "Не удалось сохранить изменения",
+        "networkError": "Произошла сетевая ошибка",
+        "tryAgain": "Пожалуйста, попробуйте снова"
+    }
+}

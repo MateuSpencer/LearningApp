@@ -42,10 +42,17 @@ function DynamicNotFoundPage() {
     }
 
     // If we have dynamic data, use it
-    if (data) {
+    if (data && data.componentName) {
         const Component = LazyContainers[data.componentName];
         if (Component) {
-            return <Component {...data.componentProps} />;
+            try {
+                return <Component {...data.componentProps} />;
+            } catch (error) {
+                console.error(`Error rendering 404 component ${data.componentName}:`, error);
+                // Fall through to default NotFoundPage
+            }
+        } else {
+            console.error(`Component ${data.componentName} not found in LazyContainers`);
         }
     }
 

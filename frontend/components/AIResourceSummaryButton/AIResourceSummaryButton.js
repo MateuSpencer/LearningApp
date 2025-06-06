@@ -2,11 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import s from './AIResourceSummaryButton.module.css';
 
 const AIResourceSummaryButton = ({ resourceId, onClick, isGenerating = false }) => {
     const { isAuthenticated } = useAuth();
     const router = useRouter();
+    const { t } = useTranslation();
     
     const handleClick = () => {
         // Redirect to login if not authenticated
@@ -30,12 +32,12 @@ const AIResourceSummaryButton = ({ resourceId, onClick, isGenerating = false }) 
             {isGenerating ? (
                 <>
                     <span className={s.loadingIcon}></span>
-                    Generating Summary...
+                    {t('ai.generatingSummary')}
                 </>
             ) : (
                 <>
                     <span className={s.aiIcon}>✨</span>
-                    Generate AI Summary
+                    {t('ai.generateSummary')}
                 </>
             )}
         </button>
