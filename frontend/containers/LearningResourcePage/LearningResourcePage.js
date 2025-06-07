@@ -63,6 +63,27 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
     difficulty: ''
   });
   
+  // Helper function to get translated resource type name
+  const getResourceTypeName = (type) => {
+    if (!type) return '';
+    
+    const typeMap = {
+      'youtube': t('learningResourcesPage.typeYoutube'),
+      'video': t('learningResourcesPage.typeVideo'),
+      'pdf': t('learningResourcesPage.typePdf'),
+      'image': t('learningResourcesPage.typeImage'),
+      'website': t('learningResourcesPage.typeWebsite'),
+      'article': t('learningResourcesPage.typeArticle'),
+      'book': t('learningResourcesPage.typeBook'),
+      'course': t('learningResourcesPage.typeCourse'),
+      'documentation': t('learningResourcesPage.typeDocumentation'),
+      'tutorial': t('learningResourcesPage.typeTutorial'),
+      'tool': t('learningResourcesPage.typeTool')
+    };
+    
+    return typeMap[type.toLowerCase()] || type;
+  };
+  
   // Add state for page associations
   const [pageAssociations, setPageAssociations] = useState([]);
   const [loadingAssociations, setLoadingAssociations] = useState(false);
@@ -250,7 +271,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
       </div>
     );
   }
-  
+
   // Determine primary URL to display/embed
   const primaryUrl = resource.urls?.find(url => url.is_primary)?.url || resource.urls?.[0]?.url || '';
   const additionalUrls = resource.urls?.filter(url => !url.is_primary) || [];
@@ -260,7 +281,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
       <h1 className={s.title}>{resource.title}</h1>
       
       <div className={s.headerSection}>
-        <div className={s.typeLabel}>{resource.resource_type}</div>
+        <div className={s.typeLabel}>{getResourceTypeName(resource.resource_type)}</div>
         {resource.language && (
           <div className={s.languageInfo}>
             <LanguageBadge language={resource.language} size="medium" />
@@ -291,22 +312,22 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
       {loadingAssociations && (
         <div className={s.associatedPagesSection}>
           <div className={s.associatedPages}>
-            <span>Loading associated pages...</span>
+            <span>{t('learningResourcePage.loadingAssociatedPages')}</span>
           </div>
         </div>
       )}
       
       {/* Metadata section - moved near top */}
       <div className={s.metadata}>
-        <div className={s.created}>Created: {new Date(resource.created_at).toLocaleDateString()}</div>
-        <div className={s.updated}>Last Updated: {new Date(resource.updated_at).toLocaleDateString()}</div>
+        <div className={s.created}>{t('learningResourcePage.created')} {new Date(resource.created_at).toLocaleDateString()}</div>
+        <div className={s.updated}>{t('learningResourcePage.lastUpdated')} {new Date(resource.updated_at).toLocaleDateString()}</div>
       </div>
       
       {primaryUrl && (
         <>
           {/* URL fallback message - moved above the iframe */}
           <div className={s.embedFallback}>
-            <p>If the content doesn't load correctly, you can access it directly:</p>
+            <p>{t('learningResourcePage.contentFallbackMessage')}</p>
             <a 
               href={primaryUrl}
               target="_blank"
@@ -334,32 +355,32 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
       
       {!primaryUrl && (
         <div className={s.noContent}>
-          <p>This resource doesn't have any URLs attached.</p>
+          <p>{t('learningResourcePage.noUrlsAttached')}</p>
         </div>
       )}
       
       <div className={s.votingSection}>
         <div className={s.ratingCard}>
-          <h3 className={s.sectionTitle}>Quality Rating</h3>
+          <h3 className={s.sectionTitle}>{t('learningResourcePage.qualityRating')}</h3>
           <div className={s.ratingDisplay}>
             <div className={s.averageRating}>
-              <span className={s.ratingValue}>{resource.average_quality_rating?.toFixed(1) || 'No votes'}</span>
+              <span className={s.ratingValue}>{resource.average_quality_rating?.toFixed(1) || t('learningResourcePage.noVotes')}</span>
               <span className={s.ratingLabel}>/ 5</span>
             </div>
           </div>
           <div className={s.voteSection}>
-            <h4 className={s.voteTitle}>Your Rating</h4>
+            <h4 className={s.voteTitle}>{t('learningResourcePage.yourRating')}</h4>
             {renderStarInput()}
           </div>
         </div>
         
         <div className={s.ratingCard}>
-          <h3 className={s.sectionTitle}>Difficulty Level</h3>
+          <h3 className={s.sectionTitle}>{t('learningResourcePage.difficultyLevel')}</h3>
           <div className={s.difficultyDisplay}>
             <div className={s.dominantLevel}>
               {t('learningResources.mostUsersRated')}
               <span className={`${s.levelBadge} ${getLevelBadgeClass(resource.dominant_difficulty_level)}`}>
-                {resource.dominant_difficulty_level ? resource.dominant_difficulty_level.charAt(0).toUpperCase() + resource.dominant_difficulty_level.slice(1) : t('learningResources.notYetRated')}
+                {resource.dominant_difficulty_level ? t(`difficulty.${resource.dominant_difficulty_level}`) : t('learningResources.notYetRated')}
               </span>
             </div>
           </div>
@@ -394,7 +415,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
       
       {additionalUrls.length > 0 && (
         <div className={s.additionalUrls}>
-          <h3 className={s.sectionTitle}>Additional URLs</h3>
+          <h3 className={s.sectionTitle}>{t('learningResourcePage.additionalUrls')}</h3>
           <ul className={s.urlList}>
             {additionalUrls.map((urlItem, index) => (
               <li key={index} className={s.urlItem}>

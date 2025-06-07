@@ -1,9 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import s from './NotFoundPage.module.css';
 
-const NotFoundPage = ({ exception }) => {
+const NotFoundPage = ({ exception, domain }) => {
     const { t } = useTranslation();
     
     return (

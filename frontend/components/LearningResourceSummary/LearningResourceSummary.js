@@ -5,6 +5,7 @@ import styles from './LearningResourceSummary.module.css';
 import { generateSummary } from '../../api/aiSummary';
 import learningResources from '../../api/learningResources';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 /**
  * Component that displays AI summary for a learning resource
@@ -16,6 +17,7 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
   const [showSummary, setShowSummary] = useState(true);
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
   
   // Function to handle generating a summary
   const handleGenerateSummary = async () => {
@@ -36,7 +38,7 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
                   (resource.urls && resource.urls.length > 0 ? resource.urls[0].url : null);
       
       if (!url) {
-        throw new Error('No URL available for this resource');
+        throw new Error(t('aiSummary.noUrlError'));
       }
       
       // Prepare resource data for summary generation
@@ -63,12 +65,12 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
           });
         }
       } catch (saveError) {
-        setError(`Summary was generated but couldn't be saved: ${saveError.message || 'Unknown error'}`);
+        setError(t('aiSummary.saveError') + ' ' + (saveError.message || t('aiSummary.generateError')));
         console.error('Summary save error:', saveError);
       }
     } catch (err) {
       console.error('Error generating summary:', err);
-      setError(err.message || 'Failed to generate summary');
+      setError(err.message || t('aiSummary.generateError'));
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +92,7 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
   // Helper to render summary content
   const renderSummaryContent = () => {
     if (!resource?.ai_summary) {
-      return <p>No summary content available.</p>;
+      return <p>{t('aiSummary.noSummaryContent')}</p>;
     }
     
     // Simply display the raw summary as is
@@ -103,7 +105,7 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
         </div>
         
         <div className={styles.summaryMeta}>
-          <span>Generated: {new Date(resource.ai_summary_generated_at).toLocaleString()}</span>
+          <span>{t('aiSummary.generated')} {new Date(resource.ai_summary_generated_at).toLocaleString()}</span>
         </div>
       </>
     );
@@ -113,14 +115,14 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
     <div className={styles.summaryContainer}>
       <div className={styles.summaryCard}>
         <div className={styles.summaryHeader}>
-          <h3>✨ AI Summary ✨</h3>
+          <h3>{t('aiSummary.title')}</h3>
           <div className={styles.headerActions}>
             {hasSummary && (
               <button 
                 onClick={toggleSummary} 
                 className={styles.toggleButton}
               >
-                {showSummary ? 'Hide' : 'Show'}
+                {showSummary ? t('aiSummary.hide') : t('aiSummary.show')}
               </button>
             )}
             {!hasSummary && (
@@ -129,7 +131,7 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
                 disabled={isLoading || !resource?.id}
                 className={`${styles.generateButton} ${isLoading ? styles.loading : ''}`}
               >
-                {isLoading ? 'Generating...' : 'Generate AI Summary'}
+                {isLoading ? t('aiSummary.generating') : t('aiSummary.generate')}
               </button>
             )}
           </div>
@@ -144,7 +146,7 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
         {/* If already generated but hidden, show message */}
         {hasSummary && !showSummary && (
           <div className={styles.hiddenMessage}>
-            <p>Summary is hidden. Click 'Show' to view the AI-generated summary.</p>
+            <p>{t('aiSummary.hiddenMessage')}</p>
           </div>
         )}
       </div>
