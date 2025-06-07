@@ -6,9 +6,11 @@ import {
     getPasswordProtectedPage,
     WagtailApiResponseError,
 } from '../../api/wagtail';
+import { useTranslation } from '../../hooks/useTranslation';
 import LazyContainers from '../LazyContainers';
 
 const PasswordProtectedPage = ({ restrictionId, pageId, csrfToken }) => {
+    const { t } = useTranslation();
     const [values, setValues] = useState({ password: '' });
     const [error, setError] = useState(null);
     const [pageData, setPageData] = useState(null);
@@ -38,13 +40,13 @@ const PasswordProtectedPage = ({ restrictionId, pageId, csrfToken }) => {
 
             switch (e.response.status) {
                 case 403:
-                    setError('Forbidden');
+                    setError(t('passwordProtectedPage.forbidden'));
                     break;
                 case 401:
-                    setError('Invalid password');
+                    setError(t('passwordProtectedPage.invalidPassword'));
                     break;
                 default:
-                    setError('Technical issues');
+                    setError(t('passwordProtectedPage.technicalIssues'));
                     break;
             }
         }
@@ -59,15 +61,15 @@ const PasswordProtectedPage = ({ restrictionId, pageId, csrfToken }) => {
         const { componentName, componentProps } = pageData;
         const Component = LazyContainers[componentName];
         if (!Component) {
-            return <h1>Component {componentName} not found</h1>;
+            return <h1>{t('passwordProtectedPage.componentNotFound', { componentName })}</h1>;
         }
         return <Component {...componentProps} />;
     }
 
     return (
         <div>
-            <h1>Password is required</h1>
-            <p>You need a password to access this website</p>
+            <h1>{t('passwordProtectedPage.title')}</h1>
+            <p>{t('passwordProtectedPage.description')}</p>
 
             {!!error && <p>{error}</p>}
             <p>
@@ -75,10 +77,10 @@ const PasswordProtectedPage = ({ restrictionId, pageId, csrfToken }) => {
                     type="password"
                     name="password"
                     onChange={handlePasswordChange}
-                    placeholder="Password"
+                    placeholder={t('passwordProtectedPage.passwordPlaceholder')}
                 />
             </p>
-            <button onClick={handleFormChange}>Continue</button>
+            <button onClick={handleFormChange}>{t('passwordProtectedPage.continue')}</button>
         </div>
     );
 };

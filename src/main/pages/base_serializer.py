@@ -22,6 +22,8 @@ class BasePageSerializer(serializers.ModelSerializer):
     seo = serializers.SerializerMethodField()
     site_setting = serializers.SerializerMethodField()
     wagtail_userbar = serializers.SerializerMethodField()
+    language_code = serializers.SerializerMethodField()
+    translations = serializers.SerializerMethodField()
 
     class Meta:
         model = BasePage
@@ -33,6 +35,8 @@ class BasePageSerializer(serializers.ModelSerializer):
             "seo",
             "site_setting",
             "wagtail_userbar",
+            "language_code",
+            "translations",
         ]
 
     def get_seo(self, page):
@@ -62,3 +66,17 @@ class BasePageSerializer(serializers.ModelSerializer):
         return {
             "html": html,
         }
+
+    def get_language_code(self, page):
+        return getattr(page.locale, "language_code", "en")
+
+    def get_translations(self, page):
+        translations = page.get_translations(inclusive=False)
+        return [
+            {
+                "title": x.title,
+                "url": x.full_url,
+                "language_code": getattr(x.locale, "language_code", "en"),
+            }
+            for x in translations
+        ]

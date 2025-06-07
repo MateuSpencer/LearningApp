@@ -16,18 +16,8 @@ class Post(TimestampMixin, models.Model):
         ("archived", "Archived"),
     )
 
-    LANGUAGE_CHOICES = (
-        ("en", "English"),
-        ("es", "Spanish"),
-        ("fr", "French"),
-        ("de", "German"),
-        ("pt", "Portuguese"),
-        ("it", "Italian"),
-        ("ru", "Russian"),
-        ("zh", "Chinese"),
-        ("ja", "Japanese"),
-        ("ko", "Korean"),
-    )
+    # Use centralized language configuration from Django settings
+    LANGUAGE_CHOICES = settings.LANGUAGES
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255, verbose_name="Title")

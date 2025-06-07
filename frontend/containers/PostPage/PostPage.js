@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { basePageWrap } from '../BasePage';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import posts from '../../api/posts';
 import { formatPageSlug } from '../../utils/stringUtils';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
@@ -13,6 +14,7 @@ import s from './PostPage.module.css';
 const PostPage = ({ postId, initialPostData }) => {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
+  const { t } = useTranslation();
   
   const [post, setPost] = useState(initialPostData || null);
   const [loading, setLoading] = useState(!initialPostData);
@@ -33,7 +35,7 @@ const PostPage = ({ postId, initialPostData }) => {
   useEffect(() => {
     const fetchPostData = async () => {
       if (!postId) {
-        setError('Post ID is required');
+        setError(t('postPage.postIdRequired'));
         setLoading(false);
         return;
       }
@@ -57,11 +59,11 @@ const PostPage = ({ postId, initialPostData }) => {
         
         // Handle based on error type
         if (err.status === 404) {
-          setError('Post not found. It may have been removed.');
+          setError(t('postPage.postNotFound'));
           // Redirect immediately for 404s
           router.replace('/posts');
         } else {
-          setError('Failed to load post. You may not have permission to view it.');
+          setError(t('postPage.failedToLoad'));
         }
       } finally {
         setLoading(false);
@@ -162,7 +164,7 @@ const PostPage = ({ postId, initialPostData }) => {
       }
     } catch (err) {
       console.error('Error updating post:', err);
-      setError('Failed to update post. Please try again.');
+      setError(t('postPage.failedToUpdate'));
     } finally {
       setLoading(false);
     }
@@ -192,7 +194,7 @@ const PostPage = ({ postId, initialPostData }) => {
       router.replace('/posts');
     } catch (err) {
       console.error('Error deleting post:', err);
-      setError('Failed to delete post. Please try again.');
+      setError(t('postPage.failedToDelete'));
       setShowDeleteModal(false);
       setLoading(false);
     }
@@ -222,12 +224,12 @@ const PostPage = ({ postId, initialPostData }) => {
   }, [error, post, loading, router]);
   
   if (loading) {
-    return <div className={s.loading}>Loading post...</div>;
+    return <div className={s.loading}>{t('postPage.loadingPost')}</div>;
   }
   
   // This renders briefly before redirect happens
   if (error || !post) {
-    return <div className={s.loading}>Redirecting to posts...</div>;
+    return <div className={s.loading}>{t('postPage.redirectingToPosts')}</div>;
   }
   
   // Format the page slug for display
@@ -243,10 +245,10 @@ const PostPage = ({ postId, initialPostData }) => {
         isOpen={showDeleteModal}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
-        title="Delete Post"
-        message="Are you sure you want to delete this post? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('postPage.deletePost')}
+        message={t('postPage.confirmDeleteMessage')}
+        confirmText={t('postPage.delete')}
+        cancelText={t('postPage.cancel')}
       />
       
       <div className={s.postContainer}>
@@ -257,30 +259,30 @@ const PostPage = ({ postId, initialPostData }) => {
               
               <div className={s.statusRow}>
                 <span className={`${s.statusLabel} ${s[`status${post.status.charAt(0).toUpperCase() + post.status.slice(1)}`]}`}>
-                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                  {t(`posts.status${post.status.charAt(0).toUpperCase() + post.status.slice(1)}`)}
                 </span>
               </div>
             </>
           ) : (
-            <h1 className={s.formTitle}>Edit Post</h1>
+            <h1 className={s.formTitle}>{t('postPage.editPost')}</h1>
           )}
           
           <div className={s.authorSection}>
             <div className={s.authorInfo}>
-              <span className={s.byAuthor}>Author: {post.author_name || post.author_username}</span>
-              <span className={s.postedDate}>Posted: {new Date(post.created_at).toLocaleDateString()}</span>
+              <span className={s.byAuthor}>{t('postPage.author')}: {post.author_name || post.author_username}</span>
+              <span className={s.postedDate}>{t('postPage.posted')}: {new Date(post.created_at).toLocaleDateString()}</span>
               {post.updated_at !== post.created_at && (
-                <span className={s.updatedDate}>Updated: {new Date(post.updated_at).toLocaleDateString()}</span>
+                <span className={s.updatedDate}>{t('postPage.updated')}: {new Date(post.updated_at).toLocaleDateString()}</span>
               )}
               {post.language && (
                 <div className={s.languageInfo}>
-                  <span className={s.languageLabel}>Language: </span>
+                  <span className={s.languageLabel}>{t('postPage.language')}: </span>
                   <LanguageBadge language={post.language} size="medium" />
                 </div>
               )}
               {pageAssociations && pageAssociations.length > 0 && (
                 <span className={s.associatedPages}>
-                  Associated Pages: {pageAssociations.map((association, index) => (
+                  {t('postPage.associatedPages')}: {pageAssociations.map((association, index) => (
                     <React.Fragment key={association.id}>
                       <Link 
                         href={`/wiki/${association.page_slug}`} 
@@ -303,14 +305,14 @@ const PostPage = ({ postId, initialPostData }) => {
                   className={`${s.actionButton} ${s.editButton}`}
                   disabled={loading}
                 >
-                  Edit Post
+                  {t('postPage.editPost')}
                 </button>
                 <button 
                   onClick={handleDeleteClick} 
                   className={`${s.actionButton} ${s.deleteButton}`}
                   disabled={loading}
                 >
-                  Delete Post
+                  {t('postPage.deletePost')}
                 </button>
               </div>
             )}
@@ -331,7 +333,7 @@ const PostPage = ({ postId, initialPostData }) => {
                 {error && <div className={s.errorMessage}>{error}</div>}
                 
                 <div className={s.formGroup}>
-                  <label htmlFor="title" className={s.label}>Title</label>
+                  <label htmlFor="title" className={s.label}>{t('postPage.title')}</label>
                   <input
                     id="title"
                     type="text"
@@ -344,7 +346,7 @@ const PostPage = ({ postId, initialPostData }) => {
                 </div>
                 
                 <div className={s.formGroup}>
-                  <label htmlFor="content" className={s.label}>Content</label>
+                  <label htmlFor="content" className={s.label}>{t('postPage.content')}</label>
                   <textarea
                     id="content"
                     value={editContent}
@@ -362,14 +364,14 @@ const PostPage = ({ postId, initialPostData }) => {
                     className={s.cancelButton}
                     disabled={loading}
                   >
-                    Cancel
+                    {t('postPage.cancel')}
                   </button>
                   <button 
                     onClick={handleSaveEdit} 
                     className={s.saveButton}
                     disabled={loading || !editTitle.trim() || !editContent.trim()}
                   >
-                    {loading ? 'Saving...' : 'Save Changes'}
+                    {loading ? t('postPage.saving') : t('postPage.saveChanges')}
                   </button>
                 </div>
               </div>

@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "wagtail.contrib.redirects",
     "wagtail.contrib.routable_page",
     "wagtail.contrib.settings",
+    "wagtail_localize",
+    "wagtail_localize.locales",
     "modelcluster",
     "taggit",
     "wagtail_meta_preview",
@@ -157,11 +159,19 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 TIME_ZONE = "Europe/Copenhagen"
-LANGUAGE_CODE = "en-en"
+LANGUAGE_CODE = "en"
 SITE_ID = 1
 USE_I18N = True
 USE_TZ = True
 LOCALE_PATHS = [os.path.join(BASE_DIR, "locale")]
+
+# Multi-language support configuration
+# Centralized language configuration for the backend
+WAGTAIL_I18N_ENABLED = True
+WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
+    ("en", "English"),
+    ("ru", "Русский"),
+]
 
 # Email
 DEFAULT_FROM_EMAIL = get_env("DEFAULT_FROM_EMAIL", default="noreply@example.com")

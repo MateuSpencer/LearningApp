@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTranslation } from '../../hooks/useTranslation';
+import { SUPPORTED_LANGUAGES, getLanguageInfo } from '../../config/languages';
 import Portal from '../Portal/Portal';
 import s from './LanguageSelector.module.css';
 
@@ -12,40 +13,14 @@ const LanguageSelector = ({ onToggle }) => {
 
     // Get flag emoji based on language code
     const getFlag = (langCode) => {
-        const flags = {
-            en: '🇬🇧',
-            es: '🇪🇸',
-            fr: '🇫🇷',
-            de: '🇩🇪',
-            it: '🇮🇹',
-            pt: '🇵🇹',
-            ru: '🇷🇺',
-            ja: '🇯🇵',
-            ko: '🇰🇷',
-            zh: '🇨🇳',
-            ar: '🇸🇦',
-            hi: '🇮🇳',
-        };
-        return flags[langCode] || '🌐';
+        const languageInfo = getLanguageInfo(langCode);
+        return languageInfo.flag || '🌐';
     };
     
     // Get language name based on language code
     const getLanguageName = (langCode) => {
-        const languageNames = {
-            en: 'English',
-            es: 'Español',
-            fr: 'Français',
-            de: 'Deutsch',
-            it: 'Italiano',
-            pt: 'Português',
-            ru: 'Русский',
-            ja: '日本語',
-            ko: '한국어',
-            zh: '中文',
-            ar: 'العربية',
-            hi: 'हिन्दी',
-        };
-        return languageNames[langCode] || langCode;
+        const languageInfo = getLanguageInfo(langCode);
+        return languageInfo.nativeName || languageInfo.name || langCode;
     };
     
     // Close language options when clicking outside
@@ -83,22 +58,6 @@ const LanguageSelector = ({ onToggle }) => {
         // Just update the language
     };
 
-    // Available languages for website UI
-    const availableLanguages = [
-        { code: 'en', name: 'English', direction: 'ltr' },
-        { code: 'es', name: 'Español', direction: 'ltr' },
-        { code: 'fr', name: 'Français', direction: 'ltr' },
-        { code: 'de', name: 'Deutsch', direction: 'ltr' },
-        { code: 'it', name: 'Italiano', direction: 'ltr' },
-        { code: 'pt', name: 'Português', direction: 'ltr' },
-        { code: 'ru', name: 'Русский', direction: 'ltr' },
-        { code: 'ja', name: '日本語', direction: 'ltr' },
-        { code: 'ko', name: '한국어', direction: 'ltr' },
-        { code: 'zh', name: '中文', direction: 'ltr' },
-        { code: 'ar', name: 'العربية', direction: 'rtl' },
-        { code: 'hi', name: 'हिन्दी', direction: 'ltr' }
-    ];
-
     return (
         <div className={s.LanguageSelector} ref={selectorRef}>
             <button 
@@ -130,15 +89,15 @@ const LanguageSelector = ({ onToggle }) => {
                             </div>
                             <div className={s.ModalContent}>
                                 <div className={s.LanguageGrid}>
-                                    {availableLanguages.map((lang) => (
+                                    {SUPPORTED_LANGUAGES.map((lang) => (
                                         <button 
                                             key={lang.code}
                                             className={`${s.LanguageCard} ${lang.code === language ? s.ActiveCard : ''}`}
                                             onClick={() => changeLanguage(lang.code)}
                                             disabled={isLoading}
                                         >
-                                            <span className={s.CardFlag}>{getFlag(lang.code)}</span>
-                                            <span className={s.CardName}>{lang.name}</span>
+                                            <span className={s.CardFlag}>{lang.flag}</span>
+                                            <span className={s.CardName}>{lang.nativeName}</span>
                                             {lang.code === language && <span className={s.ActiveIndicator}>✓</span>}
                                         </button>
                                     ))}

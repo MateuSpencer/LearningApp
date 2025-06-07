@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from main.mixins import TimestampMixin
 import uuid
-from django.db.models import Sum
+from django.db.models import Sum, Count
 
 
 class LearningResource(TimestampMixin, models.Model):
@@ -24,18 +24,8 @@ class LearningResource(TimestampMixin, models.Model):
         ("tool", "Tool"),
     )
 
-    LANGUAGE_CHOICES = (
-        ("en", "English"),
-        ("es", "Spanish"),
-        ("fr", "French"),
-        ("de", "German"),
-        ("pt", "Portuguese"),
-        ("it", "Italian"),
-        ("ru", "Russian"),
-        ("zh", "Chinese"),
-        ("ja", "Japanese"),
-        ("ko", "Korean"),
-    )
+    # Use centralized language configuration from Django settings
+    LANGUAGE_CHOICES = settings.LANGUAGES
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)

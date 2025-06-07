@@ -71,7 +71,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
   useEffect(() => {
     const fetchResourceData = async () => {
       if (!resourceId) {
-        setError('Resource ID is required');
+        setError(t('learningResourcePage.resourceIdRequired'));
         setLoading(false);
         return;
       }
@@ -94,7 +94,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
           setUserVotes(prev => ({ ...prev, difficulty: data.user_difficulty_vote }));
         }
       } catch (err) {
-        setError('Failed to load resource. It may have been removed or you may not have permission to view it.');
+        setError(t('learningResourcePage.failedToLoad'));
       } finally {
         setLoading(false);
       }
@@ -222,7 +222,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
             className={`${s.starButton} ${star <= qualityRating ? s.active : ''}`}
             onClick={() => handleQualityVote(star)}
             disabled={!isAuthenticated}
-            title={isAuthenticated ? `Rate ${star} out of 5` : 'Log in to vote'}
+            title={isAuthenticated ? t('learningResourcePage.rateOutOf5', { star }) : t('learningResourcePage.logInToVote')}
           >
             ★
           </button>
@@ -233,7 +233,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
   
   // If still loading or error occurred
   if (loading && !resource) {
-    return <div className={s.container}><p className={s.loading}>Loading resource...</p></div>;
+    return <div className={s.container}><p className={s.loading}>{t('learningResourcePage.loadingResource')}</p></div>;
   }
   
   if (error && !resource) {
@@ -244,9 +244,9 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
   if (!resource) {
     return (
       <div className={s.container}>
-        <h1 className={s.title}>Resource Not Found</h1>
-        <p>The learning resource you're looking for doesn't exist or has been removed.</p>
-        <Link href="/learning-resources" className={s.link}>Browse All Resources</Link>
+        <h1 className={s.title}>{t('learningResourcePage.resourceNotFound')}</h1>
+        <p>{t('learningResourcePage.resourceNotFoundMessage')}</p>
+        <Link href="/learning-resources" className={s.link}>{t('learningResourcePage.browseAllResources')}</Link>
       </div>
     );
   }
@@ -272,7 +272,7 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
       {pageAssociations.length > 0 && (
         <div className={s.associatedPagesSection}>
           <div className={s.associatedPages}>
-            <span className={s.associatedPagesLabel}>Associated Pages:</span>
+            <span className={s.associatedPagesLabel}>{t('learningResourcePage.associatedPages')}</span>
             {pageAssociations.map((association, index) => (
               <React.Fragment key={association.id}>
                 <Link 

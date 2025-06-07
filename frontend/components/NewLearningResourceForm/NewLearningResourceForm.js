@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import learningResources from '../../api/learningResources';
 import { normalizeUrl, validateUrl } from '../../utils/urlUtils';
 import urlValidationService from '../../services/urlValidationService';
@@ -39,6 +40,7 @@ const NewLearningResourceForm = ({
   // Get router and auth context
   const router = useRouter();
   const { isAuthenticated, refreshAuth } = useAuth();
+  const { t } = useTranslation();
 
   // Auto-validate URL if provided as initial value
   useEffect(() => {
@@ -89,14 +91,14 @@ const NewLearningResourceForm = ({
     
     // Basic format validation
     if (value && !isValidUrlFormat(value)) {
-      setUrlError('Please enter a valid URL (e.g., https://example.com)');
+      setUrlError(t('newLearningResourceForm.invalidUrl'));
     }
   };
   
   // Handle URL validation
   const handleValidateUrl = async () => {
     if (!url.trim()) {
-      setUrlError('URL is required');
+      setUrlError(t('newLearningResourceForm.urlRequired'));
       return;
     }
     
@@ -155,7 +157,7 @@ const NewLearningResourceForm = ({
       }
     } catch (err) {
       console.error('Error validating URL:', err);
-      setUrlError(`URL validation failed: ${err.message || 'Unknown error'}`);
+      setUrlError(`${t('newLearningResourceForm.urlValidationFailed')}: ${err.message || t('newLearningResourceForm.unknownError')}`);
       setUrlSuccess(false);
       // Unlock fields since validation failed
       setTitleLocked(false);
@@ -180,12 +182,12 @@ const NewLearningResourceForm = ({
     
     // Basic client-side validation
     if (!url.trim()) {
-      setUrlError('URL is required');
+      setUrlError(t('newLearningResourceForm.urlRequired'));
       return;
     }
     
     if (!title.trim()) {
-      setError('Title is required');
+      setError(t('newLearningResourceForm.titleRequired'));
       return;
     }
     
@@ -196,7 +198,7 @@ const NewLearningResourceForm = ({
     
     // Ensure URL was validated
     if (!urlSuccess) {
-      setUrlError('Please validate the URL before submitting');
+      setUrlError(t('newLearningResourceForm.validateBeforeSubmit'));
       return;
     }
 
@@ -223,7 +225,7 @@ const NewLearningResourceForm = ({
         if (result.status === 'duplicate_url') {
           const resourceInfo = result.existingResource ? 
             ` (Resource ID: ${result.existingResource.id.substring(0, 8)}...)` : '';
-          setUrlError(`${result.message}${resourceInfo}. Please try another URL.`);
+          setUrlError(`${result.message}${resourceInfo}. ${t('newLearningResourceForm.duplicateUrl')}`);
           setSubmitting(false);
           return;
         }
@@ -249,13 +251,13 @@ const NewLearningResourceForm = ({
       
       // Check if it's an authentication issue
       if (err.status === 401) {
-        setError('Your session has expired. Redirecting to login...');
+        setError(t('newLearningResourceForm.sessionExpired'));
         refreshAuth();
         setTimeout(() => {
           router.push('/accounts/login/');
         }, 1500);
       } else if (err.status === 403) {
-        setError('You don\'t have permission to create resources. Please make sure you are logged in.');
+        setError(t('newLearningResourceForm.permissionDenied'));
         refreshAuth();
       } else if (err.data) {
         // Handle field-specific errors from the server
@@ -267,10 +269,10 @@ const NewLearningResourceForm = ({
         } else if (err.data.detail || err.data.message) {
           setError(err.data.detail || err.data.message);
         } else {
-          setError(`Failed to create resource: ${err.message || 'Unknown error'}`);
+          setError(`${t('newLearningResourceForm.failedToAdd')}: ${err.message || t('newLearningResourceForm.unknownError')}`);
         }
       } else {
-        setError(`Failed to create resource: ${err.message || 'Unknown error'}`);
+        setError(`${t('newLearningResourceForm.failedToAdd')}: ${err.message || t('newLearningResourceForm.unknownError')}`);
       }
     } finally {
       setSubmitting(false);
@@ -279,15 +281,15 @@ const NewLearningResourceForm = ({
 
   return (
     <div className={s.formContainer}>
-      <h3 className={s.formTitle}>Add Learning Resource</h3>
+      <h3 className={s.formTitle}>{t('newLearningResourceForm.title')}</h3>
       
       {error && <div className={s.errorMessage}>{error}</div>}
       {urlError && <div className={s.errorMessage}>{urlError}</div>}
-      {urlSuccess && <div className={s.successMessage}>URL validated successfully!</div>}
+      {urlSuccess && <div className={s.successMessage}>{t('newLearningResourceForm.urlValidated')}</div>}
       
       <form onSubmit={handleSubmit} className={s.form}>
         <div className={s.formGroup}>
-          <label htmlFor="url" className={s.label}>Resource URL *</label>
+          <label htmlFor="url" className={s.label}>{t('newLearningResourceForm.urlLabel')}</label>
           <div className={s.urlInputGroup}>
             <input
               id="url"
@@ -297,7 +299,7 @@ const NewLearningResourceForm = ({
               className={`${s.input} ${urlSuccess ? s.validatedInput : ''}`}
               disabled={submitting || validating}
               required
-              placeholder="https://example.com"
+              placeholder={t('newLearningResourceForm.urlPlaceholder')}
             />
             {urlSuccess && (
               <div className={s.validationIcon}>✓</div>
@@ -309,37 +311,37 @@ const NewLearningResourceForm = ({
               disabled={submitting || validating || !url}
               title="Validates URL format, accessibility, and checks if it's already in the system"
             >
-              {validating ? 'Checking...' : 
-               urlSuccess ? '✓ Valid URL' : 
-               url !== lastValidatedUrl && lastValidatedUrl ? 'Validate New URL!' : 'Check URL'}
+              {validating ? t('newLearningResourceForm.validating') : 
+               urlSuccess ? t('newLearningResourceForm.urlValid') : 
+               url !== lastValidatedUrl && lastValidatedUrl ? t('newLearningResourceForm.validateNewUrl') : t('newLearningResourceForm.validateUrl')}
             </button>
           </div>
           {suggestedUrl && (
             <div className={s.suggestionContainer}>
-              <span>Suggested URL: </span>
+              <span>{t('newLearningResourceForm.suggestedUrl')}</span>
               <code className={s.suggestedUrl}>{suggestedUrl}</code>
               <button 
                 type="button" 
                 className={s.useSuggestedButton}
                 onClick={handleUseSuggestedUrl}
               >
-                Use this
+                {t('newLearningResourceForm.useThis')}
               </button>
             </div>
           )}
           <small className={s.hint}>
             {urlSuccess ? 
-              'URL validated successfully. You can now submit the form.' : 
+              t('newLearningResourceForm.validateSuccessHint') : 
               url !== lastValidatedUrl && lastValidatedUrl ?
-              'URL has changed since last validation. Please validate again before submitting.' :
-              'The URL of the resource you want to add. Click "Check URL" to validate it before submitting.'}
+              t('newLearningResourceForm.urlChangedValidate') :
+              t('newLearningResourceForm.validateHint')}
           </small>
         </div>
         
         <div className={s.formGroup}>
           <label htmlFor="title" className={`${s.label} ${titleLocked ? s.lockedFieldLabel : ''}`}>
             {titleLocked && <span className={s.lockIcon}>🔒</span>}
-            Title *
+            {t('newLearningResourceForm.titleLabel')}
           </label>
           <input
             id="title"
@@ -350,20 +352,20 @@ const NewLearningResourceForm = ({
             disabled={submitting || validating || titleLocked}
             required
             maxLength={255}
-            placeholder="Resource title"
+            placeholder={t('newLearningResourceForm.titlePlaceholder')}
             readOnly={titleLocked}
           />
           <small className={s.hint}>
             {titleLocked ? 
-              'Title auto-populated from YouTube video. Edit URL and validate again to change.' : 
-              'A descriptive title for the resource (required)'}
+              t('newLearningResourceForm.titleLockedHint') : 
+              t('newLearningResourceForm.titleHint')}
           </small>
         </div>
         
         <div className={s.formGroup}>
           <label htmlFor="resourceType" className={`${s.label} ${resourceTypeLocked ? s.lockedFieldLabel : ''}`}>
             {resourceTypeLocked && <span className={s.lockIcon}>🔒</span>}
-            Resource Type
+            {t('newLearningResourceForm.typeLabel')}
           </label>
           <select
             id="resourceType"
@@ -373,25 +375,25 @@ const NewLearningResourceForm = ({
             disabled={submitting || validating || resourceTypeLocked}
             readOnly={resourceTypeLocked}
           >
-            <option value="website">Website</option>
-            <option value="youtube">YouTube</option>
-            <option value="video">Video</option>
-            <option value="pdf">PDF</option>
-            <option value="article">Article</option>
-            <option value="book">Book</option>
-            <option value="course">Course</option>
-            <option value="documentation">Documentation</option>
-            <option value="tutorial">Tutorial</option>
-            <option value="image">Image</option>
-            <option value="tool">Tool</option>
+            <option value="website">{t('newLearningResourceForm.typeWebsite')}</option>
+            <option value="youtube">{t('newLearningResourceForm.typeYoutube')}</option>
+            <option value="video">{t('newLearningResourceForm.typeVideo')}</option>
+            <option value="pdf">{t('newLearningResourceForm.typePdf')}</option>
+            <option value="article">{t('newLearningResourceForm.typeArticle')}</option>
+            <option value="book">{t('newLearningResourceForm.typeBook')}</option>
+            <option value="course">{t('newLearningResourceForm.typeCourse')}</option>
+            <option value="documentation">{t('newLearningResourceForm.typeDocumentation')}</option>
+            <option value="tutorial">{t('newLearningResourceForm.typeTutorial')}</option>
+            <option value="image">{t('newLearningResourceForm.typeImage')}</option>
+            <option value="tool">{t('newLearningResourceForm.typeTool')}</option>
           </select>
           {resourceTypeLocked && (
-            <small className={s.hint}>Resource type is fixed for this URL. Edit URL and validate again to change.</small>
+            <small className={s.hint}>{t('newLearningResourceForm.typeLockedHint')}</small>
           )}
         </div>
         
         <div className={s.formGroup}>
-          <label htmlFor="language" className={s.label}>Language</label>
+          <label htmlFor="language" className={s.label}>{t('newLearningResourceForm.languageLabel')}</label>
           <ContentLanguageSelector
             id="language"
             name="language"
@@ -407,12 +409,12 @@ const NewLearningResourceForm = ({
             type="submit" 
             className={s.submitButton}
             disabled={submitting || !isAuthenticated || !urlSuccess || (url !== lastValidatedUrl && lastValidatedUrl)}
-            title={!urlSuccess ? "URL must be validated before submitting" : 
-                  (url !== lastValidatedUrl && lastValidatedUrl) ? "URL has changed - please validate again" : ""}
+            title={!urlSuccess ? t('newLearningResourceForm.urlMustBeValidated') : 
+                  (url !== lastValidatedUrl && lastValidatedUrl) ? t('newLearningResourceForm.urlChangedValidateAgain') : ""}
           >
-            {submitting ? 'Adding...' : 
-             !urlSuccess && url ? 'Validate URL First' : 
-             (url !== lastValidatedUrl && lastValidatedUrl) ? 'Validate URL First' : 'Add Resource'}
+            {submitting ? t('newLearningResourceForm.adding') : 
+             !urlSuccess && url ? t('newLearningResourceForm.validateUrlFirst') : 
+             (url !== lastValidatedUrl && lastValidatedUrl) ? t('newLearningResourceForm.validateUrlFirst') : t('newLearningResourceForm.add')}
           </button>
           
           <button 
@@ -421,7 +423,7 @@ const NewLearningResourceForm = ({
             onClick={onCancel}
             disabled={submitting}
           >
-            Cancel
+            {t('newLearningResourceForm.cancel')}
           </button>
         </div>
       </form>

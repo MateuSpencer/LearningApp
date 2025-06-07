@@ -213,7 +213,12 @@ const LearningResourceItem = ({
   // Format difficulty level for display
   const formatDifficultyLevel = (level) => {
     if (!level) return t('learningResources.notRated');
-    return level.charAt(0).toUpperCase() + level.slice(1);
+    switch (level) {
+      case 'beginner': return t('difficulty.beginner');
+      case 'moderate': return t('difficulty.moderate');
+      case 'advanced': return t('difficulty.advanced');
+      default: return level.charAt(0).toUpperCase() + level.slice(1);
+    }
   };
   
   // Get CSS class for difficulty level

@@ -5,12 +5,14 @@ import SearchBar from '../../components/SearchBar';
 import WikiSearchResults from '../../components/WikiSearchResults';
 import useWikiSearch from '../../hooks/useWikiSearch';
 import { useRouter } from 'next/router';
-import { useLanguage } from '../../context/LanguageContext'; // Import useLanguage
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import s from './WikiIndexPage.module.css';
 
 const WikiIndexPage = ({ title }) => {
   const router = useRouter();
-  const { language } = useLanguage(); // Get language from context
+  const { language } = useLanguage();
+  const { t } = useTranslation();
   
   // Custom hook for handling search
   const { query, setQuery, results, loading, error } = useWikiSearch();
@@ -70,11 +72,11 @@ const WikiIndexPage = ({ title }) => {
 
   return (
     <div className={s.container}>
-      <h1 className={s.title}>Wiki Explorer</h1>
+      <h1 className={s.title}>{t('wiki.searchWiki')}</h1>
       
       <div className={s.searchContainer}>
         <SearchBar 
-          placeholder="Search for articles..." 
+          placeholder={t('wiki.searchPlaceholder')} 
           onInputChange={handleSearchInput}
           onSearch={handleSearch}
           initialQuery={query}
@@ -97,15 +99,8 @@ const WikiIndexPage = ({ title }) => {
       {/* Instructions when no search is active */}
       {!query && !results.length && !loading && !error && (
         <div className={s.instructions}>
-          <h2>Welcome to Wiki Explorer!</h2>
-          <p>Type in the search bar above to find wiki articles.</p>
-          <p>For example, you can try searching for:</p>
-          <ul>
-            <li>JavaScript</li>
-            <li>Python programming</li>
-            <li>Machine learning</li>
-            <li>Web development</li>
-          </ul>
+          <h2>{t('wiki.searchWiki')}</h2>
+          <p>{t('wiki.searchHint')}</p>
         </div>
       )}
     </div>

@@ -1,17 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import WikiLink from '../WikiLink';
+import { useTranslation } from '../../hooks/useTranslation';
 import s from './WikiSearchResults.module.css';
 
 /**
  * Display wiki search results with formatting similar to Wikipedia
  */
 const WikiSearchResults = ({ results, loading, error, query }) => {
+  const { t } = useTranslation();
+  
   if (loading) {
     return (
       <div className={s.searchResults}>
         <div className={s.loadingContainer}>
-          <p className={s.loadingText}>Searching for "{query}"...</p>
+          <p className={s.loadingText}>{t('wiki.searchFor', { query })}</p>
         </div>
       </div>
     );
@@ -32,8 +35,8 @@ const WikiSearchResults = ({ results, loading, error, query }) => {
       return (
         <div className={s.searchResults}>
           <div className={s.noResults}>
-            <p className={s.noResultsText}>No results found for "{query}"</p>
-            <p className={s.helpText}>Try different keywords or check your spelling.</p>
+            <p className={s.noResultsText}>{t('wiki.searchFor', { query })}</p>
+            <p className={s.helpText}>{t('wiki.tryAgain')}</p>
           </div>
         </div>
       );
@@ -43,8 +46,8 @@ const WikiSearchResults = ({ results, loading, error, query }) => {
   
   return (
     <div className={s.searchResults}>
-      <h2 className={s.resultsHeading}>Search results for "{query}"</h2>
-      <p className={s.resultCount}>{results.length} {results.length === 1 ? 'result' : 'results'} found</p>
+      <h2 className={s.resultsHeading}>{t('wiki.searchFor', { query })}</h2>
+      <p className={s.resultCount}>{t('wiki.resultsFound', { count: results.length })}</p>
       
       <ul className={s.resultsList}>
         {results.map((result) => (
@@ -66,7 +69,7 @@ const WikiSearchResults = ({ results, loading, error, query }) => {
       
       {results.length > 5 && (
         <div className={s.resultFooter}>
-          <p className={s.footerNote}>Showing {results.length} results. Try refining your search for more specific results.</p>
+          <p className={s.footerNote}>{t('wiki.resultsFound', { count: results.length })}. {t('wiki.tryAgain')}</p>
         </div>
       )}
     </div>

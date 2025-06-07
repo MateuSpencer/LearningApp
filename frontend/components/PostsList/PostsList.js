@@ -7,6 +7,7 @@ import { PostsFilter, PostsSort, PostsPagination } from '../PostsControls';
 import ConfirmationModal from '../ConfirmationModal';
 import usePosts from '../../hooks/usePosts';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import s from './PostsList.module.css';
 
 /**
@@ -28,6 +29,7 @@ const PostsList = ({
   fixedFilters = {}
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const LOGIN_URL = '/accounts/login/';
   
   // Track changes to dependencies 
@@ -392,14 +394,14 @@ const PostsList = ({
         isOpen={deleteModalOpen}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
-        title="Delete Post"
-        message="Are you sure you want to delete this post? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('posts.deleteTitle')}
+        message={t('posts.deleteMessage')}
+        confirmText={t('posts.deleteConfirm')}
+        cancelText={t('posts.deleteCancel')}
       />
       
       {/* Add centered title inside the container */}
-      <h2 className={s.centeredTitle}>Posts</h2>
+      <h2 className={s.centeredTitle}>{t('posts.title')}</h2>
       
       <div className={s.controlsWrapper}>
         <div className={s.controlsBar}>
@@ -409,11 +411,11 @@ const PostsList = ({
               className={`${s.iconButton} ${showFilters ? s.active : ''}`}
               onClick={toggleFilters}
               disabled={controlsDisabled}
-              aria-label="Toggle filters"
-              title="Toggle filters"
+              aria-label={t('posts.toggleFilters')}
+              title={t('posts.toggleFilters')}
             >
               <span className={s.icon}><FilterIcon /></span>
-              <span className={s.iconText}>Filter</span>
+              <span className={s.iconText}>{t('posts.filter')}</span>
             </button>
             
             {/* Sort toggle button */}
@@ -421,11 +423,11 @@ const PostsList = ({
               className={`${s.iconButton} ${showSort ? s.active : ''}`}
               onClick={toggleSort}
               disabled={controlsDisabled}
-              aria-label="Toggle sort options"
-              title="Toggle sort options"
+              aria-label={t('posts.toggleSort')}
+              title={t('posts.toggleSort')}
             >
               <span className={s.icon}><SortIcon /></span>
-              <span className={s.iconText}>Sort</span>
+              <span className={s.iconText}>{t('posts.sort')}</span>
             </button>
             
             {/* Search input - always visible */}
@@ -433,7 +435,7 @@ const PostsList = ({
               <input
                 type="text"
                 className={s.searchInput}
-                placeholder="Search posts..."
+                placeholder={t('posts.searchPlaceholder')}
                 value={searchValue}
                 onChange={handleSearchChange}
                 disabled={controlsDisabled}
@@ -446,7 +448,7 @@ const PostsList = ({
                     updateFilter('search', '');
                   }}
                   disabled={controlsDisabled}
-                  aria-label="Clear search"
+                  aria-label={t('posts.clearSearch')}
                 >
                   ✕
                 </button>
@@ -498,22 +500,22 @@ const PostsList = ({
       </div>
       
       {/* Show authentication-related errors */}
-      {authLoading && <p className={s.loading}>Checking authentication...</p>}
+      {authLoading && <p className={s.loading}>{t('posts.checkingAuth')}</p>}
       {authError && (
         <div className={s.errorContainer}>
-          <p className={s.error}>Authentication error: {authError}</p>
+          <p className={s.error}>{t('posts.authError')}: {authError}</p>
         </div>
       )}
       
       {/* Show post loading and errors */}
-      {loading && <p className={s.loading}>Loading posts...</p>}
+      {loading && <p className={s.loading}>{t('posts.loading')}</p>}
       {error && <p className={s.error}>{error}</p>}
       
       {!loading && !error && posts.length === 0 && (
         <p className={s.emptyMessage}>
           {showOnlyMyPosts 
-            ? "You haven't created any posts yet."
-            : "No posts yet. Be the first to contribute!"}
+            ? t('posts.noPostsUser')
+            : t('posts.noPostsEmpty')}
         </p>
       )}
       

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { LANGUAGE_OPTIONS } from '../ContentLanguageSelector/ContentLanguageSelector';
+import { SUPPORTED_LANGUAGES } from '../../config/languages';
 import styles from './LanguageBadge.module.css';
 
 /**
@@ -13,8 +13,8 @@ const LanguageBadge = ({
 }) => {
   if (!language) return null;
 
-  const languageOption = LANGUAGE_OPTIONS.find(option => option.value === language);
-  const languageLabel = languageOption ? languageOption.label : language.toUpperCase();
+  const languageOption = SUPPORTED_LANGUAGES.find(lang => lang.code === language);
+  const languageLabel = languageOption ? languageOption.name : language.toUpperCase();
 
   return (
     <span 

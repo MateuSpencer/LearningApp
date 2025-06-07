@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from '../../hooks/useTranslation';
 import styles from './PostsSort.module.css';
 
 /**
@@ -11,6 +12,8 @@ const PostsSort = ({
   onSortChange,
   disabled = false 
 }) => {
+  const { t } = useTranslation();
+  
   const handleSortChange = (e) => {
     const value = e.target.value;
     onSortChange(value);
@@ -18,15 +21,15 @@ const PostsSort = ({
 
   return (
     <div className={styles.container}>
-      <label className={styles.sortLabel}>Sort by:</label>
+      <label className={styles.sortLabel}>{t('posts.sortBy')}:</label>
       <select
         className={styles.sortSelect}
         value={order}
         onChange={handleSortChange}
         disabled={disabled}
       >
-        <option value="newest">Newest First</option>
-        <option value="oldest">Oldest First</option>
+        <option value="newest">{t('posts.newestFirst')}</option>
+        <option value="oldest">{t('posts.oldestFirst')}</option>
       </select>
     </div>
   );

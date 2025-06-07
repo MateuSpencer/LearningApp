@@ -613,10 +613,10 @@ const LearningResourcesList = ({
               className={`${s.iconButton} ${showFilters ? s.active : ''}`}
               onClick={toggleFilters}
               disabled={controlsDisabled}
-              aria-label="Show filters"
+              aria-label={t('learningResourcesPage.showFilters')}
             >
               <span className={s.icon}><FilterIcon /></span>
-              <span className={s.iconText}>Filter</span>
+              <span className={s.iconText}>{t('learningResourcesPage.filter')}</span>
             </button>
             
             {/* Sort button */}
@@ -624,10 +624,10 @@ const LearningResourcesList = ({
               className={`${s.iconButton} ${showSort ? s.active : ''}`}
               onClick={toggleSort}
               disabled={controlsDisabled}
-              aria-label="Show sort options"
+              aria-label={t('learningResourcesPage.showSortOptions')}
             >
               <span className={s.icon}><SortIcon /></span>
-              <span className={s.iconText}>Sort</span>
+              <span className={s.iconText}>{t('learningResourcesPage.sort')}</span>
             </button>
           </div>
           
@@ -636,7 +636,7 @@ const LearningResourcesList = ({
             <input
               type="text"
               className={s.searchInput}
-              placeholder="Search resources..."
+              placeholder={t('learningResourcesPage.searchPlaceholder')}
               value={searchValue}
               onChange={handleSearchChange}
               disabled={controlsDisabled}
@@ -701,8 +701,8 @@ const LearningResourcesList = ({
       {/* Empty state */}
       {!loading && !error && resources.length === 0 && (
         <div className={s.emptyMessage}>
-          <p>{showAll ? 'No learning resources have been added yet.' : 'No learning resources have been added to this page yet.'}</p>
-          {showAddButton && <p>Click "Add Resource" to be the first!</p>}
+          <p>{showAll ? t('learningResourcesPage.noResourcesGlobal') : t('learningResourcesPage.noResourcesPage')}</p>
+          {showAddButton && <p>{t('learningResourcesPage.clickAddFirst')}</p>}
         </div>
       )}
       

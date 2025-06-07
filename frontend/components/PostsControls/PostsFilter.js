@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import ContentLanguageSelector from '../ContentLanguageSelector';
+import { useTranslation } from '../../hooks/useTranslation';
 import styles from './PostsFilter.module.css';
 
 /**
@@ -15,6 +16,8 @@ const PostsFilter = ({
   allowedFilters = ['status'],
   disabled = false 
 }) => {
+  const { t } = useTranslation();
+  
   // Add state for managing the search input independently
   const [searchValue, setSearchValue] = useState(filters.search || '');
   // Reference to store the timeout ID for debouncing
@@ -58,30 +61,30 @@ const PostsFilter = ({
     <div className={styles.container}>
       {allowedFilters.includes('status') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Status:</label>
+          <label className={styles.filterLabel}>{t('posts.filterByStatus')}:</label>
           <select
             className={styles.filterSelect}
             value={filters.status || 'all'}
             onChange={(e) => handleFilterChange('status', e.target.value)}
             disabled={disabled}
           >
-            <option value="all">All Posts</option>
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
+            <option value="all">{t('posts.allPosts')}</option>
+            <option value="published">{t('posts.statusPublished')}</option>
+            <option value="draft">{t('posts.statusDraft')}</option>
+            <option value="archived">{t('posts.statusArchived')}</option>
           </select>
         </div>
       )}
 
       {allowedFilters.includes('language') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Language:</label>
+          <label className={styles.filterLabel}>{t('posts.filterByLanguage')}:</label>
           <ContentLanguageSelector
             value={filters.language || ''}
             onChange={(value) => handleFilterChange('language', value)}
             disabled={disabled}
             showAllOption={true}
-            allOptionLabel="All Languages"
+            allOptionLabel={t('posts.allLanguages')}
             className={styles.filterSelect}
           />
         </div>
@@ -92,7 +95,7 @@ const PostsFilter = ({
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Search posts..."
+            placeholder={t('posts.searchPlaceholder')}
             value={searchValue}
             onChange={handleSearchChange}
             disabled={disabled}
@@ -102,11 +105,11 @@ const PostsFilter = ({
 
       {allowedFilters.includes('author') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Author:</label>
+          <label className={styles.filterLabel}>{t('posts.filterByAuthor')}:</label>
           <input
             type="text"
             className={styles.filterInput}
-            placeholder="Enter author username..."
+            placeholder={t('posts.authorPlaceholder')}
             value={filters.author || ''}
             onChange={(e) => handleFilterChange('author', e.target.value)}
             disabled={disabled}
@@ -116,28 +119,28 @@ const PostsFilter = ({
 
       {allowedFilters.includes('timeframe') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Date Range:</label>
+          <label className={styles.filterLabel}>{t('posts.dateRange')}:</label>
           <div className={styles.dateRangeContainer}>
             <div className={styles.dateInputWrapper}>
-              <label className={styles.dateLabel}>From:</label>
+              <label className={styles.dateLabel}>{t('posts.from')}:</label>
               <DatePicker
                 selected={filters.created_after ? new Date(filters.created_after) : null}
                 onChange={(date) => handleFilterChange('created_after_date', date)}
                 className={styles.dateInput}
                 dateFormat="yyyy-MM-dd"
-                placeholderText="Select start date"
+                placeholderText={t('posts.selectStartDate')}
                 disabled={disabled}
                 isClearable
               />
             </div>
             <div className={styles.dateInputWrapper}>
-              <label className={styles.dateLabel}>To:</label>
+              <label className={styles.dateLabel}>{t('posts.to')}:</label>
               <DatePicker
                 selected={filters.created_before ? new Date(filters.created_before) : null}
                 onChange={(date) => handleFilterChange('created_before_date', date)}
                 className={styles.dateInput}
                 dateFormat="yyyy-MM-dd"
-                placeholderText="Select end date"
+                placeholderText={t('posts.selectEndDate')}
                 disabled={disabled}
                 isClearable
               />
@@ -152,7 +155,7 @@ const PostsFilter = ({
           onClick={() => onFilterChange(null, null, true)}
           disabled={disabled}
         >
-          Clear Filters
+          {t('posts.clearFilters')}
         </button>
       )}
     </div>

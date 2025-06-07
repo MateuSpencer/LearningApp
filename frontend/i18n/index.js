@@ -9,30 +9,17 @@
  */
 
 import i18next from 'i18next';
+import { LANGUAGE_CODES, DEFAULT_LANGUAGE, isLanguageSupported } from '../config/languages';
 
-// Import all translation files
+// Import only supported translation files
 import en from './translations/en.json';
-import es from './translations/es.json';
-import fr from './translations/fr.json';
-import de from './translations/de.json';
-import it from './translations/it.json';
-import pt from './translations/pt.json';
-import sv from './translations/sv.json';
 import ru from './translations/ru.json';
-import ja from './translations/ja.json';
-import zh from './translations/zh.json';
-import ar from './translations/ar.json';
-import hi from './translations/hi.json';
-import ko from './translations/ko.json';
-
-// Available languages
-const availableLanguages = ['en', 'es', 'fr', 'de', 'it', 'pt', 'sv', 'ru', 'ja', 'zh', 'ar', 'hi', 'ko'];
 
 // Only initialize if not already initialized
 if (!i18next.isInitialized) {
     i18next.init({
-        lng: 'en', // default language
-        fallbackLng: 'en',
+        lng: DEFAULT_LANGUAGE, // default language
+        fallbackLng: DEFAULT_LANGUAGE,
         debug: false, // Disabled debug logging
         logger: {
             warn: () => {}, // Suppress warning logs
@@ -43,35 +30,24 @@ if (!i18next.isInitialized) {
         },
         resources: {
             en: { translation: en },
-            es: { translation: es },
-            fr: { translation: fr },
-            de: { translation: de },
-            it: { translation: it },
-            pt: { translation: pt },
-            sv: { translation: sv },
             ru: { translation: ru },
-            ja: { translation: ja },
-            zh: { translation: zh },
-            ar: { translation: ar },
-            hi: { translation: hi },
-            ko: { translation: ko },
         },
     });
 }
 
 // Get current language
-export const getCurrentLanguage = () => i18next.language || 'en';
+export const getCurrentLanguage = () => i18next.language || DEFAULT_LANGUAGE;
 
 // Change language
 export const changeLanguage = (langCode) => {
-    if (availableLanguages.includes(langCode)) {
+    if (isLanguageSupported(langCode)) {
         return i18next.changeLanguage(langCode);
     }
     return Promise.reject(new Error(`Language ${langCode} not supported`));
 };
 
 // Get available languages
-export const getAvailableLanguages = () => availableLanguages;
+export const getAvailableLanguages = () => LANGUAGE_CODES;
 
 // Translation function with better error handling
 export const t = (key, options = {}) => {

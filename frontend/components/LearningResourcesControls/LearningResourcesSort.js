@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from '../../hooks/useTranslation';
 import styles from './LearningResourcesSort.module.css';
 
 /**
@@ -13,6 +14,8 @@ const LearningResourcesSort = ({
   allowedSortFields = ['quality_vote_sum', 'created_at', 'updated_at', 'quality_vote_count'],
   disabled = false 
 }) => {
+  const { t } = useTranslation();
+  
   const handleSortChange = (e) => {
     const value = e.target.value;
     // Extract field and direction from value (e.g., "created_at:desc")
@@ -25,7 +28,7 @@ const LearningResourcesSort = ({
 
   return (
     <div className={styles.container}>
-      <label className={styles.sortLabel}>Sort by:</label>
+      <label className={styles.sortLabel}>{t('learningResourcesPage.sortBy')}:</label>
       <select
         className={styles.sortSelect}
         value={currentValue}
@@ -35,29 +38,29 @@ const LearningResourcesSort = ({
         {/* Add quality score sorting options */}
         {allowedSortFields.includes('quality_vote_sum') && (
           <>
-            <option value="quality_vote_sum:desc">Highest Quality First</option>
-            <option value="quality_vote_sum:asc">Lowest Quality First</option>
+            <option value="quality_vote_sum:desc">{t('learningResourcesPage.sortHighestQuality')}</option>
+            <option value="quality_vote_sum:asc">{t('learningResourcesPage.sortLowestQuality')}</option>
           </>
         )}
         
         {allowedSortFields.includes('quality_vote_count') && (
           <>
-            <option value="quality_vote_count:desc">Most Voted First</option>
-            <option value="quality_vote_count:asc">Least Voted First</option>
+            <option value="quality_vote_count:desc">{t('learningResourcesPage.sortMostVoted')}</option>
+            <option value="quality_vote_count:asc">{t('learningResourcesPage.sortLeastVoted')}</option>
           </>
         )}
         
         {allowedSortFields.includes('created_at') && (
           <>
-            <option value="created_at:desc">Newest First</option>
-            <option value="created_at:asc">Oldest First</option>
+            <option value="created_at:desc">{t('learningResourcesPage.sortNewest')}</option>
+            <option value="created_at:asc">{t('learningResourcesPage.sortOldest')}</option>
           </>
         )}
         
         {allowedSortFields.includes('updated_at') && (
           <>
-            <option value="updated_at:desc">Recently Updated</option>
-            <option value="updated_at:asc">Least Recently Updated</option>
+            <option value="updated_at:desc">{t('learningResourcesPage.sortRecentlyUpdated')}</option>
+            <option value="updated_at:asc">{t('learningResourcesPage.sortLeastRecentlyUpdated')}</option>
           </>
         )}
       </select>

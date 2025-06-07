@@ -1,19 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { SUPPORTED_LANGUAGES } from '../../config/languages';
 import styles from './ContentLanguageSelector.module.css';
 
-const LANGUAGE_OPTIONS = [
-  { value: 'en', label: 'English' },
-  { value: 'es', label: 'Spanish' },
-  { value: 'fr', label: 'French' },
-  { value: 'de', label: 'German' },
-  { value: 'pt', label: 'Portuguese' },
-  { value: 'it', label: 'Italian' },
-  { value: 'ru', label: 'Russian' },
-  { value: 'zh', label: 'Chinese' },
-  { value: 'ja', label: 'Japanese' },
-  { value: 'ko', label: 'Korean' }
-];
+// Content languages based on the centralized language configuration
+const CONTENT_LANGUAGE_OPTIONS = SUPPORTED_LANGUAGES.map(lang => ({
+  value: lang.code,
+  label: lang.name
+}));
 
 /**
  * Reusable content language selector component
@@ -51,7 +45,7 @@ const ContentLanguageSelector = ({
       {showAllOption && (
         <option value="">{allOptionLabel}</option>
       )}
-      {LANGUAGE_OPTIONS.map((option) => (
+      {CONTENT_LANGUAGE_OPTIONS.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
         </option>
@@ -74,4 +68,4 @@ ContentLanguageSelector.propTypes = {
 };
 
 export default ContentLanguageSelector;
-export { LANGUAGE_OPTIONS };
+export { CONTENT_LANGUAGE_OPTIONS };

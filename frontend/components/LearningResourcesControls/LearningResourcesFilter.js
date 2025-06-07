@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import ContentLanguageSelector from '../ContentLanguageSelector';
+import { useTranslation } from '../../hooks/useTranslation';
 import styles from './LearningResourcesFilter.module.css';
 
 /**
@@ -15,6 +16,8 @@ const LearningResourcesFilter = ({
   allowedFilters = ['type'],
   disabled = false 
 }) => {
+  const { t } = useTranslation();
+  
   // Add state for managing the search input independently
   const [searchValue, setSearchValue] = useState(filters.search || '');
   // Reference to store the timeout ID for debouncing
@@ -58,55 +61,55 @@ const LearningResourcesFilter = ({
     <div className={styles.container}>
       {allowedFilters.includes('type') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Type:</label>
+          <label className={styles.filterLabel}>{t('learningResourcesPage.filterByType')}:</label>
           <select
             className={styles.filterSelect}
             value={filters.type || 'all'}
             onChange={(e) => handleFilterChange('type', e.target.value)}
             disabled={disabled}
           >
-      <option value="all">All Types</option>
-      <option value="youtube">YouTube</option>
-      <option value="video">Video</option>
-      <option value="pdf">PDF</option>
-      <option value="image">Image</option>
-      <option value="website">Website</option>
-      <option value="article">Article</option>
-      <option value="book">Book</option>
-      <option value="course">Course</option>
-      <option value="documentation">Documentation</option>
-      <option value="tutorial">Tutorial</option>
-      <option value="tool">Tool</option>
+      <option value="all">{t('learningResourcesPage.allTypes')}</option>
+      <option value="youtube">{t('learningResourcesPage.typeYoutube')}</option>
+      <option value="video">{t('learningResourcesPage.typeVideo')}</option>
+      <option value="pdf">{t('learningResourcesPage.typePdf')}</option>
+      <option value="image">{t('learningResourcesPage.typeImage')}</option>
+      <option value="website">{t('learningResourcesPage.typeWebsite')}</option>
+      <option value="article">{t('learningResourcesPage.typeArticle')}</option>
+      <option value="book">{t('learningResourcesPage.typeBook')}</option>
+      <option value="course">{t('learningResourcesPage.typeCourse')}</option>
+      <option value="documentation">{t('learningResourcesPage.typeDocumentation')}</option>
+      <option value="tutorial">{t('learningResourcesPage.typeTutorial')}</option>
+      <option value="tool">{t('learningResourcesPage.typeTool')}</option>
           </select>
         </div>
       )}
 
       {allowedFilters.includes('difficulty') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Difficulty:</label>
+          <label className={styles.filterLabel}>{t('learningResourcesPage.filterByDifficulty')}:</label>
           <select
             className={styles.filterSelect}
             value={filters.difficulty || 'all'}
             onChange={(e) => handleFilterChange('difficulty', e.target.value)}
             disabled={disabled}
           >
-            <option value="all">All Levels</option>
-            <option value="beginner">Beginner</option>
-            <option value="moderate">Moderate</option>
-            <option value="advanced">Advanced</option>
+            <option value="all">{t('learningResourcesPage.allLevels')}</option>
+            <option value="beginner">{t('learningResourcesPage.difficultyBeginner')}</option>
+            <option value="moderate">{t('learningResourcesPage.difficultyModerate')}</option>
+            <option value="advanced">{t('learningResourcesPage.difficultyAdvanced')}</option>
           </select>
         </div>
       )}
 
       {allowedFilters.includes('language') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Language:</label>
+          <label className={styles.filterLabel}>{t('learningResourcesPage.filterByLanguage')}:</label>
           <ContentLanguageSelector
             value={filters.language || ''}
             onChange={(value) => handleFilterChange('language', value)}
             disabled={disabled}
             showAllOption={true}
-            allOptionLabel="All Languages"
+            allOptionLabel={t('learningResourcesPage.allLanguages')}
             className={styles.filterSelect}
           />
         </div>
@@ -114,47 +117,47 @@ const LearningResourcesFilter = ({
 
       {allowedFilters.includes('category') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Category:</label>
+          <label className={styles.filterLabel}>{t('learningResourcesPage.filterByCategory')}:</label>
           <select
             className={styles.filterSelect}
             value={filters.resource_category || 'all'}
             onChange={(e) => handleFilterChange('resource_category', e.target.value)}
             disabled={disabled}
           >
-            <option value="all">All Categories</option>
-            <option value="video">Videos</option>
-            <option value="document">Documents</option>
-            <option value="website">Websites</option>
-            <option value="course">Courses</option>
-            <option value="image">Images</option>
+            <option value="all">{t('learningResourcesPage.allCategories')}</option>
+            <option value="video">{t('learningResourcesPage.categoryVideos')}</option>
+            <option value="document">{t('learningResourcesPage.categoryDocuments')}</option>
+            <option value="website">{t('learningResourcesPage.categoryWebsites')}</option>
+            <option value="course">{t('learningResourcesPage.categoryCourses')}</option>
+            <option value="image">{t('learningResourcesPage.categoryImages')}</option>
           </select>
         </div>
       )}
 
       {allowedFilters.includes('timeframe') && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Date Range:</label>
+          <label className={styles.filterLabel}>{t('learningResourcesPage.dateRange')}:</label>
           <div className={styles.dateRangeContainer}>
             <div className={styles.dateInputWrapper}>
-              <label className={styles.dateLabel}>From:</label>
+              <label className={styles.dateLabel}>{t('learningResourcesPage.from')}:</label>
               <DatePicker
                 selected={filters.created_after ? new Date(filters.created_after) : null}
                 onChange={(date) => handleFilterChange('created_after_date', date)}
                 className={styles.dateInput}
                 dateFormat="yyyy-MM-dd"
-                placeholderText="Select start date"
+                placeholderText={t('learningResourcesPage.selectStartDate')}
                 disabled={disabled}
                 isClearable
               />
             </div>
             <div className={styles.dateInputWrapper}>
-              <label className={styles.dateLabel}>To:</label>
+              <label className={styles.dateLabel}>{t('learningResourcesPage.to')}:</label>
               <DatePicker
                 selected={filters.created_before ? new Date(filters.created_before) : null}
                 onChange={(date) => handleFilterChange('created_before_date', date)}
                 className={styles.dateInput}
                 dateFormat="yyyy-MM-dd"
-                placeholderText="Select end date"
+                placeholderText={t('learningResourcesPage.selectEndDate')}
                 disabled={disabled}
                 isClearable
               />
@@ -168,7 +171,7 @@ const LearningResourcesFilter = ({
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Search resources..."
+            placeholder={t('learningResourcesPage.searchPlaceholder')}
             value={searchValue}
             onChange={handleSearchChange}
             disabled={disabled}
@@ -182,7 +185,7 @@ const LearningResourcesFilter = ({
           onClick={() => onFilterChange(null, null, true)}
           disabled={disabled}
         >
-          Clear Filters
+          {t('learningResourcesPage.clearFilters')}
         </button>
       )}
     </div>

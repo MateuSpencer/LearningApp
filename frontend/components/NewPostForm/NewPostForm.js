@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 import { httpPost } from '../../utils/Http';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import ContentLanguageSelector from '../ContentLanguageSelector';
 import s from './NewPostForm.module.css';
 
 const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('published');
@@ -55,12 +57,12 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
     e.preventDefault();
     
     if (!title.trim()) {
-      setError('Title is required');
+      setError(t('newPostForm.titleRequired'));
       return;
     }
     
     if (!content.trim()) {
-      setError('Content is required');
+      setError(t('newPostForm.contentRequired'));
       return;
     }
     
@@ -96,13 +98,13 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
       
       // Check if it's an authentication issue (401 Unauthorized)
       if (err.status === 401) {
-        setError('Your session has expired. Redirecting to login...');
+        setError(t('newPostForm.sessionExpired'));
         refreshAuth();
         setTimeout(() => {
           router.push('/accounts/login/');
         }, 1500);
       } else if (err.status === 403) {
-        setError('You don\'t have permission to create a post. Please make sure you are logged in.');
+        setError(t('newPostForm.permissionDenied'));
         refreshAuth();
       } else if (err.data) {
         // Handle field-specific errors from the server
@@ -114,10 +116,10 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
         } else if (err.data.detail || err.data.message) {
           setError(err.data.detail || err.data.message);
         } else {
-          setError(`Failed to create post: ${err.message || 'Unknown error'}`);
+          setError(`${t('newPostForm.failedToCreate')}: ${err.message || t('newPostForm.unknownError')}`);
         }
       } else {
-        setError(`Failed to create post: ${err.message || 'Unknown error'}`);
+        setError(`${t('newPostForm.failedToCreate')}: ${err.message || t('newPostForm.unknownError')}`);
       }
     } finally {
       setSubmitting(false);
@@ -126,13 +128,13 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
 
   return (
     <div className={s.formContainer}>
-      <h3 className={s.formTitle}>Share Your Thoughts</h3>
+      <h3 className={s.formTitle}>{t('newPostForm.title')}</h3>
       
       {error && <div className={s.errorMessage}>{error}</div>}
       
       <form onSubmit={handleSubmit} className={s.form}>
         <div className={s.formGroup}>
-          <label htmlFor="title" className={s.label}>Title *</label>
+          <label htmlFor="title" className={s.label}>{t('newPostForm.titleLabel')}</label>
           <input
             id="title"
             type="text"
@@ -141,12 +143,12 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             className={s.input}
             disabled={submitting || !isAuthenticated}
             required
-            placeholder="Enter a title for your post"
+            placeholder={t('newPostForm.titlePlaceholder')}
           />
         </div>
         
         <div className={s.formGroup}>
-          <label htmlFor="content" className={s.label}>Content *</label>
+          <label htmlFor="content" className={s.label}>{t('newPostForm.contentLabel')}</label>
           <textarea
             id="content"
             value={content}
@@ -155,12 +157,12 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             disabled={submitting || !isAuthenticated}
             rows={5}
             required
-            placeholder="Share your knowledge, ideas, or questions..."
+            placeholder={t('newPostForm.contentPlaceholder')}
           />
         </div>
         
         <div className={s.formGroup}>
-          <label htmlFor="language" className={s.label}>Language</label>
+          <label htmlFor="language" className={s.label}>{t('newPostForm.languageLabel')}</label>
           <ContentLanguageSelector
             id="language"
             name="language"
@@ -172,7 +174,7 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
         </div>
         
         <div className={s.formGroup}>
-          <label htmlFor="status" className={s.label}>Status</label>
+          <label htmlFor="status" className={s.label}>{t('newPostForm.statusLabel')}</label>
           <select
             id="status"
             value={status}
@@ -180,9 +182,9 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             className={s.select}
             disabled={submitting || !isAuthenticated}
           >
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
+            <option value="published">{t('newPostForm.statusPublished')}</option>
+            <option value="draft">{t('newPostForm.statusDraft')}</option>
+            <option value="archived">{t('newPostForm.statusArchived')}</option>
           </select>
         </div>
         
@@ -193,14 +195,14 @@ const NewPostForm = ({ pageSlug, onSubmit, onCancel }) => {
             className={s.cancelButton}
             disabled={submitting}
           >
-            Cancel
+            {t('newPostForm.cancel')}
           </button>
           <button 
             type="submit" 
             className={s.submitButton}
             disabled={submitting || !isAuthenticated || !title.trim() || !content.trim()}
           >
-            {submitting ? 'Posting...' : 'Post'}
+            {submitting ? t('newPostForm.posting') : t('newPostForm.post')}
           </button>
         </div>
       </form>

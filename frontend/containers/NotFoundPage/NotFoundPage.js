@@ -1,22 +1,25 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import s from './NotFoundPage.module.css';
 
 const NotFoundPage = ({ exception }) => {
+    const { t } = useTranslation();
+    
     return (
         <div className={s.Container}>
             <div className={s.Content}>
                 <div className={s.ErrorCode}>404</div>
                 
-                <h1 className={s.Title}>Page Not Found</h1>
+                <h1 className={s.Title}>{t('notFound.title')}</h1>
                 
                 <p className={s.Description}>
-                    {exception || "Sorry, the page you are looking for doesn't exist or has been moved."}
+                    {exception || t('notFound.description')}
                 </p>
                 
                 <div className={s.Actions}>
                     <Link href="/" className={s.PrimaryButton}>
-                        ← Back to Homepage
+                        {t('notFound.backToHomepage')}
                     </Link>
                 </div>
             </div>

@@ -36,9 +36,14 @@ def get_external_site_from_request(request) -> Site:
 
 class PageRelativeUrlListSerializer(serializers.Serializer):
     def to_representation(self, obj):
+        request = self.context.get("request")
+        site = None
+        if request:
+            site = Site.find_for_request(request)
+
         return {
             "title": obj.title,
-            "relative_url": obj.get_url(None),
+            "relative_url": obj.relative_url(site) if site else obj.get_url(None),
         }
 
 
@@ -46,7 +51,9 @@ class PageRelativeUrlListAPIViewSet(PagesAPIViewSet):
     """Return all pages and their relative url"""
 
     def get_serializer(self, qs, many=True):
-        return PageRelativeUrlListSerializer(qs, many=many)
+        return PageRelativeUrlListSerializer(
+            qs, many=many, context={"request": self.request}
+        )
 
     @classmethod
     def get_urlpatterns(cls):

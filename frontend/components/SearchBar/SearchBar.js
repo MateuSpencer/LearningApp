@@ -2,15 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import DOMPurify from 'dompurify';
 import { useRouter } from 'next/router';
+import { useTranslation } from '../../hooks/useTranslation';
 import s from './SearchBar.module.css';
 
 const SearchBar = ({ 
-    placeholder = "What do you want to learn?",
+    placeholder,
     initialQuery = '',
     onInputChange = null,
     onSearch = null, // Added onSearch prop
     enableSuggestions = true // Control whether to show suggestions
 }) => {
+    const { t } = useTranslation();
+    const defaultPlaceholder = placeholder || t('search.placeholder');
+    
     let router;
     try {
         router = useRouter();
@@ -58,14 +62,14 @@ const SearchBar = ({
     const validateQuery = (input) => {
         // Basic validation rules
         if (input.length > maxLength) {
-            return 'Search query is too long';
+            return t('search.queryTooLong');
         }
         
         // More comprehensive regex for detecting potential XSS
         // But still not a complete solution - see sanitizeQuery function
         const suspiciousPatterns = /<[^>]*>|javascript:|data:|vbscript:|on\w+\s*=|xmlns\s*=|formaction|@import|expression\s*\(|url\s*\(/i;
         if (suspiciousPatterns.test(input)) {
-            return 'Invalid search query';
+            return t('search.invalidQuery');
         }
         
         return null;
@@ -185,7 +189,7 @@ const SearchBar = ({
         const sanitizedQuery = sanitizeQuery(currentLocalQuery);
 
         if (!sanitizedQuery.trim()) {
-            setError("Search query cannot be empty.");
+            setError(t('search.emptyQuery'));
             return;
         }
         setError(null); // Clear previous errors
@@ -350,11 +354,11 @@ const SearchBar = ({
                         value={query}
                         onChange={handleChange}
                         className={s.Input}
-                        placeholder={placeholder}
+                        placeholder={defaultPlaceholder}
                         maxLength={maxLength}
                         aria-invalid={!!error}
                     />
-                    <button type="submit" className={s.Button}>Search</button>
+                    <button type="submit" className={s.Button}>{t('search.search')}</button>
                 </div>
                 
                 {/* Suggestions dropdown - only show if enableSuggestions is true */}
@@ -380,7 +384,7 @@ const SearchBar = ({
                 {/* Loading indicator - only show if enableSuggestions is true */}
                 {enableSuggestions && loading && showSuggestions && (
                     <div className={s.LoadingIndicator}>
-                        Loading suggestions...
+                        {t('search.searching')}
                     </div>
                 )}
                 

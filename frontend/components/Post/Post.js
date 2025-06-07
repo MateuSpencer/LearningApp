@@ -4,6 +4,7 @@ import Link from 'next/link';
 import s from './Post.module.css';
 import { formatPageSlug } from '../../utils/stringUtils'; // Import from new utility file
 import LanguageBadge from '../LanguageBadge/LanguageBadge';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const Post = ({ 
   id, 
@@ -28,6 +29,7 @@ const Post = ({
   canModify,
   canVote
 }) => {
+    const { t } = useTranslation();
     const authorStr = String(author).trim();
     const currentUserStr = currentUser ? String(currentUser).trim() : '';
     const isAuthor = currentUser && authorStr === currentUserStr;
@@ -41,13 +43,13 @@ const Post = ({
     const getStatusInfo = () => {
         switch(status) {
             case 'published':
-                return { label: 'Published', className: s.statusPublished };
+                return { label: t('posts.statusPublished'), className: s.statusPublished };
             case 'draft':
-                return { label: 'Draft', className: s.statusDraft };
+                return { label: t('posts.statusDraft'), className: s.statusDraft };
             case 'archived':
-                return { label: 'Archived', className: s.statusArchived };
+                return { label: t('posts.statusArchived'), className: s.statusArchived };
             default:
-                return { label: 'Unknown', className: '' };
+                return { label: t('posts.statusUnknown'), className: '' };
         }
     };
     
@@ -90,8 +92,8 @@ const Post = ({
                             className={getUpvoteClasses()}
                             onClick={() => typeof onUpvote === 'function' && onUpvote(id)}
                             disabled={!canVote}
-                            aria-label="Upvote"
-                            title={user_vote === 'upvote' ? 'You upvoted this post' : 'Upvote this post'}
+                            aria-label={t('posts.upvote')}
+                            title={user_vote === 'upvote' ? t('posts.youUpvoted') : t('posts.upvoteThis')}
                         >
                             <span className={s.voteIcon}>▲</span>
                         </button>
@@ -100,8 +102,8 @@ const Post = ({
                             className={getDownvoteClasses()}
                             onClick={() => typeof onDownvote === 'function' && onDownvote(id)}
                             disabled={!canVote}
-                            aria-label="Downvote"
-                            title={user_vote === 'downvote' ? 'You downvoted this post' : 'Downvote this post'}
+                            aria-label={t('posts.downvote')}
+                            title={user_vote === 'downvote' ? t('posts.youDownvoted') : t('posts.downvoteThis')}
                         >
                             <span className={s.voteIcon}>▼</span>
                         </button>
@@ -127,14 +129,14 @@ const Post = ({
                         </div>
                     )}
                     <div className={s.meta}>
-                        <span className={s.author}>By: {author}</span>
+                        <span className={s.author}>{t('posts.by')}: {author}</span>
                         <span className={s.date}>{new Date(createdAt).toLocaleDateString()}</span>
                         
                         {language && <LanguageBadge language={language} size="small" />}
                         
                         {page_associations && page_associations.length > 0 && (
                             <span className={s.topic}>
-                                {page_associations.length === 1 ? 'Page: ' : 'Pages: '}
+                                {page_associations.length === 1 ? t('posts.page') + ': ' : t('posts.pages') + ': '}
                                 {page_associations.map((assoc, index) => (
                                     <React.Fragment key={assoc.id || index}>
                                         <Link 
@@ -157,8 +159,8 @@ const Post = ({
                             <button 
                                 onClick={() => typeof onEdit === 'function' && onEdit(id)} 
                                 className={`${s.actionButton} ${s.editButton}`}
-                                aria-label="Edit post"
-                                title="Edit post"
+                                aria-label={t('posts.editPost')}
+                                title={t('posts.editPost')}
                                 disabled={!canModify}
                             >
                                 <span className={s.icon}>✎</span>
@@ -166,8 +168,8 @@ const Post = ({
                             <button 
                                 onClick={() => typeof onDelete === 'function' && onDelete(id)} 
                                 className={`${s.actionButton} ${s.deleteButton}`}
-                                aria-label="Delete post"
-                                title="Delete post"
+                                aria-label={t('posts.deletePost')}
+                                title={t('posts.deletePost')}
                                 disabled={!canModify}
                             >
                                 <span className={s.icon}>✕</span>
