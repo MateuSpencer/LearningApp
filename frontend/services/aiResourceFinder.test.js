@@ -1,76 +1,83 @@
 import { findLearningResources, findResourcesWithFunctionCalling } from './aiResourceFinder';
-import { ChatOpenAI } from "@langchain/openai";
-import { ChatTogetherAI } from "@langchain/community/chat_models/togetherai";
 
-// Mock the LangChain modules
-jest.mock("@langchain/openai");
-jest.mock("@langchain/community/chat_models/togetherai");
+// Mock the LangChain modules that are dynamically imported
+jest.mock("@langchain/openai", () => ({
+  ChatOpenAI: jest.fn()
+}));
+
+jest.mock("@langchain/community/chat_models/togetherai", () => ({
+  ChatTogetherAI: jest.fn()
+}));
+
+jest.mock("@langchain/core/prompts", () => ({
+  ChatPromptTemplate: {
+    fromMessages: jest.fn()
+  }
+}));
+
+jest.mock("@langchain/core/output_parsers", () => ({
+  StructuredOutputParser: {
+    fromZodSchema: jest.fn()
+  },
+  JsonOutputFunctionsParser: jest.fn()
+}));
 
 describe('aiResourceFinder', () => {
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
     
-    // Mock implementations for LangChain models
-    ChatOpenAI.mockImplementation(() => ({
-      bind: jest.fn().mockReturnValue({
-        invoke: jest.fn().mockResolvedValue({
-          content: JSON.stringify({
-            resources: [
-              {
-                title: "Test Resource 1",
-                url: "https://example.com/resource1",
-                description: "This is a test resource",
-                resourceType: "video"
-              },
-              {
-                title: "Test Resource 2",
-                url: "https://example.com/resource2",
-                description: "This is another test resource",
-                resourceType: "article"
-              }
-            ]
-          })
-        })
-      }),
+    // Mock the dynamic imports
+    const mockInvoke = jest.fn().mockResolvedValue({
+      resources: [
+        {
+          title: "Test Resource 1",
+          url: "https://example.com/resource1",
+          description: "This is a test resource",
+          resourceType: "video"
+        },
+        {
+          title: "Test Resource 2",
+          url: "https://example.com/resource2",
+          description: "This is another test resource",
+          resourceType: "article"
+        }
+      ]
+    });
+
+    const mockBind = jest.fn().mockReturnValue({
       pipe: jest.fn().mockReturnValue({
-        pipe: jest.fn().mockReturnValue({
-          invoke: jest.fn().mockResolvedValue({
-            resources: [
-              {
-                title: "Test Resource 1",
-                url: "https://example.com/resource1",
-                description: "This is a test resource",
-                resourceType: "video"
-              },
-              {
-                title: "Test Resource 2",
-                url: "https://example.com/resource2",
-                description: "This is another test resource",
-                resourceType: "article"
-              }
-            ]
-          })
-        })
+        invoke: mockInvoke
       })
-    }));
-    
-    ChatTogetherAI.mockImplementation(() => ({
+    });
+    const mockPipe = jest.fn().mockReturnValue({
       pipe: jest.fn().mockReturnValue({
-        pipe: jest.fn().mockReturnValue({
-          invoke: jest.fn().mockResolvedValue({
-            resources: [
-              {
-                title: "Together Test Resource 1",
-                url: "https://example.com/resource1",
-                description: "This is a test resource from Together AI",
-                resourceType: "video"
-              }
-            ]
-          })
-        })
+        invoke: mockInvoke
       })
-    }));
+    });
+
+    const mockPromptTemplate = {
+      pipe: mockPipe
+    };
+
+    const mockParser = {};
+
+    // Setup mocks for the imported modules
+    const { ChatPromptTemplate } = require("@langchain/core/prompts");
+    const { StructuredOutputParser, JsonOutputFunctionsParser } = require("@langchain/core/output_parsers");
+    const { ChatOpenAI } = require("@langchain/openai");
+    const { ChatTogetherAI } = require("@langchain/community/chat_models/togetherai");
+
+    ChatPromptTemplate.fromMessages.mockReturnValue(mockPromptTemplate);
+    StructuredOutputParser.fromZodSchema.mockReturnValue(mockParser);
+    JsonOutputFunctionsParser.mockImplementation(() => ({}));
+    // Using a function expression here to access 'this' for binding purposes
+    ChatOpenAI.mockImplementation(function() {
+      // Create an instance that has the bind method
+      this.bind = mockBind;
+      return this;
+    });
+    ChatTogetherAI.mockImplementation(() => ({}));
   });
 
   describe('findLearningResources', () => {
@@ -83,8 +90,13 @@ describe('aiResourceFinder', () => {
     });
 
     it('should use the right provider based on config', async () => {
+      const { ChatOpenAI } = require("@langchain/openai");
+      const { ChatTogetherAI } = require("@langchain/community/chat_models/togetherai");
+      
       await findLearningResources('test topic', { provider: 'openai', apiKey: 'test-key' });
       expect(ChatOpenAI).toHaveBeenCalled();
+      
+      jest.clearAllMocks();
       
       await findLearningResources('test topic', { provider: 'together', apiKey: 'test-key' });
       expect(ChatTogetherAI).toHaveBeenCalled();
@@ -119,10 +131,13 @@ describe('aiResourceFinder', () => {
     });
 
     it('should use function calling with supported providers', async () => {
+      const { ChatOpenAI } = require("@langchain/openai");
+      
       await findResourcesWithFunctionCalling('test topic', { provider: 'openai', apiKey: 'test-key' });
       
       expect(ChatOpenAI).toHaveBeenCalled();
-      expect(ChatOpenAI.mock.instances[0].bind).toHaveBeenCalledWith(expect.objectContaining({
+      const mockInstance = ChatOpenAI.mock.instances[0];
+      expect(mockInstance.bind).toHaveBeenCalledWith(expect.objectContaining({
         functions: expect.arrayContaining([
           expect.objectContaining({
             name: 'find_learning_resources'

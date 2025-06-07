@@ -1,15 +1,10 @@
-import { render, /* screen */ } from '@testing-library/react';
+import { render, /* screen */ } from '../../utils/test-utils';
 import LearningResourceItem from './';
-import { AuthProvider } from '../../context/AuthContext';
 // import data from './LearningResourceItem.data';
 
 describe('<LearningResourceItem />', () => {
     it('Renders an empty LearningResourceItem', () => {
-        render(
-          <AuthProvider>
-            <LearningResourceItem />
-          </AuthProvider>
-        );
+        render(<LearningResourceItem />);
     });
 
     // it('Renders LearningResourceItem with data', () => {

@@ -1,4 +1,4 @@
-import { render, /* screen */ } from '@testing-library/react';
+import { render, /* screen */ } from '../../utils/test-utils';
 import LearningResourcesIndexPage from './';
 import { ThemeProvider } from '../../context/ThemeContext';
 import { AuthProvider } from '../../context/AuthContext';

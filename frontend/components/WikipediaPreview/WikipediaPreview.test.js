@@ -1,4 +1,4 @@
-import { render, /* screen */ } from '@testing-library/react';
+import { render, /* screen */ } from '../../utils/test-utils';
 import WikipediaPreview from './';
 // import data from './WikipediaPreview.data';
 

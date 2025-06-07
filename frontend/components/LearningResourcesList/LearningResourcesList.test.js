@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render } from '../../utils/test-utils';
 import LearningResourcesList from './';
 import { AuthProvider } from '../../context/AuthContext';
 import { ThemeProvider } from '../../context/ThemeContext';

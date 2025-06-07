@@ -1,7 +1,5 @@
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '../../utils/test-utils';
 import WikiArticlePage from './';
-import { ThemeProvider } from '../../context/ThemeContext';
-import { AuthProvider } from '../../context/AuthContext';
 
 // Mock push function to test redirects
 const mockRouterPush = jest.fn();
@@ -15,16 +13,10 @@ jest.mock('next/router', () => ({
   }),
 }));
 
-// Variable to control mock fetch response
-let mockFetchOk = true;
-
-// Mock the fetch function used by WikipediaPreview component
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    ok: mockFetchOk,
-    json: () => Promise.resolve({ extract: 'Test Wikipedia extract' }),
-  })
-);
+// Mock the fetchWikipediaArticle function
+jest.mock('../../utils/wikiUtils', () => ({
+  fetchWikipediaArticle: jest.fn(),
+}));
 
 // Mock child components to simplify testing
 jest.mock('../../components/WikipediaPreview', () => {
@@ -35,40 +27,36 @@ jest.mock('../../components/RightSidebar', () => ({ onToggle }) => <div data-tes
 jest.mock('../../components/PostsList', () => ({ pageSlug }) => <div data-testid="posts-list" />);
 jest.mock('../../components/LearningResourcesList', () => ({ pageSlug }) => <div data-testid="resources-list" />);
 
-// Wrapper component with all required providers
-const AllProviders = ({ children }) => {
-  return (
-    <ThemeProvider>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    </ThemeProvider>
-  );
-};
-
 describe('<WikiArticlePage />', () => {
+    let mockFetchWikipediaArticle;
+
     beforeEach(() => {
-        mockFetchOk = true;
+        // Get the mock function
+        mockFetchWikipediaArticle = require('../../utils/wikiUtils').fetchWikipediaArticle;
         mockRouterPush.mockClear();
+        mockFetchWikipediaArticle.mockClear();
     });
 
     it('Renders an empty WikiArticlePage', () => {
-        render(
-          <AllProviders>
-            <WikiArticlePage articleSlug="test-article" />
-          </AllProviders>
-        );
+        // Mock successful article fetch
+        mockFetchWikipediaArticle.mockResolvedValue({
+            summaryData: { extract: 'Test content' },
+            isDisambiguation: false,
+            error: null
+        });
+
+        render(<WikiArticlePage articleSlug="test-article" />);
     });
 
     it('Redirects to main wiki page with query when article does not exist', async () => {
-        // Set the mock fetch to return not ok
-        mockFetchOk = false;
+        // Mock article not found
+        mockFetchWikipediaArticle.mockResolvedValue({
+            summaryData: null,
+            isDisambiguation: false,
+            error: 'Article not found'
+        });
         
-        render(
-          <AllProviders>
-            <WikiArticlePage articleSlug="non-existent-article" />
-          </AllProviders>
-        );
+        render(<WikiArticlePage articleSlug="non-existent-article" />);
 
         // Wait for the redirect to happen
         await waitFor(() => {
