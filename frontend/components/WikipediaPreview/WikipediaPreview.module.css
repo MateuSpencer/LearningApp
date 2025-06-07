@@ -1,0 +1,60 @@
+/* Simplified styles for WikipediaPreview component */
+
+.container {
+  margin-bottom: 24px;
+}
+
+.centeredTitle {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 24px;
+  font-family: 'Linux Libertine', 'Libertine', 'Georgia', 'Times', serif;
+  font-weight: normal;
+}
+
+.centeredTitle a {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.centeredTitle a:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.articleText {
+  font-family: 'Linux Libertine', 'Libertine', 'Georgia', 'Times', serif;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.readMoreLink {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.readMoreLink a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-family: 'Linux Libertine', 'Libertine', 'Georgia', 'Times', serif;
+}
+
+.readMoreLink a:hover {
+  text-decoration: underline;
+}
+
+.loadingText, .errorText, .noContentText {
+  text-align: center;
+  font-family: 'Linux Libertine', 'Libertine', 'Georgia', 'Times', serif;
+  font-size: 1.2rem;
+}
+
+.errorText {
+  color: var(--color-error, #ff3333);
+}

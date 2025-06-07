@@ -58,3 +58,4 @@ htmlcov
 
 # Mypy
 .mypy_cache
+docker/files/pgadmin/pgadmin4.db

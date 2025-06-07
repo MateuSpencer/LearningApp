@@ -1,4 +1,4 @@
-import { render, /* screen */ } from '@testing-library/react';
+import { render, /* screen */ } from '../../utils/test-utils';
 import Logo from './';
 // import data from './Logo.data';
 

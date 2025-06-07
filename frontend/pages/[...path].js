@@ -6,21 +6,40 @@ import {
     WagtailApiResponseError,
 } from '../api/wagtail';
 import LazyContainers from '../containers/LazyContainers';
+import fetch from 'node-fetch';
 
 const isProd = process.env.NODE_ENV === 'production';
 
 export default function CatchAllPage({ componentName, componentProps }) {
+    // Add error handling around component loading
+    if (!componentName || typeof componentName !== 'string') {
+        return <h1>Invalid component name provided</h1>;
+    }
+    
     const Component = LazyContainers[componentName];
     if (!Component) {
+        console.error(`Component ${componentName} not found in LazyContainers`);
         return <h1>Component {componentName} not found</h1>;
     }
-    return <Component {...componentProps} />;
+    
+    // Wrap component rendering in try-catch for debugging
+    try {
+        return <Component {...componentProps} />;
+    } catch (error) {
+        console.error(`Error rendering component ${componentName}:`, error);
+        return <h1>Error rendering component {componentName}</h1>;
+    }
 }
 
 // For SSR
 export async function getServerSideProps({ req, params, res }) {
     let path = params?.path || [];
     path = path.join('/');
+    
+    // Skip processing for authentication paths
+    if (path.startsWith('accounts/')) {
+        return { notFound: true };  // This will make Next.js pass the request to the server
+    }
 
     const { host } = req.headers;
     let queryParams = new URL(req.url, `https://${host}`).search;
@@ -71,24 +90,155 @@ export async function getServerSideProps({ req, params, res }) {
             };
         }
 
+        // Check if it's a WikiArticlePage and validate if it exists on Wikipedia
+        if (componentName === 'WikiArticlePage') {
+            // Extract the article slug, ensuring we use unencoded special characters
+            const articleSlug = path.startsWith('wiki/') ? path.substring(5) : path;
+            const pageTitleForApi = componentProps.title || articleSlug.replace(/_/g, ' ');
+            
+            try {
+                // Use MediaWiki API to check if page exists
+                // encodeURIComponent is only used for the API request, not for our internal URLs
+                const mediaWikiApiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&titles=${encodeURIComponent(pageTitleForApi)}&origin=*`;
+                const wikiResponse = await fetch(mediaWikiApiUrl, {
+                    headers: {
+                        'User-Agent': 'LearningApp/1.0 (contact@yourapp.com)' 
+                    }
+                });
+
+                if (wikiResponse.ok) {
+                    const wikiData = await wikiResponse.json();
+                    
+                    // Check if page is missing
+                    const pages = wikiData.query?.pages || {};
+                    const pageIds = Object.keys(pages);
+                    
+                    // If pageId is negative or page has "missing" attribute, it doesn't exist
+                    const pageNotExistInWikipedia = pageIds.length === 0 || 
+                                                  (pageIds.length === 1 && (pageIds[0] === '-1' || pages[pageIds[0]].hasOwnProperty('missing')));
+                    
+                    // First, check if content indicates this is a disambiguation page
+                    const summaryText = componentProps.summary || '';
+                    const pageTitleFromProps = componentProps.title || '';
+                    const isDisambiguationPage = 
+                        (typeof summaryText === 'string' && summaryText.toLowerCase().includes(' may refer to:')) || 
+                        pageTitleFromProps.toLowerCase().endsWith('(disambiguation)') ||
+                        (componentProps.content && typeof componentProps.content === 'string' && 
+                         componentProps.content.toLowerCase().includes(' may refer to:'));
+                    
+                    if (pageNotExistInWikipedia || isDisambiguationPage) {
+                        const pageTitle = isDisambiguationPage 
+                            ? `Content Disambiguation: ${pageTitleForApi}` 
+                            : `Wiki Page Not Found: ${pageTitleForApi}`;
+                            
+                        const searchDescription = isDisambiguationPage
+                            ? `The page titled "${pageTitleForApi}" may refer to multiple topics. Please clarify your search.`
+                            : `The wiki page titled "${pageTitleForApi}" could not be found on Wikipedia.`;
+                        
+                        // Redirect to main wiki page with query parameter instead of showing a not found page
+                        return {
+                            redirect: {
+                                destination: `/wiki?q=${encodeURIComponent(pageTitleForApi)}`,
+                                permanent: false,
+                            },
+                        };
+                    }
+                } else {
+                    // Log API errors but proceed with caution
+                    // Removed console.warn
+                }
+            } catch (apiError) {
+                // Removed console.error
+                // Continue to render the page if there's an API error, but log it
+            }
+        }
+
         return { props: { componentName, componentProps } };
     } catch (err) {
-        if (!(err instanceof WagtailApiResponseError)) {
-            throw err;
-        }
+        if (err instanceof WagtailApiResponseError) {
+            if (err.response.status === 404) {
+                // Hard 404 from API (our backend)
+                // Only treat paths that explicitly start with 'wiki/' as wiki article paths
+                // Let all other unknown paths fall through to the 404 page
+                const isWikiArticlePath = path.startsWith('wiki/') && path !== 'wiki/index';
 
-        // When in development, show django error page on error
-        if (!isProd && err.response.status >= 500) {
-            const html = await err.response.text();
-            return {
-                props: {
-                    componentName: 'PureHtmlPage',
-                    componentProps: { html },
-                },
-            };
-        }
-
-        if (err.response.status >= 500) {
+                if (isWikiArticlePath) {
+                    const attemptedTitle = path.substring(5).replace(/_/g, ' '); // Remove 'wiki/' prefix
+                    
+                    try {
+                        // Double-check with Wikipedia API if this page exists
+                        const mediaWikiApiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&titles=${encodeURIComponent(attemptedTitle)}&origin=*`;
+                        const wikiResponse = await fetch(mediaWikiApiUrl, {
+                            headers: {
+                                'User-Agent': 'LearningApp/1.0 (contact@yourapp.com)'
+                            }
+                        });
+                        
+                        if (wikiResponse.ok) {
+                            const wikiData = await wikiResponse.json();
+                            const pages = wikiData.query?.pages || {};
+                            const pageIds = Object.keys(pages);
+                            
+                            // If pageId is negative or page has "missing" attribute, it doesn't exist
+                            const pageNotExistInWikipedia = pageIds.length === 0 || 
+                                                          (pageIds.length === 1 && (pageIds[0] === '-1' || pages[pageIds[0]].hasOwnProperty('missing')));
+                            
+                            // If the page exists on Wikipedia and is not a disambiguation page, redirect to the proper wiki path
+                            if (!pageNotExistInWikipedia) {
+                                // Try to get more info about the page to check if it's a disambiguation page
+                                const pageMeta = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(attemptedTitle)}`, {
+                                    headers: {
+                                        'User-Agent': 'LearningApp/1.0 (contact@yourapp.com)'
+                                    }
+                                });
+                                
+                                if (pageMeta.ok) {
+                                    const pageData = await pageMeta.json();
+                                    const isDisambiguation = pageData.type === 'disambiguation' || 
+                                                            (pageData.extract && pageData.extract.toLowerCase().includes('may refer to:'));
+                                    
+                                    if (!isDisambiguation) {
+                                        return {
+                                            redirect: {
+                                                destination: `/wiki/${attemptedTitle.replace(/\s+/g, '_')}`,
+                                                permanent: false,
+                                            },
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                    } catch (apiError) {
+                        // Continue to show not found page if API fails
+                    }
+                    
+                    // Redirect to main wiki page with query parameter instead of showing a not found page
+                    return {
+                        redirect: {
+                            destination: `/wiki?q=${encodeURIComponent(attemptedTitle)}`,
+                            permanent: false,
+                        },
+                    };
+                }
+                // For other 404s (e.g., non-wiki paths that 404 at the API level)
+                return { notFound: true }; // Use Next.js default 404
+            } else if (err.response.status >= 500) {
+                // When in development, show django error page on error
+                if (!isProd) {
+                    const html = await err.response.text();
+                    return {
+                        props: {
+                            componentName: 'PureHtmlPage',
+                            componentProps: { html },
+                        },
+                    };
+                }
+                throw err; // Rethrow for production 500s to be handled by Next.js error page
+            }
+            // Other Wagtail API errors (e.g., 401, 403) - show generic not found
+            return { notFound: true };
+        } else {
+            // Non-Wagtail API errors
             throw err;
         }
     }

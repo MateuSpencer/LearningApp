@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useTheme } from '../../context/ThemeContext'; // Import theme context
+import { useTheme } from '../../context/ThemeContext';
 import s from './RightSidebar.module.css';
 
-const RightSidebar = ({ items }) => {
-    const [collapsed, setCollapsed] = useState(true); // Default to collapsed
-    const { theme } = useTheme(); // Use theme context
+const RightSidebar = ({ items, onToggle }) => {
+    const [collapsed, setCollapsed] = useState(true);
+    const { theme } = useTheme();
+
+    // Call the onToggle callback when state changes
+    useEffect(() => {
+        if (onToggle) {
+            onToggle(!collapsed);
+        }
+    }, [collapsed, onToggle]);
 
     const toggleSidebar = () => {
         setCollapsed(!collapsed);
@@ -27,12 +34,14 @@ const RightSidebar = ({ items }) => {
     );
 };
 
-RightSidebar.propTypes = {
-    items: PropTypes.array,
-};
-
 RightSidebar.defaultProps = {
     items: [],
+    onToggle: null
+};
+
+RightSidebar.propTypes = {
+    items: PropTypes.array,
+    onToggle: PropTypes.func
 };
 
 export default RightSidebar;

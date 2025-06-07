@@ -1,0 +1,188 @@
+.Container {
+  /* No background or border needed since we're using the parent container */
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  overflow: hidden;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.Header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.Title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #FF8C00; /* Orange title to match the screenshot */
+  font-weight: 600;
+}
+
+.CloseButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.CloseButton:hover {
+  color: var(--color-primary);
+}
+
+.ResourceList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.ResourceItem {
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  background-color: inherit; /* Inherit background from parent container */
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: transform 0.2s, box-shadow 0.2s;
+  min-width: 0; /* Allow flex items to shrink */
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.ResourceItem:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow);
+}
+
+.ResourceContent {
+  flex: 1;
+  min-width: 0; /* Allow content to shrink */
+  overflow: hidden; /* Prevent content from overflowing */
+  max-width: calc(100% - 120px); /* Reserve space for the add button */
+}
+
+.ResourceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.ResourceType {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: rgba(255, 140, 0, 0.2); /* Slightly stronger orange for badge */
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ResourceTitle {
+  margin: 0 0 0.5rem 0;
+  color: white; /* White text on dark background */
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.ResourceDescription {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7); /* Light gray text for descriptions */
+  line-height: 1.5;
+}
+
+.ResourceUrl {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5); /* Dimmer text for URLs */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.ExternalLink {
+  color: var(--color-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.ExternalLink:hover {
+  color: var(--color-primary-dark);
+}
+
+.ResourceActions {
+  margin-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0; /* Prevent the actions from shrinking */
+}
+
+.AddButton {
+  background-color: #60cc8d; /* Matching the turquoise in the screenshot */
+  color: white;
+  border: none;
+  border-radius: 20px; /* More rounded like in the screenshot */
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.AddButton:hover {
+  background-color: #4eb97c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.AddButton.Added {
+  background-color: var(--color-primary);
+  cursor: default;
+}
+
+.AddButton:disabled {
+  background-color: var(--text-tertiary);
+  cursor: not-allowed;
+}
+
+.Loading {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.AddedIcon {
+  color: white;
+}
+
+.EmptyState {
+  text-align: center;
+  padding: 2rem 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

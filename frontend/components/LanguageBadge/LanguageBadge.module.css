@@ -1,0 +1,69 @@
+.languageBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.languageBadge.small {
+  padding: 2px 6px;
+  font-size: 0.7rem;
+}
+
+.languageBadge.medium {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
+.languageBadge.large {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+/* Specific language colors for better visual distinction */
+.languageBadge[title*="English"] {
+  background-color: #1e40af;
+}
+
+.languageBadge[title*="Spanish"] {
+  background-color: #dc2626;
+}
+
+.languageBadge[title*="French"] {
+  background-color: #1d4ed8;
+}
+
+.languageBadge[title*="German"] {
+  background-color: #374151;
+}
+
+.languageBadge[title*="Portuguese"] {
+  background-color: #059669;
+}
+
+.languageBadge[title*="Italian"] {
+  background-color: #dc2626;
+}
+
+.languageBadge[title*="Russian"] {
+  background-color: #7c3aed;
+}
+
+.languageBadge[title*="Chinese"] {
+  background-color: #dc2626;
+}
+
+.languageBadge[title*="Japanese"] {
+  background-color: #dc2626;
+}
+
+.languageBadge[title*="Korean"] {
+  background-color: #1f2937;
+}

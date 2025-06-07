@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render } from '../../utils/test-utils';
 import RightSidebar from './RightSidebar';
 import { ThemeProvider } from '../../context/ThemeContext';
 

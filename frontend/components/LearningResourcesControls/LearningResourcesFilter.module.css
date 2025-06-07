@@ -1,0 +1,162 @@
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filterLabel {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.filterSelect {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--text-primary);
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-width: 120px;
+  cursor: pointer;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              background-color var(--theme-transition-speed) var (--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.filterSelect:disabled {
+  background-color: var(--bg-disabled, #f5f5f5);
+  cursor: not-allowed;
+}
+
+.searchInput {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--text-primary);
+  box-shadow: var(--glass-shadow);
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-width: 200px;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              background-color var(--theme-transition-speed) var (--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.searchInput:disabled {
+  background-color: var(--bg-disabled, #f5f5f5);
+  cursor: not-allowed;
+}
+
+.clearButton {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--text-primary);
+  box-shadow: var(--glass-shadow);
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.clearButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.clearButton:disabled {
+  background-color: var(--bg-disabled, #f5f5f5);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Date range picker styles */
+.dateRangeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dateInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dateLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-width: 3rem;
+}
+
+.dateInput {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--text-primary);
+  box-shadow: var(--glass-shadow);
+  padding: 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+}
+
+.dateInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-disabled);
+}

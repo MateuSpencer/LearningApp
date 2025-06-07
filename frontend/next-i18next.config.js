@@ -1,6 +1,8 @@
+const { LANGUAGE_CODES, DEFAULT_LANGUAGE } = require('./config/languages');
+
 module.exports = {
     i18n: {
-        defaultLocale: 'en',
-        locales: ['en'],
+        defaultLocale: DEFAULT_LANGUAGE,
+        locales: LANGUAGE_CODES,
     },
 };

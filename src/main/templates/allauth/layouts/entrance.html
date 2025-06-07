@@ -1,0 +1,64 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n allauth %}
+{% block body %}
+    <style>
+        /* Fix for form elements not adapting to theme */
+        .form-control, input[type="text"], input[type="email"], 
+        input[type="password"], input[type="search"], input[type="tel"], 
+        input[type="url"], input[type="number"], select, textarea {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+            transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+                        color var(--theme-transition-speed) var(--theme-transition-timing),
+                        border-color var(--theme-transition-speed) var(--theme-transition-timing);
+        }
+        
+        .form-control:focus, input:focus, select:focus, textarea:focus {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 0.25rem rgba(42, 198, 208, 0.25);
+        }
+        
+        option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .auth-form {
+            text-align: left;
+        }
+    </style>
+    <div class="container">
+        <div class="content-container">
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        {% element alert level=message.tags %}
+                            {% slot message %}
+                                {{ message }}
+                            {% endslot %}
+                        {% endelement %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <div id="content" class="text-center">
+                <h2 class="section-title">
+                    {% if request.resolver_match.view_name %}
+                        {% with title=request.resolver_match.view_name|title %}
+                            {{ title|slice:"8:" }}
+                        {% endwith %}
+                    {% else %}
+                        Authentication
+                    {% endif %}
+                </h2>
+                
+                <div class="auth-form">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

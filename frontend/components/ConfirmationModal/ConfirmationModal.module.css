@@ -1,0 +1,128 @@
+/* Modal backdrop that covers the entire screen */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Modal container */
+.modal {
+  width: 100%;
+  max-width: 450px;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+  border: 1px solid var(--border-color);
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Modal header */
+.header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Modal content */
+.content {
+  padding: 20px;
+}
+
+.message {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Modal actions/buttons */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  gap: 12px;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.button {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.cancelButton {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.cancelButton:hover {
+  background-color: var(--bg-hover);
+}
+
+.confirmButton {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+.confirmButton:hover {
+  background-color: var(--color-secondary-dark);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+  .modal {
+    width: 90%;
+  }
+  
+  .actions {
+    flex-direction: column-reverse;
+  }
+  
+  .button {
+    width: 100%;
+  }
+}

@@ -1,25 +1,35 @@
 .LeftSidebar {
     position: fixed;
     height: 100%;
-    width: 100%;
-    background-color: var(--bg-secondary);
-    border-right: 1px solid var(--border-color);
+    /* width properties */
+    max-width: 250px;   /* expanded width */
+    min-width: 60px;    /* collapsed width */
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-right: 1px solid var(--glass-border);
     border-radius: 0 15px 15px 0;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--glass-shadow);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    transition: width var(--theme-transition-speed) var(--theme-transition-timing), 
-    background-color var(--theme-transition-speed) var(--theme-transition-timing), 
-    border-color var(--theme-transition-speed) var(--theme-transition-timing);
+    overflow-x: hidden; /* Prevent horizontal scrolling completely */
+    overflow-y: auto;  /* Allow vertical scrolling if needed */
+    z-index: 1001;
+    /* Improve transitions for smoother animations */
+    transition: 
+      max-width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1),
+      backdrop-filter var(--theme-transition-speed) var(--theme-transition-timing),
+      border-color var(--theme-transition-speed) var(--theme-transition-timing);
+    will-change: max-width; /* Hint to browser to optimize this property */
+    transform: translateZ(0); /* Hardware acceleration for smoother transitions */
 }
 
 .Collapsed {
-    width: 60px;
+    max-width: 60px;
 }
 
 .Expanded {
-    width: 250px;
+    max-width: 250px;
 }
 
 .Content {
@@ -29,13 +39,16 @@
     height: 100%;
     padding: 20px 0;
     overflow-y: auto;
+    overflow-x: hidden; /* Ensure no horizontal scrollbar */
+    max-width: 100%; /* Ensure content doesn't exceed parent width */
 }
 
 .Header {
-    padding: 20px 15px;
+    padding: 20px 10px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: center;
+    overflow: visible; /* Allow content to overflow if needed */
 }
 
 .LogoWrapper {
@@ -43,37 +56,117 @@
     flex-direction: row;
     align-items: center;
     gap: 10px;
+    overflow: visible; /* Allow content to overflow if needed */
+    max-width: none; /* Remove width constraints */
 }
 
 .SiteNameWrapper {
-    max-width: 180px;
-    overflow: hidden;
+    max-width: 200px;
+    overflow: visible; /* Changed from hidden to visible */
     opacity: 1;
-    transition: max-width var(--theme-transition-speed) var(--theme-transition-timing),
-                opacity var(--theme-transition-speed) var(--theme-transition-timing),
-                margin-left var(--theme-transition-speed) var(--theme-transition-timing);
+    transition: 
+                max-width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1),
+                opacity 0.2s cubic-bezier(0.4, 0.0, 0.2, 1),
+                margin-left 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
     white-space: nowrap;
+    will-change: max-width, opacity, margin-left; /* Optimize transitions */
+    text-decoration: none; /* Remove link underline */
+    color: inherit; /* Inherit color from parent */
+    display: inline-block; /* Ensure proper layout */
+    /* Add padding to prevent text cutoff */
+    padding-right: 5px;
   }
   
-  .Collapsed .SiteNameWrapper {
+.Collapsed .SiteNameWrapper {
     max-width: 0;
     opacity: 0;
-    margin-left: -10px; /* Slight shift effect */
-  }
+    margin-left: -10px;
+}
 
 .Footer {
     margin-top: auto;
-    padding: 15px;
+    padding: 15px 0;
     border-top: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow: visible; /* Allow dropdowns to be visible */
+    overflow-x: clip; /* Better than hidden - prevents horizontal scrollbar */
+    width: 100%;
+    position: relative;
+    /* Force hardware acceleration and contain the overflow better */
+    transform: translateZ(0);
+    contain: layout;
 }
 
-.ThemeLabel {
-    font-size: 14px;
-    margin-bottom: 10px;
-    color: var(--text-secondary);
+
+.ButtonsContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%; /* Fill available space but don't exceed it */
+    max-width: 100%; /* Ensure it doesn't exceed container width */
+    flex-wrap: nowrap; /* Prevent wrapping during transition */
+    min-width: 0; /* Allow container to shrink properly */
+    overflow: visible; /* Allow language toggle to be visible outside container */
+    transform: translateZ(0); /* Hardware acceleration for smoother transitions */
+}
+
+.ThemeButtonWrapper {
+    order: 1;  /* First icon (leftmost) */
+}
+
+/* AboutButtonWrapper and AccountButtonWrapper orders updated further below */
+
+.ButtonWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 
+                max-width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1),
+                opacity 0.2s cubic-bezier(0.4, 0.0, 0.2, 1),
+                margin 0.25s cubic-bezier(0.4, 0.0, 0.2, 1),
+                visibility 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+    flex: 0 0 auto; /* Don't grow or shrink */
+    overflow: visible; /* Allow dropdowns to be visible */
+    will-change: max-width, opacity, margin; /* Optimize transitions */
+    position: relative; /* For positioning context */
+}
+
+.ThemeButtonWrapper,
+.AboutButtonWrapper {
+    max-width: 100px;
+    width: auto;
+    opacity: 1;
+    visibility: visible;
+    white-space: nowrap;
+    /* Add a small delay to the appearance of buttons during expansion */
+    transition: 
+        max-width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1),
+        opacity 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 0.05s, /* Small delay on opacity */
+        visibility 0.25s cubic-bezier(0.4, 0.0, 0.2, 1),
+        margin 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.Collapsed .ThemeButtonWrapper,
+.Collapsed .AboutButtonWrapper,
+.Collapsed .LanguageButtonWrapper {
+    max-width: 0;
+    width: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    visibility: hidden;
+    position: absolute;
+    pointer-events: none;
+}
+
+.Collapsed .AccountButtonWrapper {
+    width: 40px;
+    min-width: 40px;
+    margin: 0 auto;
 }
 
 .ToggleButton {
@@ -88,7 +181,7 @@
     border: none;
     font-size: 22px;
     cursor: pointer;
-    display: flex;
+    display: none; /* Hide the toggle button */
     align-items: center;
     justify-content: center;
     transform: translateY(-50%);
@@ -98,4 +191,117 @@
 
 .ToggleButton:hover {
     background-color: var(--color-primary-dark);
+}
+
+
+.Navigation {
+    padding: 0 15px;
+    margin-bottom: 20px;
+}
+
+.NavList {
+list-style: none;
+padding: 0;
+margin: 0;
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.NavItem {
+width: 100%;
+}
+
+/* Add styles for sub navigation items */
+.SubNavItem {
+padding-left: 15px; /* Indent the sub item */
+}
+
+.SubNavItem .NavLink {
+background-color: var(--bg-tertiary, rgba(0, 0, 0, 0.02)); /* Subtle background to distinguish it */
+border-left: 3px solid var(--color-primary-light, #6a8eae);
+}
+
+.NavLink {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background-color 0.2s ease,
+                padding-left var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.NavLink:hover {
+background-color: var(--bg-hover);
+}
+
+.NavIcon {
+    font-size: 22px;
+    min-width: 24px;
+    margin-right: 15px;   
+    margin-left: -10px;           /* stays the same in collapsed & expanded */
+    transition: margin-right var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.NavTextWrapper {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    opacity: 1;
+    white-space: nowrap;
+    transition:
+        max-width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1),
+        opacity 0.2s cubic-bezier(0.4, 0.0, 0.2, 1),
+        margin-left 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    will-change: max-width, opacity, margin-left; /* Optimize transitions */
+    pointer-events: auto; /* Ensure it can receive interaction events */
+}
+
+.Collapsed .NavTextWrapper {
+    max-width: 0;
+    opacity: 0;
+    margin-left: -10px;
+    pointer-events: none; /* Disable interaction when hidden */
+}
+
+/* Hide the subnav item completely when collapsed */
+.Collapsed .SubNavItem {
+    display: none;
+}
+
+.LanguageButtonWrapper {
+    position: relative;
+    z-index: 10001; /* Higher z-index to ensure dropdown visibility */
+    order: 2; /* Place it between theme button and about button */
+    overflow: visible !important; /* Ensure dropdown is visible */
+}
+
+.AboutButtonWrapper {
+    order: 3;  /* Third icon after Language (moved up one) */
+}
+
+.AccountButtonWrapper {
+    order: 4;  /* Last icon (rightmost) */
+}
+
+/* Clean up language button wrappers since they're now consistent with other buttons */
+.ButtonWrapper.LanguageButtonWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100px;
+    width: auto;
+    opacity: 1;
+    visibility: visible;
+    white-space: nowrap;
+}
+
+/* Make sure language button is visible in expanded state */
+.Expanded .ButtonWrapper.LanguageButtonWrapper {
+    display: flex;
+    visibility: visible;
+    opacity: 1;
 }

@@ -1,3 +1,4 @@
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
 from wagtail.fields import RichTextField
@@ -9,8 +10,12 @@ from .base import BasePage
 
 class ArticlePage(HeadlessPreviewMixin, BasePage):
     rich_text = RichTextField(blank=True, null=True, verbose_name=_("Rich text"))
+    wiki_url = models.URLField(blank=True, null=True, verbose_name=_("Wikipedia URL"))
 
-    content_panels = BasePage.content_panels + [FieldPanel("rich_text")]
+    content_panels = BasePage.content_panels + [
+        FieldPanel("rich_text"),
+        FieldPanel("wiki_url"),
+    ]
 
     extra_panels = BasePage.extra_panels
     serializer_class = "main.pages.ArticlePageSerializer"

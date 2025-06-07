@@ -9,24 +9,54 @@
  */
 
 import i18next from 'i18next';
+import { LANGUAGE_CODES, DEFAULT_LANGUAGE, isLanguageSupported } from '../config/languages';
 
+// Import only supported translation files
 import en from './translations/en.json';
+import ru from './translations/ru.json';
 
-i18next.init({
-    languages: ['en'],
-    fallbackLng: ['en'],
-    resources: {
-        en: {
-            translation: en,
-        }
-    },
-});
+// Only initialize if not already initialized
+if (!i18next.isInitialized) {
+    i18next.init({
+        lng: DEFAULT_LANGUAGE, // default language
+        fallbackLng: DEFAULT_LANGUAGE,
+        debug: false, // Disabled debug logging
+        logger: {
+            warn: () => {}, // Suppress warning logs
+            error: console.error, // Keep error logs
+        },
+        interpolation: {
+            escapeValue: false, // React already escapes values
+        },
+        resources: {
+            en: { translation: en },
+            ru: { translation: ru },
+        },
+    });
+}
 
-// Update this to reflect what language your page should use
-const lang = () => {
-    return 'en';
+// Get current language
+export const getCurrentLanguage = () => i18next.language || DEFAULT_LANGUAGE;
+
+// Change language
+export const changeLanguage = (langCode) => {
+    if (isLanguageSupported(langCode)) {
+        return i18next.changeLanguage(langCode);
+    }
+    return Promise.reject(new Error(`Language ${langCode} not supported`));
 };
 
-i18next.changeLanguage(lang());
+// Get available languages
+export const getAvailableLanguages = () => LANGUAGE_CODES;
+
+// Translation function with better error handling
+export const t = (key, options = {}) => {
+    try {
+        return i18next.t(key, options);
+    } catch (error) {
+        console.warn(`Translation missing for key: ${key}`);
+        return key; // Return the key as fallback
+    }
+};
 
 export default i18next;

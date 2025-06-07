@@ -12,6 +12,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from main.views.error_500 import error_500_view
 from main.views.page_not_found import PageNotFoundView
+from main.views.api.auth_status import auth_status
 from nextjs.api import api_router
 
 handler404 = PageNotFoundView.as_view()
@@ -66,6 +67,10 @@ urlpatterns += [
     path("wt/documents/", include(wagtaildocs_urls)),
     path("wt/sitemap.xml", sitemap, name="sitemap"),
     path("wt/health-check/", health_check, name="health_check"),
+    path("api/posts/", include("posts.urls")),
+    path("api/learning-resources/", include("learning_resources.urls")),
+    path("api/auth/status/", auth_status, name="auth_status"),
+    path("accounts/", include("allauth.urls")),
 ]
 
 urlpatterns += [re_path(r"", include(wagtail_urls))]

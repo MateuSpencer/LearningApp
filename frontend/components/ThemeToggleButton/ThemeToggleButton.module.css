@@ -15,13 +15,6 @@
                 background-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
-.Small {
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
-}
-
 .ThemeToggle:hover {
-    transform: scale(1.1);
     background-color: var(--color-primary-dark);
 }

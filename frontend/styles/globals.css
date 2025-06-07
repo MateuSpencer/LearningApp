@@ -1,16 +1,91 @@
-html,
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+html {
+    height: 100%;
+    overflow-x: hidden;
+}
+
 body {
     padding: 0;
     margin: 0;
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* Global font */
-    background-color: var(--bg-primary);
     color: var(--text-primary);
-    transition: background-color var(--theme-transition-speed) var(--theme-transition-timing), 
-                color var(--theme-transition-speed) var(--theme-transition-timing), 
-                margin-left var(--theme-transition-speed) var(--theme-transition-timing);
-    height: 100%; /* Ensure full height */
+    min-height: 100vh; /* Use viewport height for full coverage */
+    height: auto; /* Allow content to determine height */
     overflow-x: hidden; /* Prevent horizontal scrolling */
-    overflow-y: hidden; /* Prevent vertical scrolling when unnecessary */
+    position: relative; /* For potential absolute positioned elements */
+    
+    /* Ensure background extends beyond scroll limits */
+    overscroll-behavior: none; /* Prevents bounce effects that might show white space */
+    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Create background layers that can transition smoothly */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    /* Light theme gradient */
+    background: radial-gradient(
+        ellipse at bottom,
+        #F58A28 0%,
+        #80E5E5 20%,
+        #F0FFFF 60%,
+        #FFFFFF 100%
+    );
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: 300% 300%;
+    animation: gradientAnimation 40s ease infinite;
+    opacity: 1;
+    transition: opacity var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    /* Dark theme gradient */
+    background: radial-gradient(
+        ellipse at bottom,
+        #001515 0%,
+        #003333 20%,
+        #001515 60%,
+        #000909 100%
+    );
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: 300% 300%;
+    animation: gradientAnimation 40s ease infinite;
+    opacity: 0;
+    transition: opacity var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* When dark theme is active, fade in the dark background */
+[data-theme="dark"] body::before {
+    opacity: 0;
+}
+
+[data-theme="dark"] body::after {
+    opacity: 1;
 }
 
 a {
@@ -24,4 +99,73 @@ a {
     transition-property: background-color, color, border-color, box-shadow;
     transition-duration: var(--theme-transition-speed);
     transition-timing-function: var(--theme-transition-timing);
+}
+
+/* Add theme variables for text and background colors */
+:root {
+    --theme-bg-primary: var(--bg-primary);
+    --theme-bg-secondary: var(--bg-secondary);
+    --theme-text-primary: var(--text-primary);
+    --theme-text-secondary: var(--text-secondary);
+    --theme-code-bg: var(--color-grey-200);
+    --theme-code-text: var(--text-primary);
+    --theme-bg-hover: var(--bg-accent);
+}
+
+[data-theme="dark"] {
+    --theme-bg-primary: var(--bg-primary);
+    --theme-bg-secondary: var(--bg-secondary);
+    --theme-text-primary: var(--text-primary);
+    --theme-text-secondary: var(--text-secondary);
+    --theme-code-bg: #2d2d2d;
+    --theme-code-text: #f1f1f1;
+    --theme-bg-hover: var(--bg-accent);
+}
+
+/* Glass morphism effect for components */
+.glass-effect {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 12px;
+    transition: all var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Glass card with hover effect */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 12px;
+    transition: all var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
+}
+
+/* Prevent white space when overscrolling */
+html {
+    background: var(--gradient-end); /* Fallback background */
+    overscroll-behavior: none; /* Prevents bounce/overscroll showing white space */
+    background-size: 200% 200%; /* Enlarge to avoid white edges during scroll */
+    transition: background var(--theme-transition-speed) var(--theme-transition-timing),
+                background-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+body {
+    overscroll-behavior: none; /* Prevents bounce/overscroll showing white space */
+}
+
+/* Add extra space at the bottom to ensure no white space when scrolling beyond */
+#__next {
+    min-height: 100vh; /* Ensure minimum full viewport height */
+    padding-bottom: 100px; /* Extra padding to prevent seeing white space */
+    overflow-x: hidden;
+    background: inherit; /* Ensure it inherits the gradient from body */
 }

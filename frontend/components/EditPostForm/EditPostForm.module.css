@@ -1,0 +1,136 @@
+.formContainer {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+                border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.formTitle {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.input, .textarea {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+                background-color var(--theme-transition-speed) var(--theme-transition-timing),
+                color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: border-color 0.2s ease,
+                color var(--theme-transition-speed) var(--theme-transition-timing),
+                background-color var(--theme-transition-speed) var (--theme-transition-timing);
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.select:disabled {
+    background-color: var(--bg-disabled);
+    cursor: not-allowed;
+}
+
+.input:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.errorMessage {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--color-secondary);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.submitButton, .cancelButton {
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border: none;
+}
+
+.submitButton {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.submitButton:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.submitButton:disabled {
+    background-color: var(--color-grey-400);
+    cursor: not-allowed;
+}
+
+.cancelButton {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.cancelButton:hover {
+    background-color: var(--color-grey-200);
+}
+
+.cancelButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}

@@ -4,3 +4,11 @@ from .base import *  # NOQA
 from .base_serializer import *  # NOQA
 from .home import *  # NOQA
 from .home_serializer import *  # NOQA
+from .about import *  # NOQA
+from .about_serializer import *  # NOQA
+from .wiki import *  # NOQA
+from .wiki_serializer import *  # NOQA
+from .learning_resources import *  # NOQA
+from .learning_resources_serializer import *  # NOQA
+from .posts import *  # NOQA
+from .posts_serializer import *  # NOQA

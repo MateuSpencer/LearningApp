@@ -1,0 +1,690 @@
+.container {
+  width: 100%;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 25px;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              box-shadow var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary); /* Use text-primary for proper light/dark mode support */
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Top action buttons container */
+.topActions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Style addButton like newPostButton from PostsList.module.css */
+.addButton {
+  background-color: var(--color-primary, #01FFFF);
+  color: #333333;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.9rem; /* Match PostsList button */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease,
+              box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Match PostsList button */
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              transform 0.2s ease,
+              box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.addButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark, #2AC6D0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Match PostsList button */
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.addButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--color-grey-400);
+  cursor: not-allowed;
+}
+
+/* Container for the inline form */
+.formContainer {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  animation: slideDown 0.3s ease-out; /* Add animation like PostsList filter/sort panels */
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Keyframes for slideDown animation (copied from PostsList.module.css) */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.resourcesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.resourceItemContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.useResourceButton {
+  align-self: flex-end;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-secondary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.useResourceButton:hover:not(:disabled) {
+  background-color: var(--color-secondary-dark);
+}
+
+.useResourceButton:disabled {
+  background-color: var(--bg-disabled);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.loading, .error, .emptyMessage {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary, #666666);
+  font-size: 1.1rem;
+  background-color: var(--bg-info-light);
+  color: var(--text-info);
+}
+
+.error {
+  color: var(--text-error);
+  background-color: var(--bg-error-light);
+  color: var(--color-secondary);
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid var(--color-secondary-light);
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.errorMessage {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: var(--color-secondary, #EA6400);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.emptyMessage {
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 30px 20px;
+  background-color: var(--bg-secondary, #ffffff);
+  border: 1px dashed var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  color: var(--text-secondary, #666666);
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var (--theme-transition-timing);
+}
+
+.emptyState p {
+  margin: 5px 0;
+}
+
+.footer {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.totalCount {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.resourcesContainer {
+  margin: 20px 0 30px;
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .addButton {
+    width: 100%;
+  }
+}
+
+/* Controls wrapper - contains all control elements before the horizontal divider */
+.controlsWrapper {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Controls bar that contains all top-level controls */
+.controlsBar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.controlsLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 1rem;
+}
+
+/* Icon buttons for toggling filters and sorting */
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              transform 0.2s ease;
+}
+
+.iconButton:hover:not(:disabled) {
+  background-color: var(--bg-hover, var(--color-grey-200));
+  transform: translateY(-1px);
+}
+
+.iconButton.active {
+  background-color: var(--color-primary-light, rgba(0, 191, 191, 0.1));
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.iconButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.25rem;
+}
+
+.iconText {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Search container */
+.searchContainer {
+  position: relative;
+  flex: 1;
+  max-width: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color var(--theme-transition-speed) var(--theme-transition-timing),
+              background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              box-shadow 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 191, 191, 0.25);
+}
+
+.searchInput:disabled {
+  background-color: var(--bg-disabled, var(--color-grey-200));
+  cursor: not-allowed;
+}
+
+.searchIconWrapper {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.searchIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.clearSearchButton {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.clearSearchButton:hover {
+  color: var(--color-secondary);
+}
+
+/* Filter and sort panels */
+.filterPanel, 
+.sortPanel {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  animation: slideDown 0.3s ease;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .controlsBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .controlsLeft {
+    width: 100%;
+    margin-right: 0;
+    justify-content: space-between;
+  }
+  
+  .searchContainer {
+    width: 100%;
+  }
+  
+  .topActions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .addResourceButton {
+    flex-grow: 1;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.centeredTitle {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+/* AI Resources Section Styles */
+.aiResourcesSection {
+  background: rgba(31, 32, 35, 0.85); /* Dark background with slight transparency */
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  overflow: hidden;
+  color: white;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: rgba(var(--color-secondary-rgb, 250, 152, 54), 0.05); /* Light orange background with opacity */
+  border: 1px solid rgba(var(--color-secondary-rgb, 250, 152, 54), 0.2);
+  border-radius: 8px;
+  animation: fadeIn 0.5s ease;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Dark mode style for AI resources section */
+[data-theme="dark"] .aiResourcesSection {
+  background-color: rgba(var(--color-secondary-rgb, 250, 152, 54), 0.08);
+}
+
+.aiResourcesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+}
+
+.aiResourcesTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #FF8C00; /* Orange title to match the screenshot */
+  font-weight: 600;
+}
+
+.toggleButton {
+  background: none;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  color: #FF8C00;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggleButton:hover {
+  background-color: rgba(255, 140, 0, 0.1);
+}
+
+.aiResourcesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 1rem 0;
+}
+
+.aiResourceItem {
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  border-left: 4px solid var(--color-secondary-light, #FFA500);
+  transition: transform 0.2s ease, 
+              box-shadow 0.2s ease,
+              background-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+/* Dark mode style for AI resource items */
+[data-theme="dark"] .aiResourceItem {
+  background-color: rgba(40, 40, 40, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.aiResourceItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.aiResourceItemTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.aiResourceItemTitle a {
+  color: var(--color-secondary, #EA6400);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.aiResourceItemTitle a:hover {
+  color: var(--color-secondary-dark, #D35400);
+  text-decoration: underline;
+}
+
+.aiResourceItemMeta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.aiResourceType {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background-color: rgba(255, 165, 0, 0.2);
+  color: var(--color-secondary-dark, #D35400);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Resource type specific colors */
+.resourceTypewebsite {
+  background-color: rgba(52, 152, 219, 0.2);
+  color: #2980b9;
+}
+
+.resourceTypevideo {
+  background-color: rgba(231, 76, 60, 0.2);
+  color: #c0392b;
+}
+
+.resourceTypepdf {
+  background-color: rgba(155, 89, 182, 0.2);
+  color: #8e44ad;
+}
+
+.resourceTypearticle {
+  background-color: rgba(46, 204, 113, 0.2);
+  color: #27ae60;
+}
+
+.resourceTypeimage {
+  background-color: rgba(241, 196, 15, 0.2);
+  color: #f39c12;
+}
+
+.aiResourceDescription {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.toggleButton {
+  background: none;
+  border: 1px solid var(--color-secondary-light, #FFA500);
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-secondary, #EA6400);
+  cursor: pointer;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.toggleButton:hover {
+  background-color: rgba(var(--color-secondary-rgb, 250, 152, 54), 0.1);
+}
+
+/* Button group to align Add Resource and AI Resource buttons */
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.addResourceButton {
+  background-color: var(--color-primary);
+  color: var(--bg-primary-inverse, #333);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              transform 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.addResourceButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.addResourceButton:disabled {
+  background-color: var(--color-grey-400);
+  cursor: not-allowed;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* AI Button Wrapper to add some margin/padding */
+.aiButtonWrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* Button Group to align Add Resource and AI Find buttons */
+.buttonGroup {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.addResourceButton {
+  background-color: var(--color-primary);
+  color: #333; /* Dark text for better contrast on light button */
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--theme-transition-speed) var(--theme-transition-timing),
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              transform 0.2s ease,
+              box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode specific style for buttons */
+[data-theme="dark"] .addResourceButton {
+  color: #111; /* Even darker text for dark mode's bright button */
+}
+
+.addResourceButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.addResourceButton:disabled {
+  background-color: var(--color-grey-400);
+  cursor: not-allowed;
+}

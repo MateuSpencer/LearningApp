@@ -1,38 +1,10 @@
-import { useState, useEffect } from 'react';
-import { getViewData, getPublicViewData } from '../api/wagtail';
-import LazyContainers from '../containers/LazyContainers';
+import { basePageWrap } from '../containers/BasePage';
+import NotFoundPage from '../containers/NotFoundPage';
 
-export default function DynamicNotFoundPage() {
-    // 404 does not support getServerSideProps, must fetch client side data
-    // https://github.com/vercel/next.js/blob/master/errors/404-get-initial-props.md
-    const [data, setData] = useState(null);
-    useEffect(() => {
-        async function fetchData() {
-            const { json: pageData } = await getPublicViewData('404');
-            setData(pageData);
-        }
-        fetchData();
-    }, []);
-
-    if (!data) {
-        return null;
-    }
-
-    return <NotFoundPage {...data} />;
+function Custom404() {
+    // Use our statically translated NotFoundPage component
+    return <NotFoundPage />;
 }
 
-function NotFoundPage({ componentName, componentProps }) {
-    const Component = LazyContainers[componentName];
-    if (!Component) {
-        return <h1>Component {componentName} not found</h1>;
-    }
-    return <Component {...componentProps} />;
-}
-
-/*
-// For static routing
-export async function getStaticProps({ params, preview, previewData }) {
-  const pageData = await getViewData('404');
-  return { props: pageData }
-}
-*/
+// Wrap the component with basePageWrap to inherit the base page structure
+export default basePageWrap(Custom404);

@@ -1,42 +1,136 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import s from './LeftSidebar.module.css';
 import ThemeToggleButton from '../ThemeToggleButton';
+import AboutButton from '../AboutButton';
+import AccountButton from '../AccountButton';
+import LanguageSelector from '../LanguageSelector';
 import Logo from '../Logo';
 import SiteName from '../SiteName';
 
-const LeftSidebar = ({ items }) => {
+const LeftSidebar = () => {
     const [collapsed, setCollapsed] = useState(true);
+    const [isLanguageOptionsOpen, setIsLanguageOptionsOpen] = useState(false);
+    const { language } = useLanguage();
+    const { t } = useTranslation();
+    const collapseTimerRef = useRef(null);
+    const sidebarRef = useRef(null);
 
-    const toggleCollapse = () => {
-        setCollapsed(!collapsed);
-    };
+    const handleMouseEnter = useCallback(() => {
+        // Clear any pending collapse timer
+        if (collapseTimerRef.current) {
+            clearTimeout(collapseTimerRef.current);
+            collapseTimerRef.current = null;
+        }
+        setCollapsed(false);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        if (!isLanguageOptionsOpen) {
+            // Set a timeout to delay the collapse by 500ms (half a second)
+            collapseTimerRef.current = setTimeout(() => {
+                setCollapsed(true);
+            }, 500);
+        }
+    }, [isLanguageOptionsOpen]);
+    
+    const handleLanguageToggle = useCallback((isOpen) => {
+        setIsLanguageOptionsOpen(isOpen);
+        // Prevent sidebar collapse when language selector is open
+        if (isOpen) {
+            setCollapsed(false);
+            if (collapseTimerRef.current) {
+                clearTimeout(collapseTimerRef.current);
+                collapseTimerRef.current = null;
+            }
+        }
+    }, []);
+    
+    // Cleanup timer when component unmounts
+    useEffect(() => {
+        return () => {
+            if (collapseTimerRef.current) {
+                clearTimeout(collapseTimerRef.current);
+            }
+        };
+    }, []);
 
     return (
-        <div className={`${s.LeftSidebar} ${collapsed ? s.Collapsed : s.Expanded}`}>
-            <button 
-                className={s.ToggleButton}
-                onClick={toggleCollapse}
-                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-                {collapsed ? '›' : '‹'}
-            </button>
-
+        <div 
+            ref={sidebarRef}
+            className={`${s.LeftSidebar} ${collapsed ? s.Collapsed : s.Expanded}`}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
             <div className={s.Header}>
               <div className={s.LogoWrapper}>
                 <Logo size="medium" />
                 <div className={s.SiteNameWrapper}>
-                  <SiteName size="medium" />
+                  <SiteName size="medium" linkToHome={true} />
                 </div>
               </div>
             </div>
 
             <div className={s.Content}>
                 {/* Navigation items */}
+                <nav className={s.Navigation}>
+                    <ul className={s.NavList}>
+                        <li className={s.NavItem}>
+                            <Link href="/wiki" className={s.NavLink}>
+                                <span className={s.NavIcon}>🌐</span>
+                                <div className={s.NavTextWrapper}>
+                                    <span className={s.NavText}>{t('navigation.wikiArticles')}</span>
+                                </div>
+                            </Link>
+                        </li>
+                        <li className={s.NavItem}>
+                            <Link href="/learning-resources" className={s.NavLink}>
+                                <span className={s.NavIcon}>📚</span>
+                                <div className={s.NavTextWrapper}>
+                                    <span className={s.NavText}>{t('navigation.learningResources')}</span>
+                                </div>
+                            </Link>
+                        </li>
+                        <li className={s.NavItem}>
+                            <Link href="/posts" className={s.NavLink}>
+                                <span className={s.NavIcon}>👥</span>
+                                <div className={s.NavTextWrapper}>
+                                    <span className={s.NavText}>{t('navigation.communityPosts')}</span>
+                                </div>
+                            </Link>
+                        </li>
+                        {/* SubNavItem only shows when sidebar is expanded */}
+                        {!collapsed && (
+                            <li className={`${s.NavItem} ${s.SubNavItem}`}>
+                                <Link href="/posts/my-posts" className={s.NavLink}>
+                                    <span className={s.NavIcon}>📝</span>
+                                    <div className={s.NavTextWrapper}>
+                                        <span className={s.NavText}>{t('navigation.myPosts')}</span>
+                                    </div>
+                                </Link>
+                            </li>
+                        )}
+                    </ul>
+                </nav>
                 
                 <div className={s.Footer}>
-                    {!collapsed && <p className={s.ThemeLabel}>Theme</p>}
-                    <ThemeToggleButton small={collapsed} />
+                    {!collapsed && <p className={s.ThemeLabel}></p>}
+                    <div className={s.ButtonsContainer}>
+                        <div className={`${s.ButtonWrapper} ${s.ThemeButtonWrapper}`}>
+                            <ThemeToggleButton/>
+                        </div>
+                        <div className={`${s.ButtonWrapper} ${s.LanguageButtonWrapper}`}>
+                            <LanguageSelector onToggle={handleLanguageToggle} />
+                        </div>
+                        <div className={`${s.ButtonWrapper} ${s.AboutButtonWrapper}`}>
+                            <AboutButton expanded={!collapsed} />
+                        </div>
+                        <div className={`${s.ButtonWrapper} ${s.AccountButtonWrapper}`}>
+                            <AccountButton />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -44,7 +138,6 @@ const LeftSidebar = ({ items }) => {
 };
 
 LeftSidebar.defaultProps = {
-    items: [],
 };
 
 export default LeftSidebar;
