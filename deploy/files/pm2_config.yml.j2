@@ -1,13 +1,18 @@
 apps:
   - name: {{ project_slug }}
     script: {{ ansistrano_deploy_to }}/current/src/frontend/.next/standalone/server.js
-    cwd: {{ ansistrano_deploy_to }}/current/src/frontend/
+    cwd: {{ ansistrano_deploy_to }}/current/src/frontend/.next/standalone/
     exec_mode: cluster
-    instances: 0
+    instances: 1
     max_memory_restart: "350M"
     uid: 'deploy'
     gid: 'www-data'
     env:
       PORT: {{ 3000+(pm2_application_count.stdout|int) }}
       NODE_ENV: production
-
+      NODE_OPTIONS: "--max_old_space_size=256"
+    env_file: {{ ansistrano_deploy_to }}/shared/.env.next
+    error_file: /mnt/persist/logs/{{ project_slug }}-error.log
+    out_file: /mnt/persist/logs/{{ project_slug }}-out.log
+    log_file: /mnt/persist/logs/{{ project_slug }}-combined.log
+    time: true

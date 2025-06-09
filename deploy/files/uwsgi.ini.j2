@@ -1,4 +1,3 @@
-
 [uwsgi]
 vhost = true
 plugins = python3
@@ -12,6 +11,8 @@ chdir = {{ ansistrano_deploy_to }}/current/src
 touch-reload = {{ ansistrano_deploy_to }}/reload
 memory-report = true
 stats = 127.0.0.1:{{ 9190+(uwsgi_application_count.stdout|int) }}
+socket = /run/uwsgi/app/{{ project_slug }}/socket
+chmod-socket = 666
 
 for-readline = {{ ansistrano_deploy_to }}/shared/.env
   env = %(_)
@@ -21,4 +22,3 @@ endfor =
 ignore-sigpipe = true
 ignore-write-errors = true
 disable-write-exception = true
-

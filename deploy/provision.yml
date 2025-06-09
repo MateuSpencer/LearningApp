@@ -121,6 +121,14 @@
         mode: 0775
         recurse: yes
 
+    - name: Creates directory for PM2 logs
+      file:
+        path: /mnt/persist/logs
+        state: directory
+        owner: deploy
+        group: www-data
+        mode: 0775
+
     - name: Creates pm2 .yml file for next.js
       template:
         src: files/pm2_config.yml.j2

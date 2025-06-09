@@ -29,6 +29,14 @@
   environment:
     NODE_OPTIONS: "--max_old_space_size=128"
 
+- name: Build Next.js application
+  command: npm run build
+  args:
+    chdir: "{{ ansistrano_release_path.stdout }}/src/frontend/"
+  environment:
+    NODE_ENV: production
+    NODE_OPTIONS: "--max_old_space_size=512"
+
 - name: Run Migrations
   shell: "{{ ansistrano_shared_path }}/venv/bin/python {{ ansistrano_release_path.stdout }}/src/manage.py migrate --noinput"
 

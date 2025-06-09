@@ -4,6 +4,43 @@
 - name: Collect static
   shell: "{{ ansistrano_shared_path }}/venv/bin/python {{ ansistrano_release_path.stdout }}/src/manage.py collectstatic --noinput"
 
+- name: Copy Next.js environment file to standalone build
+  copy:
+    src: "{{ ansistrano_shared_path }}/.env.next"
+    dest: "{{ ansistrano_release_path.stdout }}/src/frontend/.next/standalone/.env"
+    remote_src: yes
+    owner: deploy
+    group: www-data
+    mode: '0644'
+
+- name: Create uWSGI socket directory
+  become: yes
+  become_user: root
+  file:
+    path: "/run/uwsgi/app/{{ project_slug }}"
+    state: directory
+    owner: deploy
+    group: www-data
+    mode: '0755'
+
+- name: Create PM2 log directory
+  become: yes
+  become_user: root
+  file:
+    path: "/mnt/persist/logs"
+    state: directory
+    owner: deploy
+    group: www-data
+    mode: '0755'
+
+- name: Ensure certbot timer is enabled for auto-renewal
+  become: yes
+  become_user: root
+  systemd:
+    name: certbot.timer
+    enabled: yes
+    state: started
+
 - name: Restart uWSGI
   become: yes
   become_user: root
@@ -11,13 +48,49 @@
   async: 60
   poll: 5
 
-- name: Restart PM2 app
+- name: Wait for uWSGI socket to be created
   become: yes
   become_user: root
-  command: "sudo pm2 restart {{ project_slug }}"
+  wait_for:
+    path: "/run/uwsgi/app/{{ project_slug }}/socket"
+    timeout: 30
+
+- name: Start or restart PM2 app
+  become: yes
+  become_user: root
+  shell: |
+    if sudo -u deploy pm2 describe {{ project_slug }} > /dev/null 2>&1; then
+      sudo -u deploy pm2 restart {{ project_slug }}
+    else
+      sudo -u deploy pm2 start /mnt/persist/nodejs/{{ project_slug }}.yml
+      sudo -u deploy pm2 save
+    fi
+  register: pm2_result
+
+- name: Show PM2 status
+  debug:
+    msg: "{{ pm2_result.stdout }}"
 
 - name: Restart Nginx
   become: yes
   become_user: root
   command: sudo systemctl restart nginx
+
+- name: Verify services are running
+  become: yes
+  become_user: root
+  shell: |
+    echo "=== uWSGI Status ==="
+    systemctl is-active uwsgi || echo "uWSGI not running"
+    echo "=== PM2 Status ==="
+    sudo -u deploy pm2 list || echo "PM2 not running"
+    echo "=== Nginx Status ==="
+    systemctl is-active nginx || echo "Nginx not running"
+    echo "=== Socket Check ==="
+    ls -la /run/uwsgi/app/{{ project_slug }}/ || echo "Socket directory not found"
+  register: service_status
+
+- name: Show service status
+  debug:
+    msg: "{{ service_status.stdout }}"
 
