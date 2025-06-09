@@ -35,7 +35,8 @@
     chdir: "{{ ansistrano_release_path.stdout }}/src/frontend/"
   environment:
     NODE_ENV: production
-    NODE_OPTIONS: "--max_old_space_size=512"
+  async: 1800
+  poll: 30
 
 - name: Run Migrations
   shell: "{{ ansistrano_shared_path }}/venv/bin/python {{ ansistrano_release_path.stdout }}/src/manage.py migrate --noinput"
