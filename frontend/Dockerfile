@@ -10,7 +10,6 @@ COPY . .
 # build
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
-ENV NEXT_SHARP_PATH=/app/.next/standalone/node_modules/sharp
 
 RUN npm run build
 
@@ -25,18 +24,17 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
 
 # copy from build image
-
-COPY --from=BUILD_IMAGE /app/.next/standalone ./standalone
-COPY --from=BUILD_IMAGE /app/.next/static ./standalone/.next/static
-COPY --from=BUILD_IMAGE /app/public ./standalone/public
+COPY --from=BUILD_IMAGE /app/.next ./.next
+COPY --from=BUILD_IMAGE /app/node_modules ./node_modules
+COPY --from=BUILD_IMAGE /app/package.json ./package.json
+COPY --from=BUILD_IMAGE /app/public ./public
 
 EXPOSE 3000
 
 RUN chown -R app:app /app
 USER app
 
-ENV NEXT_SHARP_PATH=/app/standalone/node_modules/sharp
 ENV NODE_ENV production
 
 
-CMD ["dumb-init", "node", "./standalone/server.js"]
+CMD ["dumb-init", "npm", "start"]

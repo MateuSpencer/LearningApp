@@ -6,7 +6,6 @@ let nextConfig = {
     trailingSlash: true,
     productionBrowserSourceMaps: true,
     basePath,
-    output: "standalone",
     
     // Add explicit rewrites for authentication routes
     async rewrites() {

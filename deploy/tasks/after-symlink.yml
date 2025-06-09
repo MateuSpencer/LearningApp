@@ -4,10 +4,10 @@
 - name: Collect static
   shell: "{{ ansistrano_shared_path }}/venv/bin/python {{ ansistrano_release_path.stdout }}/src/manage.py collectstatic --noinput"
 
-- name: Copy Next.js environment file to standalone build
+- name: Copy Next.js environment file to build
   copy:
     src: "{{ ansistrano_shared_path }}/.env.next"
-    dest: "{{ ansistrano_release_path.stdout }}/src/frontend/.next/standalone/.env"
+    dest: "{{ ansistrano_release_path.stdout }}/src/frontend/.env.local"
     remote_src: yes
     owner: deploy
     group: www-data
