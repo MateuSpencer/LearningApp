@@ -21,7 +21,6 @@ body {
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* Global font */
     color: var(--text-primary);
     min-height: 100vh; /* Use viewport height for full coverage */
-    height: auto; /* Allow content to determine height */
     overflow-x: hidden; /* Prevent horizontal scrolling */
     position: relative; /* For potential absolute positioned elements */
     
@@ -162,10 +161,9 @@ body {
     overscroll-behavior: none; /* Prevents bounce/overscroll showing white space */
 }
 
-/* Add extra space at the bottom to ensure no white space when scrolling beyond */
+/* Container for the Next.js app */
 #__next {
     min-height: 100vh; /* Ensure minimum full viewport height */
-    padding-bottom: 100px; /* Extra padding to prevent seeing white space */
     overflow-x: hidden;
     background: inherit; /* Ensure it inherits the gradient from body */
 }

@@ -1,39 +1,30 @@
 .container {
     width: 100%;
-    padding: 40px 20px;
-    background-color: var(--bg-primary);
-    transition: background-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .contentWrapper {
     max-width: 800px;
     margin: 0 auto;
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    padding: 40px;
-    box-shadow: var(--glass-shadow);
-    transition: backdrop-filter var(--theme-transition-speed) var(--theme-transition-timing),
-                box-shadow var(--theme-transition-speed) var(--theme-transition-timing);
+    padding: 60px 20px;
 }
 
 .title {
     font-size: 2.5rem;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     text-align: center;
     color: var(--text-primary);
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-weight: 600;
+    font-weight: 500;
     transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .aboutContent {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    line-height: 1.6;
+    line-height: 1.7;
     color: var(--text-primary);
     transition: color var(--theme-transition-speed) var(--theme-transition-timing);
+    max-width: 700px;
+    margin: 0 auto;
 }
 
 .aboutContent h2 {
@@ -45,8 +36,9 @@
 }
 
 .aboutContent p {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     font-size: 1.1rem;
+    color: var(--text-secondary, var(--text-primary));
 }
 
 .aboutContent a {
@@ -62,7 +54,7 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .contentWrapper {
-        padding: 25px;
+        padding: 40px 20px;
     }
     
     .title {
@@ -71,16 +63,12 @@
 }
 
 @media (max-width: 480px) {
-    .container {
-        padding: 20px 15px;
-    }
-    
     .contentWrapper {
-        padding: 20px;
+        padding: 30px 15px;
     }
     
     .title {
         font-size: 1.8rem;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
     }
 }
