@@ -122,6 +122,22 @@ server {
     proxy_pass http://localhost:{{ 3000+(pm2_application_count.stdout|int) }};
   }
 
+  location /api/ {
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Scheme $scheme;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header REMOTE_USER $remote_user;
+    proxy_set_header AUTH_TYPE Basic;
+    uwsgi_pass  unix:///run/uwsgi/app/{{ project_slug }}/socket;
+    uwsgi_param UWSGI_SETENV ENVIRONMENT=production;
+    include     uwsgi_params;
+    
+    # For proper cookie handling with secure sessions
+    proxy_cookie_path / "/; HTTPOnly; Secure";
+  }
+
   location /accounts/ {
     proxy_set_header Host $http_host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -133,6 +149,9 @@ server {
     uwsgi_pass  unix:///run/uwsgi/app/{{ project_slug }}/socket;
     uwsgi_param UWSGI_SETENV ENVIRONMENT=production;
     include     uwsgi_params;
+    
+    # For proper cookie handling with authentication
+    proxy_cookie_path / "/; HTTPOnly; Secure";
   }
 
   # what to serve if upstream is not available or crashes

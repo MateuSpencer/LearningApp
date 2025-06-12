@@ -218,10 +218,10 @@ ACCOUNT_SIGNUP_FIELDS = [
     "password1*",
     "password2*",
 ]  # Required fields during signup
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = False
 ACCOUNT_LOGIN_BY_CODE_ENABLED = True
-ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = False
 ACCOUNT_LOGOUT_ON_GET = False  # POST request required for logout for CSRF protection
 ACCOUNT_PRESERVE_USERNAME_CASING = False  # Treat usernames as case insensitive
 
@@ -241,32 +241,6 @@ WAGTAILIMAGES_FORMAT_CONVERSIONS = {
     "png": "jpeg",
     "webp": "webp",
 }
-
-# Django AllAuth settings
-AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
-    "django.contrib.auth.backends.ModelBackend",
-    # `allauth` specific authentication methods, such as login by e-mail
-    "allauth.account.auth_backends.AuthenticationBackend",
-]
-
-# Django AllAuth configuration
-ACCOUNT_LOGIN_METHODS = {
-    "email",
-    "username",
-}  # Allow login with either username or email
-ACCOUNT_SIGNUP_FIELDS = [
-    "email*",
-    "username*",
-    "password1*",
-    "password2*",
-]  # Required fields during signup
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = False  # Add this setting from example
-ACCOUNT_LOGIN_BY_CODE_ENABLED = True  # Add this setting from example
-ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True  # Add this setting from example
-ACCOUNT_LOGOUT_ON_GET = False  # POST request required for logout for CSRF protection
-ACCOUNT_PRESERVE_USERNAME_CASING = False  # Treat usernames as case insensitive
 
 # Uploaded media
 MEDIA_URL = "/wt/media/"
