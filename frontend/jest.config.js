@@ -10,6 +10,7 @@ const customJestConfig = {
     testEnvironment: 'jest-environment-jsdom',
     moduleNameMapper: {
         '\\.svg': '<rootDir>/__mocks__/svg.js',
+        '^react-markdown$': '<rootDir>/__mocks__/react-markdown.js',
     },
 };
 
