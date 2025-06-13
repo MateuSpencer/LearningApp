@@ -50,7 +50,7 @@ const LearningResourcesList = ({
   // AI resources state
   const [aiResources, setAiResources] = useState(null);
   const [showAiResources, setShowAiResources] = useState(true); // Default to showing when available
-  const [aiResourcesCollapsed, setAiResourcesCollapsed] = useState(false);
+  const [aiResourcesCollapsed, setAiResourcesCollapsed] = useState(true); // Default to collapsed when loading page
   const [loadingPersistentSuggestions, setLoadingPersistentSuggestions] = useState(false);
   const [persistentSuggestions, setPersistentSuggestions] = useState([]);
   const [persistentSuggestionsError, setPersistentSuggestionsError] = useState(null);
@@ -148,7 +148,7 @@ const LearningResourcesList = ({
         
         setAiResources(transformedSuggestions);
         setShowAiResources(true);
-        setAiResourcesCollapsed(false);
+        setAiResourcesCollapsed(true); // Keep collapsed on page load
       }
     } catch (error) {
       console.error('Error loading persistent suggestions:', error);

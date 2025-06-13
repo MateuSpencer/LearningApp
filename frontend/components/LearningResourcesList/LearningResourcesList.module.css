@@ -466,23 +466,26 @@
 .aiResourcesTitle {
   margin: 0;
   font-size: 1.25rem;
-  color: #FF8C00; /* Orange title to match the screenshot */
+  color: var(--color-secondary, #FF8C00); /* Use CSS variable with fallback for proper light/dark mode support */
   font-weight: 600;
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .toggleButton {
   background: none;
-  border: 1px solid rgba(255, 140, 0, 0.3);
+  border: 1px solid rgba(var(--color-secondary-rgb, 255, 140, 0), 0.3);
   border-radius: 4px;
   padding: 0.25rem 0.75rem;
   font-size: 0.85rem;
-  color: #FF8C00;
+  color: var(--color-secondary, #FF8C00);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s ease,
+              color var(--theme-transition-speed) var(--theme-transition-timing),
+              border-color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .toggleButton:hover {
-  background-color: rgba(255, 140, 0, 0.1);
+  background-color: rgba(var(--color-secondary-rgb, 255, 140, 0), 0.1);
 }
 
 .aiResourcesList {
@@ -517,12 +520,14 @@
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
   font-weight: 500;
+  color: var(--text-primary); /* Ensure proper text color in light/dark mode */
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .aiResourceItemTitle a {
   color: var(--color-secondary, #EA6400);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .aiResourceItemTitle a:hover {
@@ -535,6 +540,8 @@
   gap: 1rem;
   margin-bottom: 0.5rem;
   font-size: 0.85rem;
+  color: var(--text-secondary); /* Ensure proper secondary text color */
+  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 .aiResourceType {

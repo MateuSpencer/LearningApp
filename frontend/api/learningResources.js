@@ -61,15 +61,27 @@ export const learningResources = {
     // New method: Create a resource from URL
     createFromUrl: async ({ url, title, pageSlug, resourceType = 'website', language = 'en' }) => {
         try {
+            // Validate required fields
+            if (!url || !title || !pageSlug) {
+                throw new Error('Missing required fields: url, title, or pageSlug');
+            }
+            
+            // Validate resourceType - ensure it's a valid type
+            const validResourceTypes = ['website', 'youtube', 'video', 'pdf', 'article', 'book', 'course', 'documentation', 'tutorial', 'image', 'tool'];
+            const normalizedResourceType = validResourceTypes.includes(resourceType) ? resourceType : 'website';
+            
             // Ensure we're using the normalized URL from backend validation
             // The validation should have already occurred before submitting
             const payload = {
-                url,
-                title,
+                url: url.trim(),
+                title: title.trim(),
                 page_slug: pageSlug,
-                resource_type: resourceType,
-                language
+                resource_type: normalizedResourceType,
+                language: language || 'en'
             };
+            
+            // Debug log to help with troubleshooting
+            console.log('Creating resource with payload:', payload);
             
             const response = await httpPost(`${RESOURCES_ENDPOINT}/`, payload);
             

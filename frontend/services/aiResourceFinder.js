@@ -37,14 +37,101 @@ const extractJsonFromText = (text) => {
   }
 };
 
-// Schema for learning resources
+/**
+ * Normalize and validate resource types, defaulting to 'website' for invalid types
+ * @param {string} resourceType - The resource type to normalize
+ * @returns {string} A valid resource type
+ */
+const normalizeResourceType = (resourceType) => {
+  if (!resourceType || typeof resourceType !== 'string') {
+    return 'website';
+  }
+  
+  const validTypes = [
+    'website', 'youtube', 'video', 'pdf', 'article', 
+    'book', 'course', 'documentation', 'tutorial', 'image', 'tool'
+  ];
+  
+  const normalizedType = resourceType.toLowerCase().trim();
+  
+  if (validTypes.includes(normalizedType)) {
+    return normalizedType;
+  }
+  
+  // Map common variations to valid types
+  const typeMapping = {
+    'web': 'website',
+    'webpage': 'website',
+    'site': 'website',
+    'url': 'website',
+    'link': 'website',
+    'blog': 'article',
+    'blogpost': 'article',
+    'post': 'article',
+    'guide': 'tutorial',
+    'howto': 'tutorial',
+    'instructions': 'tutorial',
+    'docs': 'documentation',
+    'doc': 'documentation',
+    'reference': 'documentation',
+    'manual': 'documentation',
+    'lesson': 'course',
+    'class': 'course',
+    'training': 'course',
+    'lecture': 'video',
+    'movie': 'video',
+    'film': 'video',
+    'clip': 'video',
+    'ebook': 'book',
+    'textbook': 'book',
+    'publication': 'book',
+    'software': 'tool',
+    'app': 'tool',
+    'application': 'tool',
+    'utility': 'tool',
+    'resource': 'website'
+  };
+  
+  if (typeMapping[normalizedType]) {
+    return typeMapping[normalizedType];
+  }
+  
+  // Default fallback
+  return 'website';
+};
+
+/**
+ * Process and validate resources, ensuring all have valid types
+ * @param {Array} resources - Array of resource objects
+ * @returns {Array} Array of validated resource objects
+ */
+const processResources = (resources) => {
+  if (!Array.isArray(resources)) {
+    return [];
+  }
+  
+  return resources.map(resource => ({
+    ...resource,
+    resourceType: normalizeResourceType(resource.resourceType)
+  })).filter(resource => 
+    resource.title && 
+    resource.url && 
+    resource.description &&
+    resource.resourceType
+  );
+};
+
+// Schema for learning resources - aligned with frontend form options
 const resourceSchema = z.object({
   resources: z.array(
     z.object({
       title: z.string().describe("Title of the resource"),
       url: z.string().url().describe("URL of the resource"),
       description: z.string().describe("Short description of the resource"),
-      resourceType: z.enum(["video", "pdf", "image", "website", "article"]).describe("Type of resource")
+      resourceType: z.enum([
+        "website", "youtube", "video", "pdf", "article", 
+        "book", "course", "documentation", "tutorial", "image", "tool"
+      ]).describe("Type of resource")
     })
   ).describe("List of learning resources for the topic")
 });
@@ -208,14 +295,39 @@ ${formatInstructions(parser)}`],
         const result = await chain.invoke({
           topic,
         });
-        return result.resources;
+        return processResources(result.resources);
       } catch (error) {
         lastError = error;
+        
+        // If it's a validation error (invalid enum values), try to parse and fix the data
+        if (error.message.includes("Invalid enum value") || error.message.includes("Failed to parse")) {
+          try {
+            // Extract the raw text from the error message if available
+            const errorText = error.message;
+            const textMatch = errorText.match(/Text: "(.*?)"\. Error:/s);
+            
+            if (textMatch && textMatch[1]) {
+              const rawText = textMatch[1];
+              const extractedJson = extractJsonFromText(rawText);
+              
+              if (extractedJson && extractedJson.resources) {
+                // Process resources with type normalization
+                const processedResources = processResources(extractedJson.resources);
+                if (processedResources.length > 0) {
+                  return processedResources;
+                }
+              }
+            }
+          } catch (fallbackError) {
+            // Continue to other error handling
+          }
+        }
         
         // If it's not a parsing error, don't retry
         if (!error.message.includes("parsing") && 
             !error.message.includes("SyntaxError") && 
-            !error.message.includes("Unterminated")) {
+            !error.message.includes("Unterminated") &&
+            !error.message.includes("Invalid enum value")) {
           break;
         }
         
@@ -251,16 +363,10 @@ DO NOT include ANY explanatory text, markdown formatting, or code blocks outside
             
             // Extract JSON from the response
             const responseText = directResponse.content;
-            const jsonMatch = responseText.match(/{[\s\S]*}/);
+            const extractedJson = extractJsonFromText(responseText);
             
-            if (jsonMatch) {
-              const jsonText = jsonMatch[0];
-              const manualParsedResult = JSON.parse(jsonText);
-              
-              // Verify it has the required structure
-              if (manualParsedResult.resources && Array.isArray(manualParsedResult.resources)) {
-                return manualParsedResult.resources;
-              }
+            if (extractedJson && extractedJson.resources && Array.isArray(extractedJson.resources)) {
+              return processResources(extractedJson.resources);
             }
             
             throw new Error("Failed to extract valid JSON structure from model response");
@@ -353,7 +459,7 @@ export const findResourcesWithFunctionCalling = async (topic, apiConfig) => {
                 },
                 resourceType: {
                   type: "string",
-                  enum: ["video", "youtube", "pdf", "image", "website", "article", "book", "course", "documentation", "tutorial", "tool"],
+                  enum: ["website", "youtube", "video", "pdf", "article", "book", "course", "documentation", "tutorial", "image", "tool"],
                   description: "Type of resource"
                 }
               },
@@ -387,8 +493,22 @@ For each resource, provide a title, URL, brief description, and resource type.`]
     
     const result = await chain.invoke({ topic });
     
-    return result.resources;
+    return processResources(result.resources);
   } catch (error) {
+    // If function calling fails, try to extract and process any partial results
+    if (error.message && error.message.includes("resources")) {
+      try {
+        const extractedJson = extractJsonFromText(error.message);
+        if (extractedJson && extractedJson.resources) {
+          const processedResources = processResources(extractedJson.resources);
+          if (processedResources.length > 0) {
+            return processedResources;
+          }
+        }
+      } catch (fallbackError) {
+        // Continue to throw original error
+      }
+    }
     throw error;
   }
 };

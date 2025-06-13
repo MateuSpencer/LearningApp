@@ -198,6 +198,22 @@ export const addSuggestionToResources = async (suggestionId) => {
     return response;
   } catch (error) {
     console.error('Error adding suggestion to resources:', error);
+    
+    // Handle specific error types
+    if (error.data && error.data.detail) {
+      const detail = error.data.detail;
+      if (detail.includes('already exists') || detail.includes('duplicate')) {
+        // Return a structured error response instead of throwing
+        return {
+          success: false,
+          status: 'duplicate_url',
+          message: detail,
+          error: error
+        };
+      }
+    }
+    
+    // For other types of errors, still throw
     throw error;
   }
 };
@@ -241,6 +257,9 @@ export const addAIResource = async (resourceData, validateUrl = true) => {
       throw new Error('Missing required fields: title, url, or page_slug');
     }
     
+    // Handle both camelCase (resourceType) and snake_case (resource_type) field names
+    const resourceType = resourceData.resourceType || resourceData.resource_type || 'website';
+    
     // Validate URL if requested
     if (validateUrl) {
       const validationResult = await urlValidationService.validateUrlFormat(resourceData.url);
@@ -257,7 +276,7 @@ export const addAIResource = async (resourceData, validateUrl = true) => {
         url: urlToUse,
         title: resourceData.title,
         pageSlug: resourceData.page_slug,
-        resourceType: validationResult.resourceType || resourceData.resource_type || 'website'
+        resourceType: validationResult.resourceType || resourceType
       });
     } else {
       // Use the learningResources.createFromUrl method without validation
@@ -265,7 +284,7 @@ export const addAIResource = async (resourceData, validateUrl = true) => {
         url: resourceData.url,
         title: resourceData.title,
         pageSlug: resourceData.page_slug,
-        resourceType: resourceData.resource_type || 'website'
+        resourceType: resourceType
       });
     }
   } catch (error) {

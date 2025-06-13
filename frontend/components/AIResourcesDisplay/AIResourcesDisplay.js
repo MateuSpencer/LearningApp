@@ -30,8 +30,6 @@ const AIResourcesDisplay = ({
   onSuggestionAdded,
   onSuggestionDismissed
 }) => {
-  // Track which resources are being added (for UI feedback)
-  const [addingResources, setAddingResources] = useState({});
   // Track which resources have been added successfully
   const [addedResources, setAddedResources] = useState({});
   // Track existing resources on the page
@@ -71,6 +69,8 @@ const AIResourcesDisplay = ({
           });
         } else if (resource.primary_url) {
           existingUrls[resource.primary_url] = true;
+        } else if (resource.url) {
+          existingUrls[resource.url] = true;
         }
       });
       
@@ -82,44 +82,25 @@ const AIResourcesDisplay = ({
     fetchExistingResources();
   }, [pageSlug, existingResources]);
 
-  // Handle adding a resource using different approaches based on if it's persistent
+  // Handle adding a resource - always show the form for consistency
   const handleAddResource = async (resource) => {
     // If already added, don't do anything
     if (addedResources[resource.url]) {
       return;
     }
     
-    // For persistent suggestions, use the dedicated API
-    if (resource.isPersistent && resource.id) {
-      try {
-        setAddingResources(prev => ({ ...prev, [resource.url]: true }));
-        
-        // Call the API to add the suggestion directly to resources
-        const result = await addSuggestionToResources(resource.id);
-        
-        // Mark as added
-        setAddedResources(prev => ({ ...prev, [resource.url]: true }));
-        
-        // Notify parent component
-        if (onSuggestionAdded) {
-          onSuggestionAdded(resource, result);
-        }
-        
-      } catch (error) {
-        console.error('Failed to add suggestion to resources:', error);
-      } finally {
-        setAddingResources(prev => ({ ...prev, [resource.url]: false }));
-      }
-    } else {
-      // For temporary suggestions, show the form
-      if (onShowAddForm) {
-        onShowAddForm({
-          url: resource.url,
-          title: resource.title,
-          resourceType: resource.resourceType || 'website',
-          description: resource.description || ''
-        });
-      }
+    // Always show the form for both persistent and fresh suggestions
+    // This ensures consistent behavior regardless of the suggestion source
+    if (onShowAddForm) {
+      onShowAddForm({
+        url: resource.url,
+        title: resource.title,
+        resourceType: resource.resourceType || 'website',
+        description: resource.description || '',
+        // Pass additional metadata for potential future use
+        isPersistent: resource.isPersistent,
+        suggestionId: resource.id
+      });
     }
   };
 
@@ -186,7 +167,7 @@ const AIResourcesDisplay = ({
                 <button 
                   className={`${s.AddButton} ${isResourceAdded(resource) ? s.Added : ''}`}
                   onClick={() => handleAddResource(resource)}
-                  disabled={addingResources[resource.url] || isResourceAdded(resource)}
+                  disabled={isResourceAdded(resource)}
                   aria-label={isResourceAdded(resource) ? "Resource already added" : "Add this resource"}
                 >
                   {getActionIcon(resource)}
