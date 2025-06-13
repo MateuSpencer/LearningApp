@@ -1,5 +1,6 @@
 // Service for generating AI summaries of learning resources
 import { z } from "zod";
+import { isValidSummary, createErrorResponse, createSuccessResponse } from '../constants/aiSummaryConstants';
 
 /**
  * Helper function to parse markdown sections into a structured object
@@ -206,6 +207,7 @@ const getOpenAIModel = async (apiKey) => {
 
 /**
  * Generate a summary for a learning resource
+ * @returns {Promise<{success: boolean, data?: object, error?: string}>}
  */
 export const generateResourceSummary = async (url, title, resourceType, apiConfig) => {
   try {
@@ -215,40 +217,44 @@ export const generateResourceSummary = async (url, title, resourceType, apiConfi
     
     // Input validation
     if (!url || typeof url !== 'string' || url.trim() === '') {
-      throw new Error("A valid URL is required");
+      return createErrorResponse("A valid URL is required");
     }
     
     if (!apiConfig || typeof apiConfig !== 'object') {
-      throw new Error("Valid API configuration is required");
+      return createErrorResponse("Valid API configuration is required");
     }
     
     // Choose which model to use based on config
     const { provider, apiKey, ...additionalConfig } = apiConfig;
     
     if (!apiKey) {
-      throw new Error("API key is required");
+      return createErrorResponse("API key is required");
     }
     
     let model;
-    switch (provider) {
-      case "together":
-        model = await getTogetherAIModel(apiKey, additionalConfig.modelName);
-        break;
-      case "azure":
-        if (!additionalConfig.endpoint || !additionalConfig.deploymentName) {
-          throw new Error("Azure endpoint and deployment name are required");
-        }
-        model = await getAzureOpenAIModel(apiKey, additionalConfig.endpoint, additionalConfig.deploymentName);
-        break;
-      case "google":
-        model = await getGoogleCloudModel(apiKey);
-        break;
-      case "openai":
-        model = await getOpenAIModel(apiKey);
-        break;
-      default:
-        // Default to Together AI
-        model = await getTogetherAIModel(apiKey);
+    try {
+      switch (provider) {
+        case "together":
+          model = await getTogetherAIModel(apiKey, additionalConfig.modelName);
+          break;
+        case "azure":
+          if (!additionalConfig.endpoint || !additionalConfig.deploymentName) {
+            return createErrorResponse("Azure endpoint and deployment name are required");
+          }
+          model = await getAzureOpenAIModel(apiKey, additionalConfig.endpoint, additionalConfig.deploymentName);
+          break;
+        case "google":
+          model = await getGoogleCloudModel(apiKey);
+          break;
+        case "openai":
+          model = await getOpenAIModel(apiKey);
+          break;
+        default:
+          // Default to Together AI
+          model = await getTogetherAIModel(apiKey);
+      }
+    } catch (modelError) {
+      return createErrorResponse(`Failed to initialize AI model: ${modelError.message}`);
     }
 
     // Create a simpler prompt template for markdown output
@@ -293,14 +299,24 @@ Type: {resourceType}`]
       // Extract the content from the response
       const markdownContent = response.content;
       
+      // Validate that we got actual content
+      if (!markdownContent || markdownContent.trim().length === 0) {
+        return createErrorResponse("AI model returned empty response");
+      }
+      
       // Parse the markdown into structured sections
       const sections = parseMarkdownSections(markdownContent);
       
-      return {
-        summary: sections.summary || "Summary could not be extracted",
+      // Validate that we got meaningful content using the centralized validation
+      if (!isValidSummary(sections.summary)) {
+        return createErrorResponse("AI model failed to generate a valid summary");
+      }
+      
+      return createSuccessResponse({
+        summary: sections.summary,
         mainParts: sections.mainParts || "Main parts could not be extracted",
         highlights: sections.highlights || []
-      };
+      });
     } catch (error) {
       // Fallback approach - direct call to model with markdown formatting instructions
       try {
@@ -334,41 +350,37 @@ Type: ${resourceType}`]
         // Extract the content from the response
         const markdownContent = directResponse.content;
         
+        if (!markdownContent || markdownContent.trim().length === 0) {
+          return createErrorResponse("AI model returned empty response on retry");
+        }
+        
         // Parse the markdown into structured sections
         const sections = parseMarkdownSections(markdownContent);
         
-        if (sections.summary) {
-          return {
+        if (isValidSummary(sections.summary)) {
+          return createSuccessResponse({
             summary: sections.summary,
             mainParts: sections.mainParts || "Details of the resource were not available",
             highlights: sections.highlights || []
-          };
+          });
         }
         
-        // If we still don't have valid sections, create a basic response structure
-        return {
-          summary: "Unable to generate a structured summary. Please try again later.",
-          mainParts: "Could not analyze the main parts of this resource.",
-          highlights: ["Summary generation encountered an issue"]
-        };
+        // If we still don't have valid content, return error
+        return createErrorResponse("AI model could not generate a valid summary after multiple attempts");
       } catch (directError) {
-        // Return a basic structure instead of throwing
-        return {
-          summary: "Unable to generate a summary at this time. Please try again later.",
-          mainParts: "Resource details could not be analyzed.",
-          highlights: ["Summary generation encountered an issue"]
-        };
+        return createErrorResponse("Failed to generate summary due to technical difficulties");
       }
     }
 
   } catch (error) {
-    throw error;
+    return createErrorResponse(`Summary generation failed: ${error.message}`);
   }
 };
 
 /**
  * Generate a summary for a learning resource using function calling approach for models that support it
  * This is an alternative implementation that may provide more reliable structured output
+ * @returns {Promise<{success: boolean, data?: object, error?: string}>}
  */
 export const generateSummaryWithFunctionCalling = async (url, title, resourceType, apiConfig) => {
   try {
@@ -378,41 +390,45 @@ export const generateSummaryWithFunctionCalling = async (url, title, resourceTyp
     
     // Input validation
     if (!url || typeof url !== 'string' || url.trim() === '') {
-      throw new Error("A valid URL is required");
+      return createErrorResponse("A valid URL is required");
     }
     
     if (!apiConfig || !apiConfig.apiKey) {
-      throw new Error("Valid API configuration with API key is required");
+      return createErrorResponse("Valid API configuration with API key is required");
     }
     
     // Only specific models support function calling
     let model;
     
-    if (apiConfig.provider === "openai") {
-      const { ChatOpenAI } = await import("@langchain/openai");
-      model = new ChatOpenAI({
-        modelName: "gpt-4o", // Ensure it's a model that supports function calling
-        temperature: 0.2,
-        openAIApiKey: apiConfig.apiKey,
-      });
-    } else if (apiConfig.provider === "azure") {
-      const { ChatOpenAI } = await import("@langchain/openai");
-      model = new ChatOpenAI({
-        temperature: 0.2,
-        azureOpenAIApiKey: apiConfig.apiKey,
-        azureOpenAIApiVersion: "2023-12-01-preview",
-        azureOpenAIApiDeploymentName: apiConfig.deploymentName,
-        azureOpenAIApiInstanceName: apiConfig.endpoint,
-      });
-    } else if (apiConfig.provider === "google") {
-      const { ChatGoogleGenerativeAI } = await import("@langchain/google-genai");
-      model = new ChatGoogleGenerativeAI({
-        modelName: "gemini-pro",
-        temperature: 0.2,
-        apiKey: apiConfig.apiKey,
-      });
-    } else {
-      throw new Error("Function calling is only supported with OpenAI, Azure OpenAI, and Google models");
+    try {
+      if (apiConfig.provider === "openai") {
+        const { ChatOpenAI } = await import("@langchain/openai");
+        model = new ChatOpenAI({
+          modelName: "gpt-4o", // Ensure it's a model that supports function calling
+          temperature: 0.2,
+          openAIApiKey: apiConfig.apiKey,
+        });
+      } else if (apiConfig.provider === "azure") {
+        const { ChatOpenAI } = await import("@langchain/openai");
+        model = new ChatOpenAI({
+          temperature: 0.2,
+          azureOpenAIApiKey: apiConfig.apiKey,
+          azureOpenAIApiVersion: "2023-12-01-preview",
+          azureOpenAIApiDeploymentName: apiConfig.deploymentName,
+          azureOpenAIApiInstanceName: apiConfig.endpoint,
+        });
+      } else if (apiConfig.provider === "google") {
+        const { ChatGoogleGenerativeAI } = await import("@langchain/google-genai");
+        model = new ChatGoogleGenerativeAI({
+          modelName: "gemini-pro",
+          temperature: 0.2,
+          apiKey: apiConfig.apiKey,
+        });
+      } else {
+        return createErrorResponse("Function calling is only supported with OpenAI, Azure OpenAI, and Google models");
+      }
+    } catch (modelError) {
+      return createErrorResponse(`Failed to initialize AI model: ${modelError.message}`);
     }
     
     // Define the function spec
@@ -473,7 +489,22 @@ Type: {resourceType}`]
         title,
         resourceType
       });
-      return result;
+      
+      // Validate the result structure
+      if (!result || typeof result !== 'object') {
+        return createErrorResponse("AI model returned invalid response format");
+      }
+      
+      // Validate using centralized validation
+      if (!isValidSummary(result.summary)) {
+        return createErrorResponse("AI model failed to generate a valid summary");
+      }
+      
+      return createSuccessResponse({
+        summary: result.summary,
+        mainParts: result.mainParts || "Main parts not available",
+        highlights: result.highlights || []
+      });
     } catch (error) {
       
       // Fallback to standard approach
@@ -503,36 +534,34 @@ URL: ${url}
 Type: ${resourceType}`]
       ]);
       
-      const directResponse = await standardPrompt.pipe(model).invoke({});
-      
-      // Extract the markdown content from the response
-      const markdownContent = directResponse.content;
-      
-      // Parse the markdown into structured sections
-      const sections = parseMarkdownSections(markdownContent);
-      
-      if (sections.summary) {
-        return {
-          summary: sections.summary,
-          mainParts: sections.mainParts || "Details not available",
-          highlights: sections.highlights || []
-        };
+      try {
+        const directResponse = await standardPrompt.pipe(model).invoke({});
+        
+        // Extract the markdown content from the response
+        const markdownContent = directResponse.content;
+        
+        if (!markdownContent || markdownContent.trim().length === 0) {
+          return createErrorResponse("AI model returned empty response on fallback attempt");
+        }
+        
+        // Parse the markdown into structured sections
+        const sections = parseMarkdownSections(markdownContent);
+        
+        if (isValidSummary(sections.summary)) {
+          return createSuccessResponse({
+            summary: sections.summary,
+            mainParts: sections.mainParts || "Details not available",
+            highlights: sections.highlights || []
+          });
+        }
+        
+        return createErrorResponse("AI model could not generate a valid summary on fallback attempt");
+      } catch (fallbackError) {
+        return createErrorResponse("All summary generation attempts failed");
       }
-      
-      // If still failing, provide a basic response in markdown format
-      return {
-        summary: "Unable to generate a detailed summary at this time. Please try again later.",
-        mainParts: "Could not analyze the resource structure.",
-        highlights: ["Summary generation encountered technical difficulties"]
-      };
     }
   } catch (error) {
-    // Return a basic structure instead of throwing
-    return {
-      summary: "Unable to generate a summary at this time due to technical difficulties. Please try again later.",
-      mainParts: "Resource structure analysis unavailable.",
-      highlights: ["Summary generation encountered an issue"]
-    };
+    return createErrorResponse(`Summary generation failed: ${error.message}`);
   }
 };
 

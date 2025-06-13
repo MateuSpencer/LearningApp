@@ -394,13 +394,10 @@
   border-top: 1px solid var(--border-color);
 }
 
-.loading, .error {
+.error {
   padding: 40px;
   text-align: center;
   font-size: 1.2rem;
-}
-
-.error {
   color: var(--color-error);
 }
 

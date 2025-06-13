@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
+import ReactMarkdown from 'react-markdown';
 import styles from './LearningResourceSummary.module.css';
 import { generateSummary } from '../../api/aiSummary';
 import learningResources from '../../api/learningResources';
@@ -49,17 +50,29 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
         resourceType: resource.resource_type
       };
             
-      // First generate the summary
+      // Generate the summary
       const generationResult = await generateSummary(resourceData);
       
-      // Then save the summary to the resource
+      // Check if summary generation was successful
+      if (!generationResult.success) {
+        // Display error without saving
+        setError(generationResult.error || t('aiSummary.generateError'));
+        return;
+      }
+      
+      // Only save the summary if generation was successful
       try {
-        await learningResources.saveSummaryToResource(resource.id, generationResult.summary);
+        await learningResources.saveSummaryToResource(resource.id, generationResult);
+        
+        // Extract the actual summary text for the callback
+        const summaryText = generationResult.data && generationResult.data.summary ? 
+                           generationResult.data.summary : 
+                           generationResult.summary || '';
         
         // Notify parent component if needed
         if (onSummaryGenerated) {
           onSummaryGenerated({ 
-            summary: generationResult.summary,
+            summary: summaryText,
             saved: true,
             resourceId: resource.id 
           });
@@ -95,13 +108,26 @@ const LearningResourceSummary = ({ resource, onSummaryGenerated }) => {
       return <p>{t('aiSummary.noSummaryContent')}</p>;
     }
     
-    // Simply display the raw summary as is
+    // Render the markdown content as formatted HTML
     return (
       <>
         <div className={styles.summaryContent}>
-          {resource.ai_summary.split('\n').map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
+          <ReactMarkdown
+            components={{
+              // Custom styling for markdown elements if needed
+              h1: ({children}) => <h1 className={styles.summaryH1}>{children}</h1>,
+              h2: ({children}) => <h2 className={styles.summaryH2}>{children}</h2>,
+              h3: ({children}) => <h3 className={styles.summaryH3}>{children}</h3>,
+              p: ({children}) => <p className={styles.summaryParagraph}>{children}</p>,
+              ul: ({children}) => <ul className={styles.summaryList}>{children}</ul>,
+              ol: ({children}) => <ol className={styles.summaryOrderedList}>{children}</ol>,
+              li: ({children}) => <li className={styles.summaryListItem}>{children}</li>,
+              strong: ({children}) => <strong className={styles.summaryBold}>{children}</strong>,
+              em: ({children}) => <em className={styles.summaryItalic}>{children}</em>,
+            }}
+          >
+            {resource.ai_summary}
+          </ReactMarkdown>
         </div>
         
         <div className={styles.summaryMeta}>

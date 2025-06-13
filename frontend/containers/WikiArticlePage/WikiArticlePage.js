@@ -123,28 +123,10 @@ const WikiArticlePage = ({ title, articleSlug }) => {
     // }
   }, [articleSlug, router]);
 
-  if (isValidating) {
-    return (
-      <div className={s.pageLayout}>
-        <div className={s.loadingSection}>
-          <p>Loading and validating article...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  // If not validating and article doesn't exist, it means a redirect should have happened.
-  // This state might be briefly visible or if a redirect fails.
-  // Or, if we decide not to redirect on certain errors, this could be an error display page.
-  if (!articleExists && !isValidating) {
-    return (
-      <div className={s.pageLayout}>
-        <div className={s.loadingSection}> 
-          <p>Article "{articleSlug}" could not be loaded or is a disambiguation page. You should have been redirected.</p>
-          <p>If not, you can <a href={`/wiki/?q=${encodeURIComponent(articleSlug)}`}>try searching for it here.</a></p>
-        </div>
-      </div>
-    );
+  // Don't render anything while validating or if article doesn't exist
+  // This prevents the brief flash of loading/error content
+  if (isValidating || !articleExists) {
+    return null;
   }
 
   return (

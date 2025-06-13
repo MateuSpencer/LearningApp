@@ -372,9 +372,20 @@ export const learningResources = {
             // If summaryData is already a string, use it directly
             if (typeof summaryData === 'string') {
                 summaryText = summaryData;
+            } else if (summaryData && typeof summaryData === 'object') {
+                // Handle the response structure from generateSummary
+                // The response has a 'data' property containing the actual summary data
+                if (summaryData.data && summaryData.data.summary) {
+                    summaryText = summaryData.data.summary;
+                } else if (summaryData.summary) {
+                    // Fallback for direct summary property
+                    summaryText = summaryData.summary;
+                } else {
+                    summaryText = '';
+                }
             } else {
-                // Just use the main summary text
-                summaryText = summaryData.summary || '';
+                // Handle case where summaryData is null/undefined
+                summaryText = '';
             }
             
             const summaryEndpoint = `${RESOURCES_ENDPOINT}/${resourceId}/set_ai_summary/`;

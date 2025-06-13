@@ -210,6 +210,65 @@
   border: 1px solid #e2e8f0;
 }
 
+/* Markdown formatting styles */
+.summaryH1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 1.5rem 0 1rem 0;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.summaryH2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 1.25rem 0 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.25rem;
+}
+
+.summaryH3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 1rem 0 0.5rem 0;
+}
+
+.summaryParagraph {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.summaryList {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.summaryOrderedList {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.summaryListItem {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.summaryBold {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.summaryItalic {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

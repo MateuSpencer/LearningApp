@@ -223,13 +223,9 @@ const PostPage = ({ postId, initialPostData }) => {
     }
   }, [error, post, loading, router]);
   
-  if (loading) {
-    return <div className={s.loading}>{t('postPage.loadingPost')}</div>;
-  }
-  
-  // This renders briefly before redirect happens
-  if (error || !post) {
-    return <div className={s.loading}>{t('postPage.redirectingToPosts')}</div>;
+  // Don't render anything while loading or if there's an error/no post
+  if (loading || error || !post) {
+    return null;
   }
   
   // Format the page slug for display

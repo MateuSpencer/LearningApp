@@ -334,12 +334,6 @@
   font-weight: 500;
 }
 
-.loading {
-  text-align: center;
-  padding: 1rem;
-  color: var(--text-secondary);
-}
-
 .voteButton:hover:not(:disabled) {
   background-color: var(--bg-hover);
   transform: translateY(-2px);
@@ -378,13 +372,6 @@
   background-color: rgba(239, 68, 68, 0.1);
   color: #b82d2d;
   text-align: center;
-}
-
-.loading {
-  text-align: center;
-  padding: 2rem;
-  color: var(--text-secondary);
-  transition: color var(--theme-transition-speed) var(--theme-transition-timing);
 }
 
 /* Back link styles removed as they are no longer needed */

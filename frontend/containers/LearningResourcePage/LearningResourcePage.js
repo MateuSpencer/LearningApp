@@ -252,13 +252,9 @@ const LearningResourcePage = ({ resourceId, initialResourceData }) => {
     );
   };
   
-  // If still loading or error occurred
-  if (loading && !resource) {
-    return <div className={s.container}><p className={s.loading}>{t('learningResourcePage.loadingResource')}</p></div>;
-  }
-  
-  if (error && !resource) {
-    return <div className={s.container}><p className={s.error}>{error}</p></div>;
+  // Don't render anything while loading or if there's an error without resource data
+  if ((loading && !resource) || (error && !resource)) {
+    return null;
   }
   
   // Resource not found

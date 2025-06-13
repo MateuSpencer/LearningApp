@@ -15,17 +15,6 @@
   max-width: calc(100% - 250px); /* Account for expanded sidebar */
 }
 
-/* Loading state styling */
-.loadingSection {
-  margin: 40px 0;
-  padding: 20px;
-  text-align: center;
-  border-radius: 8px;
-  background-color: var(--theme-bg-secondary);
-  font-style: italic;
-  color: var(--theme-text-secondary);
-}
-
 .rightSidebarContainer {
   width: 60px; /* Collapsed width */
   min-width: 60px; /* Prevent shrinking */
