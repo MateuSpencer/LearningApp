@@ -35,6 +35,13 @@
     height: 100%;
     padding: 20px 0;
     overflow-y: auto;
+    opacity: 1;
+    transition: opacity var(--theme-transition-speed) var(--theme-transition-timing);
+}
+
+.Collapsed .Content {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .ToggleButton {
@@ -59,4 +66,57 @@
 
 .ToggleButton:hover {
     background-color: var(--color-primary-dark);
+}
+
+.Section {
+    padding: 0 20px;
+    margin-bottom: 30px;
+}
+
+.SectionTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 8px;
+    text-align: center;
+}
+
+.ComingSoon {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid var(--border-light);
+}
+
+.ComingSoonText {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    font-style: italic;
+    text-align: center;
+}
+
+.FeatureList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.FeatureItem {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: color 0.2s ease;
+}
+
+.FeatureItem:last-child {
+    border-bottom: none;
+}
+
+.FeatureItem:hover {
+    color: var(--text-secondary);
 }

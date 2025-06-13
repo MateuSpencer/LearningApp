@@ -28,7 +28,22 @@ const RightSidebar = ({ items, onToggle }) => {
                 {collapsed ? '‹' : '›'}
             </button>
             <div className={s.Content}>
-                {/* Sidebar content */}
+                <div className={s.Section}>
+                    <h3 className={s.SectionTitle}>Learning Tools</h3>
+                    <div className={s.ComingSoon}>
+                        <p className={s.ComingSoonText}>Coming Soon...</p>
+                        <ul className={s.FeatureList}>
+                            <li className={s.FeatureItem}>📝 Personal Notebook</li>
+                            <li className={s.FeatureItem}>📊 Progress Tracking</li>
+                            <li className={s.FeatureItem}>🗃️ Study Flashcards</li>
+                            <li className={s.FeatureItem}>📈 Learning Analytics</li>
+                            <li className={s.FeatureItem}>🤖 AI Study Companion</li>
+                            <li className={s.FeatureItem}>🗺️ Topic Mind Maps</li>
+                            <li className={s.FeatureItem}>⏱️ Pomodoro Timer</li>
+                            <li className={s.FeatureItem}>🎯 Goal Setting</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     );
