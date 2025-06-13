@@ -85,6 +85,7 @@
     },
     "posts": {
         "title": "Посты",
+        "browserTitle": "Браузер постов сообщества",
         "myPosts": "Мои посты",
         "addNewPost": "Добавить новый пост",
         "searchPlaceholder": "Поиск постов...",

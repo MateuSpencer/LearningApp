@@ -85,6 +85,7 @@
     },
     "posts": {
         "title": "Posts",
+        "browserTitle": "Community Posts Browser",
         "myPosts": "My Posts",
         "addNewPost": "Add New Post",
         "searchPlaceholder": "Search posts...",

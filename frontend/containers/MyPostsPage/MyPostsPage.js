@@ -9,7 +9,9 @@ const MyPostsPage = () => {
   
   return (
     <div className={s.container}>
-      <h1 className={s.title}>{t('posts.myPosts')}</h1>
+      <div className={s.centeredHeader}>
+        <h1 className={s.title}>{t('posts.myPosts')}</h1>
+      </div>
       
       <div className={s.postsListContainer}>
         <PostsList 

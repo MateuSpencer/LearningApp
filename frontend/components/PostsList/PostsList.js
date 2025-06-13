@@ -400,8 +400,23 @@ const PostsList = ({
         cancelText={t('posts.deleteCancel')}
       />
       
-      {/* Add centered title inside the container */}
-      <h2 className={s.centeredTitle}>{t('posts.title')}</h2>
+      {/* Header with title and top action buttons */}
+      <div className={s.header}>
+        <h2 className={s.title}>{t('posts.title')}</h2>
+        
+        <div className={s.topActions}>
+          {/* Add New Post button */}
+          {onNewPost && !showOnlyMyPosts && (
+            <button 
+              className={s.newPostButton}
+              onClick={() => requireAuth() && onNewPost()}
+              disabled={controlsDisabled}
+            >
+              Add New Post
+            </button>
+          )}
+        </div>
+      </div>
       
       <div className={s.controlsWrapper}>
         <div className={s.controlsBar}>
@@ -462,16 +477,7 @@ const PostsList = ({
           </div>
           
           <div className={s.controlsRight}>
-            {/* Add New Post button */}
-            {onNewPost && !showOnlyMyPosts && (
-              <button 
-                className={s.newPostButton}
-                onClick={() => requireAuth() && onNewPost()}
-                disabled={controlsDisabled}
-              >
-                Add New Post
-              </button>
-            )}
+            {/* Removed the button from here as it's now in the header */}
           </div>
         </div>
         
